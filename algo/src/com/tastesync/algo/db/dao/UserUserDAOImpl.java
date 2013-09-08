@@ -22,8 +22,8 @@ import java.util.List;
 
 public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     @Override
-    public List<String> getRecorequestUserFlaggedUserList()
-        throws TasteSyncException {
+    public List<String> getRecorequestUserFlaggedUserList(
+        int algoIndicatorIdentifyUseridListOne) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -61,8 +61,8 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     }
 
     @Override
-    public List<String> getRecorequestTsAssignedFlaggedUserList()
-        throws TasteSyncException {
+    public List<String> getRecorequestTsAssignedFlaggedUserList(
+        int algoIndicatorIdentifyUseridListSecond) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -100,8 +100,8 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     }
 
     @Override
-    public List<String> getRecorequestReplyUserFlaggedUserList()
-        throws TasteSyncException {
+    public List<String> getRecorequestReplyUserFlaggedUserList(
+        int algoIndicatorIdentifyUseridListThird) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -139,8 +139,8 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     }
 
     @Override
-    public List<String> getRecorequestReplyUserForSameRecorequestIdFlaggedUserList()
-        throws TasteSyncException {
+    public List<String> getRecorequestReplyUserForSameRecorequestIdFlaggedUserList(
+        int algoIndicatorIdentifyUseridListFourth) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -253,7 +253,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     }
 
     @Override
-    public int getNumRecorequestsAssigned7Days(String flaggedUserId)
+    public int getNumRecorequestsAssignedNDays(String flaggedUserId, int nDays)
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
@@ -267,14 +267,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement.setString(1, flaggedUserId);
 
-            //java.sql.Date today = CommonFunctionsUtil.getCurrentDate();
-            // Get today as a Calendar  
-            Calendar today = Calendar.getInstance();
-            // Subtract 7 day  
-            today.add(Calendar.DATE, -7);
-
-            // Make an SQL Date out of that  
-            java.sql.Date requiredDate = new java.sql.Date(today.getTimeInMillis());
+            java.sql.Date requiredDate = CommonFunctionsUtil.getDateNDaysBeforeCurrentDate(nDays);
 
             statement.setDate(2, requiredDate);
             resultset = statement.executeQuery();
@@ -300,8 +293,8 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     }
 
     @Override
-    public int getNumRecorequestsAssigned7DaysReplied(String flaggedUserId)
-        throws TasteSyncException {
+    public int getNumRecorequestsAssignedNDaysReplied(String flaggedUserId,
+        int nDays) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -314,14 +307,8 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement.setString(1, flaggedUserId);
 
-            //java.sql.Date today = CommonFunctionsUtil.getCurrentDate();
-            // Get today as a Calendar  
-            Calendar today = Calendar.getInstance();
-            // Subtract 7 day  
-            today.add(Calendar.DATE, -7);
-
             // Make an SQL Date out of that  
-            java.sql.Date requiredDate = new java.sql.Date(today.getTimeInMillis());
+            java.sql.Date requiredDate = CommonFunctionsUtil.getDateNDaysBeforeCurrentDate(nDays);
 
             statement.setDate(2, requiredDate);
             resultset = statement.executeQuery();
@@ -705,6 +692,587 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             throw new TasteSyncException(
                 "Error while submitRecorrequestReplyUser = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecoRequestsLastNDays(String flaggedUserId, int nDays)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_REPLY_USER_UPDATE_SQL);
+            statement.setString(1, flaggedUserId);
+
+            // Make an SQL Date out of that  
+            java.sql.Date requiredDate = CommonFunctionsUtil.getDateNDaysBeforeCurrentDate(nDays);
+
+            statement.setDate(2, requiredDate);
+
+            resultset = statement.executeQuery();
+
+            List<String> recorequestUserRecorequestIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestUserRecorequestIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("recorequest_user.recorequest_id")));
+            }
+
+            statement.close();
+
+            return recorequestUserRecorequestIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecoRequestsLastNDays = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestCuisineTier1(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_CUISINE_TIER1_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestCuisineTier1List = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestCuisineTier1List.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_cuisine_tier1.cuisine_tier1_id")));
+            }
+
+            statement.close();
+
+            return recorequestCuisineTier1List;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestCuisineTier1 = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestCuisineTier2(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_CUISINE_TIER2_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestCuisineTier2List = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestCuisineTier2List.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_cuisine_tier2.cuisine_tier2_id")));
+            }
+
+            statement.close();
+
+            return recorequestCuisineTier2List;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestCuisineTier2 = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestOccasion(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_OCCASION_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestOccassionIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestOccassionIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("recorequest_occasion.occasion_id")));
+            }
+
+            statement.close();
+
+            return recorequestOccassionIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestOccasion = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestPrice(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_PRICE_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestPriceIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestPriceIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("recorequest_price.price_id")));
+            }
+
+            statement.close();
+
+            return recorequestPriceIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException("Error while getRecorequestPrice = " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestTheme(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_THEME_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestThemeIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestThemeIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("recorequest_theme.theme_id")));
+            }
+
+            statement.close();
+
+            return recorequestThemeIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException("Error while getRecorequestTheme = " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestTypeofRest(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_TYPEOFREST_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestTypeofrestIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestTypeofrestIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_typeofrest.typeofrest_id")));
+            }
+
+            statement.close();
+
+            return recorequestTypeofrestIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestTypeofRest = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestWhoarewithyou(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_WHOAREYOUWITH_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            List<String> recorequestWhoareyouwithIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestWhoareyouwithIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_whoareyouwith.whoareyouwith_id")));
+            }
+
+            statement.close();
+
+            return recorequestWhoareyouwithIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestWhoarewithyou = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecorequestLocation(String recorequestId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_LOCATION_SELECT_SQL);
+            statement.setString(1, recorequestId);
+            resultset = statement.executeQuery();
+
+            //one neighbourhood id for a city id . cud be null
+            List<String> recorequestCityIdNeighbourIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestCityIdNeighbourIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("recorequest_location.city_id")));
+                recorequestCityIdNeighbourIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_location.neighbourhood_id")));
+            }
+
+            statement.close();
+
+            return recorequestCityIdNeighbourIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestLocation = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecoRequestsReplyAnsweredLastNDays(
+        String flaggedUserId, int nDays) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_REPLY_ANSWERED_NDAYS_SELECT_SQL);
+            statement.setString(1, flaggedUserId);
+
+            java.sql.Date requiredDate = CommonFunctionsUtil.getDateNDaysBeforeCurrentDate(nDays);
+
+            statement.setDate(2, requiredDate);
+
+            resultset = statement.executeQuery();
+
+            //one neighbourhood id for a city id . cud be null
+            List<String> recorequestReplyAnsweredRecorequestIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestReplyAnsweredRecorequestIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_reply_user.recorequest_id")));
+            }
+
+            statement.close();
+
+            return recorequestReplyAnsweredRecorequestIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecoRequestsReplyAnsweredLastNDays = " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getRecoRequestsReplyUserAnsweredLastNDays(
+        String flaggedUserId, int nDays) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_REPLY_USER_ANSWERED_NDAYS_SELECT_SQL);
+            statement.setString(1, flaggedUserId);
+
+            java.sql.Date requiredDate = CommonFunctionsUtil.getDateNDaysBeforeCurrentDate(nDays);
+
+            statement.setDate(2, requiredDate);
+
+            resultset = statement.executeQuery();
+
+            //one neighbourhood id for a city id . cud be null
+            List<String> recorequestReplyUserAnsweredRecorequestIdList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                recorequestReplyUserAnsweredRecorequestIdList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "recorequest_reply_user.recorequest_id")));
+            }
+
+            statement.close();
+
+            return recorequestReplyUserAnsweredRecorequestIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecoRequestsReplyUserAnsweredLastNDays = " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public void submitUserRecoDemandTierPrecalc(String flaggedUserId,
+        int demandTierFlag) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.USER_RECO_DEMAND_INSERT_SQL);
+
+            int calcFlag = 0;
+            statement.setInt(1, calcFlag);
+            statement.setInt(2, demandTierFlag);
+            statement.setString(3, flaggedUserId);
+            statement.setInt(4, calcFlag);
+            statement.setInt(5, demandTierFlag);
+
+            statement.executeUpdate();
+
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecoRequestsReplyUserAnsweredLastNDays = " +
+                e.getMessage());
         } finally {
             tsDataSource.close();
             tsDataSource.closeConnection(connection, statement, resultset);
