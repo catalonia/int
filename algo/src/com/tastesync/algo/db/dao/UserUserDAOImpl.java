@@ -6,6 +6,7 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RecorequestReplyUserVO;
 import com.tastesync.algo.model.vo.RecorequestTsAssignedVO;
 import com.tastesync.algo.model.vo.RecorequestUserVO;
+import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
 import com.tastesync.algo.util.TSConstants;
 
@@ -15,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -1273,6 +1273,372 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecoRequestsReplyUserAnsweredLastNDays = " +
                 e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<RestaurantUserVO> getRecorequestReplyUserRestaurant(
+        int algoIndicatorIdentifyUseridListThree) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_REPLY_USER_RESTAURANT_REPLY_SELECT_SQL);
+            statement.setInt(1, algoIndicatorIdentifyUseridListThree);
+            resultset = statement.executeQuery();
+
+            List<RestaurantUserVO> recorequestReplyUserRestaurantUsersList = new ArrayList<RestaurantUserVO>();
+            RestaurantUserVO restaurantUserVO = null;
+            String userId = null;
+            String restaurantId = null;
+
+            while (resultset.next()) {
+                userId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "recorequest_reply_user.reply_user_id"));
+                restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_reply.restaurant_id"));
+
+                restaurantUserVO = new RestaurantUserVO(userId, restaurantId);
+                recorequestReplyUserRestaurantUsersList.add(restaurantUserVO);
+            }
+
+            statement.close();
+
+            return recorequestReplyUserRestaurantUsersList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestLocation = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<RestaurantUserVO> getRestaurantTipsTastesync(
+        int algoIndicatorIdentifyUseridListFour) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RESTAURANT_TIPS_TASTESNC_SELECT_SQL);
+            statement.setInt(1, algoIndicatorIdentifyUseridListFour);
+            resultset = statement.executeQuery();
+
+            List<RestaurantUserVO> restaurantTipsTastesyncUsersList = new ArrayList<RestaurantUserVO>();
+            RestaurantUserVO restaurantUserVO = null;
+            String userId = null;
+            String restaurantId = null;
+
+            while (resultset.next()) {
+                userId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_tips_tastesync.user_id"));
+                restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_tips_tastesync.restaurant_id"));
+
+                restaurantUserVO = new RestaurantUserVO(userId, restaurantId);
+                restaurantTipsTastesyncUsersList.add(restaurantUserVO);
+            }
+
+            statement.close();
+
+            return restaurantTipsTastesyncUsersList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestLocation = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<RestaurantUserVO> getUserRestaurantFav(
+        int algoIndicatorIdentifyUseridListFive) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.USER_RSTAURANT_FAV_SELECT_SQL);
+            statement.setInt(1, algoIndicatorIdentifyUseridListFive);
+            resultset = statement.executeQuery();
+
+            List<RestaurantUserVO> restaurantFavUsersList = new ArrayList<RestaurantUserVO>();
+            RestaurantUserVO restaurantUserVO = null;
+            String userId = null;
+            String restaurantId = null;
+
+            while (resultset.next()) {
+                userId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "user_restaurant_fav.user_id"));
+                restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "user_restaurant_fav.restaurant_id"));
+
+                restaurantUserVO = new RestaurantUserVO(userId, restaurantId);
+                restaurantFavUsersList.add(restaurantUserVO);
+            }
+
+            statement.close();
+
+            return restaurantFavUsersList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while getRecorequestLocation = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public String getRestaurantInfoChained(String restaurantId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserUserQueries.RESTAURANT_EXTENDED_INFO_CHAINED_SELECT_SQL);
+
+            statement.setString(1, restaurantId);
+            resultset = statement.executeQuery();
+
+            String chainFlag = "0";
+
+            if (resultset.next()) {
+                String chainId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_extended_info.chain_id"));
+
+                if (chainId != null) {
+                    chainFlag = "1";
+                }
+            }
+
+            statement.close();
+
+            return chainFlag;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getRestaurantInfoChained= " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public void submitUserCityNbrHoodAndCusineTier2Match(
+        RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        PreparedStatement statementInner = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserUserQueries.RESTAURANT_NEIGHBOURHOOD_CITY_SELECT_SQL);
+
+            statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            resultset = statement.executeQuery();
+
+            String restaurantCityId = null;
+            String restaurantNbrhoodId = null;
+
+            while (resultset.next()) {
+                restaurantCityId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant.restaurant_city_id"));
+
+                restaurantNbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_neighbourhood.neighbourhood_id"));
+
+                statementInner = connection.prepareStatement(UserUserQueries.USER_CITY_NBRHOOD_INSERT_SQL);
+                statementInner.setString(1, restaurantCityId);
+                statementInner.setInt(2, 1);
+                statementInner.setString(3, restaurantNbrhoodId);
+                statementInner.setString(4, flaggedRestaurantUserVO.getUserId());
+
+                statementInner.close();
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(UserUserQueries.RESTAURANT_PRICERANGE_SELECT_SQL);
+            statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            resultset = statement.executeQuery();
+
+            String priceId = null;
+
+            if (resultset.next()) {
+                priceId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant.restaurant_city_id"));
+
+                statementInner = connection.prepareStatement(UserUserQueries.USER_PRICE_INSERT_SQL);
+                statementInner.setInt(1, 1);
+                statementInner.setString(2, priceId);
+                statementInner.setString(3, flaggedRestaurantUserVO.getUserId());
+
+                statementInner.close();
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(UserUserQueries.RESTAURANT_CUISINE_SELECT_SQL);
+            statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            resultset = statement.executeQuery();
+
+            String cuisTier2Id = null;
+
+            while (resultset.next()) {
+                cuisTier2Id = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_cuisine.tier2_cuisine_id"));
+
+                statementInner = connection.prepareStatement(UserUserQueries.USER_CUISTIER2_INSERT_SQL);
+                statementInner.setInt(2, 1);
+                statementInner.setString(1, cuisTier2Id);
+                statementInner.setString(3, flaggedRestaurantUserVO.getUserId());
+
+                statementInner.close();
+            }
+
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getRestaurantInfoChained= " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public void submitRestaurantTipsTastesync(String flaggedUserId,
+        String restaurantId, int algoInd) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.RESTAURANT_TIPS_TASTESYNC_UPDATE_SQL);
+            statement.setInt(1, algoInd);
+            statement.setString(2, flaggedUserId);
+            statement.setString(3, restaurantId);
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while submitRecorrequestUser = " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public void submitRestaurantFav(String flaggedUserId, String restaurantId,
+        int algoInd) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserUserQueries.USER_RESTAURANT_FAV_RESTAURANT_UPDATE_SQL);
+            statement.setInt(1, algoInd);
+            statement.setString(2, flaggedUserId);
+            statement.setString(3, restaurantId);
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while submitRecorrequestUser = " + e.getMessage());
         } finally {
             tsDataSource.close();
             tsDataSource.closeConnection(connection, statement, resultset);

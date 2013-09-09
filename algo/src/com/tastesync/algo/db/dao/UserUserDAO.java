@@ -4,6 +4,7 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RecorequestReplyUserVO;
 import com.tastesync.algo.model.vo.RecorequestTsAssignedVO;
 import com.tastesync.algo.model.vo.RecorequestUserVO;
+import com.tastesync.algo.model.vo.RestaurantUserVO;
 
 import java.util.List;
 
@@ -95,4 +96,25 @@ public interface UserUserDAO {
 
     void submitUserRecoDemandTierPrecalc(String flaggedUserId,
         int demandTierFlag) throws TasteSyncException;
+
+    List<RestaurantUserVO> getRecorequestReplyUserRestaurant(
+        int algoIndicatorIdentifyUseridListThree) throws TasteSyncException;
+
+    List<RestaurantUserVO> getRestaurantTipsTastesync(
+        int algoIndicatorIdentifyUseridListFour) throws TasteSyncException;
+
+    List<RestaurantUserVO> getUserRestaurantFav(
+        int algoIndicatorIdentifyUseridListFive) throws TasteSyncException;
+
+    String getRestaurantInfoChained(String restaurantId)
+        throws TasteSyncException;
+
+    void submitUserCityNbrHoodAndCusineTier2Match(
+        RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException;
+
+    void submitRestaurantTipsTastesync(String flaggedUserId,
+        String restaurantId, int algoInd) throws TasteSyncException;
+
+    void submitRestaurantFav(String flaggedUserId, String restaurantId,
+        int algoInd) throws TasteSyncException;
 }
