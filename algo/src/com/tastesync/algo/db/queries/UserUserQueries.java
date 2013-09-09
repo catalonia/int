@@ -157,7 +157,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "SELECT recorequest_reply_user.reply_user_id, " +
         "       restaurant_reply.restaurant_id " +
         "FROM   recorequest_reply_user, " + "       restaurant_reply " +
-        "WHERE  recorequest_reply_user.algo_ind = 2 " +
+        "WHERE  recorequest_reply_user.algo_ind = ? " +
         "       AND recorequest_reply_user.reply_id = restaurant_reply.reply_id ";
     public static String RESTAURANT_TIPS_TASTESNC_SELECT_SQL = "" +
         "SELECT restaurant_tips_tastesync.user_id, " +
@@ -169,7 +169,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "       user_restaurant_fav.restaurant_id " +
         "FROM   user_restaurant_fav " +
         "WHERE  user_restaurant_fav.algo_ind = 3";
-    public static String RESTAURANT_EXTENDED_INFO_SELECT_SQL = "" +
+    public static String RESTAURANT_EXTENDED_INFO_CHAINED_SELECT_SQL = "" +
         "SELECT restaurant_extended_info.chain_id " +
         "FROM   restaurant_extended_info " +
         "WHERE  restaurant_extended_info.restaurant_id = ? ";
@@ -179,6 +179,11 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "       restaurant.price_range " + "FROM   restaurant, " +
         "       restaurant_neighbourhood " +
         "WHERE  restaurant.restaurant_id = restaurant_neighbourhood.restaurant_id = ? ";
+    public static String RESTAURANT_PRICERANGE_SELECT_SQL = "" +
+            "SELECT restaurant.price_range " + "FROM   restaurant, " +
+            "       restaurant_neighbourhood " +
+            "WHERE  restaurant.restaurant_id = restaurant_neighbourhood.restaurant_id = ? ";
+    
     public static String RESTAURANT_CUISINE_SELECT_SQL = "" +
         "SELECT restaurant_cuisine.tier2_cuisine_id " +
         "FROM   restaurant_cuisine " +
@@ -189,7 +194,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "             user_city_nbrhood_match.match_count, " +
         "             user_city_nbrhood_match.neighborhood_id, " +
         "             user_city_nbrhood_match.user_id) " + "VALUES      ( ?, " +
-        "              1, " + "              ?, " + "              ? ) " +
+        "              ?, " + "              ?, " + "              ? ) " +
         " ON DUPLICATE KEY UPDATE " +
         " user_city_nbrhood_match.match_count = user_city_nbrhood_match.match_count + 1 ";
     public static String USER_CUISTIER2_INSERT_SQL = "" +
@@ -197,14 +202,14 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "            (user_cuistier2_match.cuisine_tier2, " +
         "             user_cuistier2_match.match_count, " +
         "             user_cuistier2_match.user_id) " + "VALUES      ( ?, " +
-        "              1, " + "              ? ) " +
+        "              ?, " + "              ? ) " +
         " ON DUPLICATE KEY UPDATE " +
         " user_cuistier2_match.match_count = user_cuistier2_match.match_count + 1 ";
     public static String USER_PRICE_INSERT_SQL = "" +
         "INSERT INTO user_price_match " +
         "            (user_price_match.match_count, " +
         "             user_price_match.price_id, " +
-        "             user_price_match.user_id) " + "VALUES      ( 1, " +
+        "             user_price_match.user_id) " + "VALUES      ( ?, " +
         "              ?, " + "              ? ) " +
         " ON DUPLICATE KEY UPDATE" +
         " user_price_match.match_count = user_price_match.match_count + 1";
