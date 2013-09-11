@@ -24,6 +24,21 @@ public class CommonFunctionsUtil {
         //return inputString;
     }
 
+    public static int getModifiedValueInteger(String inputString) {
+        if (inputString == null) {
+            return 0;
+        }
+
+        if ((getModifiedValueString(inputString) == null) ||
+                getModifiedValueString(inputString).isEmpty()) {
+            return 0;
+        }
+
+        return (Integer.valueOf(inputString));
+
+        //return inputString;
+    }
+
     public static String converStringAsNullIfNeeded(String inputString) {
         if ((inputString == null) || inputString.isEmpty()) {
             return null;

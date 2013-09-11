@@ -19,6 +19,9 @@ public class SupplyInventoryCalc {
     //-- TODO: TBD - final tier calculation
     //-- TODO: Tier 1 IF User is online right now
     //-- TODO: What happens when this process is running? Are all the tables locked? How do we account for changes that happen in tables while this process is running?
+    public SupplyInventoryCalc() {
+        super();
+    }
 
     //-- Identify flagged users
     public void processAllUserFlaggedUserListSupplyInventory()
@@ -66,15 +69,15 @@ public class SupplyInventoryCalc {
             }
         }
 
-        int numRecorequestsAssignedToday = 0;
-        int numRecorequestsAssignedTodayReplied = 0;
-        int numRecorequestsAssigned7Days = 0;
-        int numRecorequestsAssigned7DaysReplied = 0;
-        int numRecorequestsInitiatedTotal = 0;
-        int numUserRecorequestsRepliedWithin10Mins = 0;
+        double numRecorequestsAssignedToday = 0;
+        double numRecorequestsAssignedTodayReplied = 0;
+        double numRecorequestsAssigned7Days = 0;
+        double numRecorequestsAssigned7DaysReplied = 0;
+        double numRecorequestsInitiatedTotal = 0;
+        double numUserRecorequestsRepliedWithin10Mins = 0;
 
-        int numRecorequestsAssignedTotal = 0;
-        int numUserRecorequestsAssignedRepliedWithin10Mins = 0;
+        double numRecorequestsAssignedTotal = 0;
+        double numUserRecorequestsAssignedRepliedWithin10Mins = 0;
 
         for (String flagUserId : allUserFlaggedUserList) {
             numRecorequestsAssignedToday = userUserDAO.getNumRecorequestsAssignedToday(flagUserId);

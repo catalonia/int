@@ -12,6 +12,10 @@ import java.util.List;
 public class DemandPriorityCalc {
     private UserUserDAO userUserDAO = new UserUserDAOImpl();
 
+    public DemandPriorityCalc() {
+        super();
+    }
+
     public void processAllUserFlaggedUserListDemandPriority()
         throws TasteSyncException {
         int algoIndicatorIdentifyUseridList = 1;

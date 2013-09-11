@@ -12,6 +12,10 @@ import java.util.List;
 public class UserTopicCalc {
     private UserUserDAO userUserDAO = new UserUserDAOImpl();
 
+    public UserTopicCalc() {
+        super();
+    }
+
     public void processAllUserFlaggedUserListUserTopic()
         throws TasteSyncException {
         int algoIndicatorIdentifyUseridList = 2;
