@@ -2,8 +2,34 @@ package com.tastesync.algo.db.queries;
 
 public interface UserRestaurantQueries extends TSDBCommonQueries {
     public static String RESTAURANT_FLAGGED_SELECT_SQL = "" +
-        "SELECT restaurant.restaurant_id " + "FROM   restaurant " +
-        "WHERE  restaurant.algo_ind = 1";
+        "SELECT restaurant.restaurant_id, " + "restaurant.restaurant_city_id " +
+        "FROM   restaurant " + "WHERE  restaurant.algo_ind = 1";
+    public static String FLAGGED_RESTAURANT_CITY_SELECT_SQL = "" +
+        "SELECT DISTINCT restaurant.restaurant_city_id " +
+        "FROM   restaurant " + "WHERE  restaurant.algo_ind = 1";
+    public static String CALCULATE_MEDIAN_USRS_NUMBER_FOR_CITY_SELECT_SQL = "" +
+        " SELECT " + " t1.RESTAURANT_CITY_ID," + " t1.4SQ_USERS_COUNT" +
+        " FROM " + " (SELECT" + " @rownum:=@rownum+1 as row_number," +
+        " t0.RESTAURANT_ID," + " t0.RESTAURANT_CITY_ID," +
+        " t0.4SQ_USERS_COUNT" + " FROM" + " (" + " SELECT" +
+        " restaurant.RESTAURANT_ID," + " restaurant.RESTAURANT_CITY_ID," +
+        " restaurant_factual_4sqvenue.4SQ_USERS_COUNT" +
+        " FROM restaurant, restaurant_factual_4sqvenue" + " WHERE" +
+        " restaurant.RESTAURANT_CITY_ID = ? AND" +
+        " restaurant.RESTAURANT_ID = restaurant_factual_4sqvenue.RESTAURANT_ID" +
+        " )t0, (SELECT @rownum:=0) r" +
+        " ORDER BY t0.RESTAURANT_CITY_ID, t0.4SQ_USERS_COUNT" + " ) t1," +
+        " (" + " SELECT t10.RESTAURANT_CITY_ID, count(*) as total_rows" +
+        " FROM" + " (" + " SELECT " + " restaurant.RESTAURANT_ID," +
+        " restaurant.RESTAURANT_CITY_ID, -- restaurantCityId" +
+        " restaurant_factual_4sqvenue.4SQ_USERS_COUNT" +
+        " FROM restaurant, restaurant_factual_4sqvenue" + " WHERE" +
+        " restaurant.RESTAURANT_CITY_ID = ? AND -- distinctFlaggedCityId" +
+        " restaurant.RESTAURANT_ID = restaurant_factual_4sqvenue.RESTAURANT_ID" +
+        " ) t10" + " group by " + " t10.RESTAURANT_CITY_ID" + " ) t2" +
+        " WHERE" + " t1.RESTAURANT_CITY_ID = t2.RESTAURANT_CITY_ID AND" +
+        " t1.row_number = round(total_rows/2)" +
+        " group by t1.RESTAURANT_CITY_ID";
     public static String RESTAURANT_RESTAURANT_FACTUAL_4SQVENUE_SELECT_SQL = "" +
         "SELECT restaurant.restaurant_id, " +
         "       restaurant.restaurant_city_id, " +
