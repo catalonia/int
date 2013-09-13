@@ -1437,7 +1437,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 statementInner.setInt(2, 1);
                 statementInner.setString(3, restaurantNbrhoodId);
                 statementInner.setString(4, flaggedRestaurantUserVO.getUserId());
-
+                statementInner.executeUpdate();
                 statementInner.close();
             }
 
@@ -1451,13 +1451,13 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             if (resultset.next()) {
                 priceId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "restaurant.restaurant_city_id"));
+                            "restaurant.price_range"));
 
                 statementInner = connection.prepareStatement(UserUserQueries.USER_PRICE_INSERT_SQL);
                 statementInner.setInt(1, 1);
                 statementInner.setString(2, priceId);
                 statementInner.setString(3, flaggedRestaurantUserVO.getUserId());
-
+                statementInner.executeUpdate();
                 statementInner.close();
             }
 
@@ -1477,7 +1477,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 statementInner.setInt(2, 1);
                 statementInner.setString(1, cuisTier2Id);
                 statementInner.setString(3, flaggedRestaurantUserVO.getUserId());
-
+                statementInner.executeUpdate();
                 statementInner.close();
             }
 

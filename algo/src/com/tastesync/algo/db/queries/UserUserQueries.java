@@ -165,10 +165,6 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "       user_restaurant_fav.restaurant_id " +
         "FROM   user_restaurant_fav " +
         "WHERE  user_restaurant_fav.algo_ind = 3";
-    public static String RESTAURANT_PRICERANGE_SELECT_SQL = "" +
-        "SELECT restaurant.price_range " + "FROM   restaurant, " +
-        "       restaurant_neighbourhood " +
-        "WHERE  restaurant.restaurant_id = restaurant_neighbourhood.restaurant_id = ? ";
     public static String USER_CITY_NBRHOOD_INSERT_SQL = "" +
         "INSERT INTO user_city_nbrhood_match " +
         "            (user_city_nbrhood_match.city_id, " +

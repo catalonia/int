@@ -11,6 +11,10 @@ public interface TSDBCommonQueries {
         "       restaurant.price_range " + "FROM   restaurant, " +
         "       restaurant_neighbourhood " +
         "WHERE  restaurant.restaurant_id = restaurant_neighbourhood.restaurant_id = ? ";
+    public static String RESTAURANT_PRICERANGE_SELECT_SQL = "" +
+            "SELECT restaurant.price_range " + "FROM   restaurant, " +
+            "       restaurant_neighbourhood " +
+            "WHERE  restaurant.restaurant_id = restaurant_neighbourhood.restaurant_id = ? ";
     public static String RESTAURANT_CUISINE_SELECT_SQL = "" +
         "SELECT restaurant_cuisine.tier2_cuisine_id " +
         "FROM   restaurant_cuisine " +

@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -298,7 +299,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
 
-            statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_INFO_POPULARITY_TIER_INSERT_SQS);
+            statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_INFO_POPULARITY_TIER_INSERT_SQL);
 
             statement.setString(1, restaurantId);
             statement.setInt(2, tierId);
@@ -413,7 +414,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public List<RestaurantUserVO> getFlaggedRestaurantTipsUserList(
         int algoIndicator) throws TasteSyncException {
-    	TSDataSource tsDataSource = TSDataSource.getInstance();
+        TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -454,13 +455,12 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             tsDataSource.close();
             tsDataSource.closeConnection(connection, statement, resultset);
         }
-        
     }
 
     @Override
     public List<RestaurantUserVO> getFlaggedRestaurantFavUserList(
         int algoIndicator) throws TasteSyncException {
-    	TSDataSource tsDataSource = TSDataSource.getInstance();
+        TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -501,5 +501,271 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             tsDataSource.close();
             tsDataSource.closeConnection(connection, statement, resultset);
         }
+    }
+
+    @Override
+    public LinkedList<String> getConsolidatedFlaggedRestaurantForSingleUser(
+        RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException {
+        //For each userId, multiple restaurant ids are associated!
+        // in a file, write user id with different restaurant ids
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        PreparedStatement statementInner = null;
+        ResultSet resultsetInner = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_NEIGHBOURHOOD_CITY_SELECT_SQL);
+
+            statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            resultset = statement.executeQuery();
+
+            String restaurantNbrhoodId = null;
+
+            LinkedList<String> restaurantIdList = new LinkedList<String>();
+
+            while (resultset.next()) {
+                restaurantNbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_neighbourhood.neighbourhood_id"));
+
+                statementInner = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_FROM_NGBRHOOD_SELECT_SQL);
+                statementInner.setString(1, restaurantNbrhoodId);
+                resultsetInner = statementInner.executeQuery();
+
+                String restaurantIdFromNgbrhoodId = null;
+
+                while (resultsetInner.next()) {
+                    restaurantIdFromNgbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "restaurant_neighbourhood.restaurant_id"));
+
+                    if (!restaurantIdList.contains(restaurantIdFromNgbrhoodId)) {
+                        restaurantIdList.add(restaurantIdFromNgbrhoodId);
+                    }
+                }
+
+                statementInner.close();
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_PRICERANGE_SELECT_SQL);
+            statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            resultset = statement.executeQuery();
+
+            String priceId = null;
+
+            //one results
+            if (resultset.next()) {
+                priceId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant.price_range"));
+
+                statementInner = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_FROM_PRICERANGE_SELECT_SQL);
+                statementInner.setString(1, priceId);
+                resultsetInner = statementInner.executeQuery();
+
+                String restaurantIdFromPricerangeId = null;
+
+                while (resultsetInner.next()) {
+                    restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "restaurant.restaurant_id"));
+
+                    if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
+                        restaurantIdList.add(restaurantIdFromPricerangeId);
+                    }
+                }
+
+                statementInner.close();
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_CUISINE_SELECT_SQL);
+            statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            resultset = statement.executeQuery();
+
+            String cuisTier2Id = null;
+
+            while (resultset.next()) {
+                cuisTier2Id = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_cuisine.tier2_cuisine_id"));
+
+                statementInner = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_FROM_CUISINE_SELECT_SQL);
+                statementInner.setString(1, cuisTier2Id);
+                resultsetInner = statementInner.executeQuery();
+
+                String restaurantIdFromPricerangeId = null;
+
+                while (resultsetInner.next()) {
+                    restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "restaurant_cuisine.restaurant_id"));
+
+                    if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
+                        restaurantIdList.add(restaurantIdFromPricerangeId);
+                    }
+                }
+
+                statementInner.close();
+            }
+
+            statement.close();
+
+            return restaurantIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getConsolidatedFlaggedRestaurantForSingleUser= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public void processRestUserMatchCounter(String flaggedUserId, String flaggedRestaurantId)
+        throws TasteSyncException {
+        
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CITY_RESTAURANT_NHBR_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numNbrhoodMatch = 0;
+
+            if (resultset.next()) {
+            	numNbrhoodMatch = resultset.getInt(1);
+            }
+
+            statement.close();
+            
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CUISINETIER2_RESTAURANT_CUISINE_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numCuis2Match = 0;
+
+            if (resultset.next()) {
+            	numCuis2Match = resultset.getInt(1);
+            }
+
+            statement.close();
+
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_PRICE_RESTAURANT_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numPriceMatch = 0;
+
+            if (resultset.next()) {
+            	numPriceMatch = resultset.getInt(1);
+            }
+
+            statement.close();
+
+            
+            
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FOLLOW_DATA_USER_RESTAURANT_FAV_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numFavFollowMatch = 0;
+
+            if (resultset.next()) {
+            	numFavFollowMatch = resultset.getInt(1);
+            }
+
+            statement.close();
+            
+            
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FOLLOW_DATA_USER_RESTAURANT_RECO_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numRecoFollowMatch = 0;
+
+            if (resultset.next()) {
+            	numRecoFollowMatch = resultset.getInt(1);
+            }
+
+            statement.close();
+            
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FRIEND_USER_RESTAURANT_FAV_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numFavTrustedMatch = 0;
+
+            if (resultset.next()) {
+            	numFavTrustedMatch = resultset.getInt(1);
+            }
+
+            statement.close();
+            
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FRIEND_RESTAURANT_RECO_SELECT_SQL);
+
+            statement.setString(1, flaggedUserId);
+
+            resultset = statement.executeQuery();
+
+            int numRecoTrustedMatch = 0;
+
+            if (resultset.next()) {
+            	numRecoTrustedMatch = resultset.getInt(1);
+            }
+
+            statement.close();
+            
+            int numUserRestaurantMatchCount = numNbrhoodMatch + numCuis2Match + numPriceMatch + numFavFollowMatch + numRecoFollowMatch + numFavTrustedMatch + numRecoTrustedMatch;
+
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
+
+            statement.setInt(1, 0);
+            statement.setInt(2, numUserRestaurantMatchCount);
+            statement.setString(3, flaggedRestaurantId);
+            statement.setString(4, flaggedUserId);
+            statement.setInt(5, 0);
+            statement.setInt(6, numUserRestaurantMatchCount);
+
+            statement.executeUpdate();
+            statement.close();
+            
+            
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while processRestUserMatchCounter= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+        
+    	
     }
 }

@@ -6,6 +6,7 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -23,20 +24,46 @@ public class RestUserMatchCounterCalc {
 
         List<RestaurantUserVO> flaggedRestaurantFavUserList = userRestaurantDAO.getFlaggedRestaurantFavUserList(algoIndicator);
 
-        List<RestaurantUserVO> allflaggedRestaurantFavUserList = new ArrayList<RestaurantUserVO>(flaggedRestaurantReplyUserList.size() +
+        List<RestaurantUserVO> allflaggedRestaurantUserList = new ArrayList<RestaurantUserVO>(flaggedRestaurantReplyUserList.size() +
                 flaggedRestaurantTipsUserList.size() +
                 flaggedRestaurantFavUserList.size());
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantReplyUserList) {
-            allflaggedRestaurantFavUserList.add(restaurantUserVO);
+            allflaggedRestaurantUserList.add(restaurantUserVO);
         }
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantTipsUserList) {
-            allflaggedRestaurantFavUserList.add(restaurantUserVO);
+            allflaggedRestaurantUserList.add(restaurantUserVO);
         }
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantFavUserList) {
-            allflaggedRestaurantFavUserList.add(restaurantUserVO);
+            allflaggedRestaurantUserList.add(restaurantUserVO);
+        }
+
+        //For each userId, multiple restaurant ids are associated!
+        for (RestaurantUserVO flaggedRestaurantUserVO : allflaggedRestaurantUserList) {
+            //String chainFlag = userRestaurantDAO.getRestaurantInfoChained(flaggedRestaurantUserVO.getRestaurantId());
+            LinkedList<String> restaurantIdList = userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
+
+            for (String restaurantId : restaurantIdList) {
+                userRestaurantDAO.processRestUserMatchCounter(flaggedRestaurantUserVO.getUserId(),
+                    restaurantId);
+            }
+        }
+
+        for (RestaurantUserVO restaurantUserVO : flaggedRestaurantReplyUserList) {
+            userRestaurantDAO.submitRecorrequestReplyUser(restaurantUserVO.getUserId(),
+                0);
+        }
+
+        for (RestaurantUserVO restaurantUserVO : flaggedRestaurantTipsUserList) {
+            userRestaurantDAO.submitRestaurantTipsTastesync(restaurantUserVO.getUserId(),
+                restaurantUserVO.getRestaurantId(), 0);
+        }
+
+        for (RestaurantUserVO restaurantUserVO : flaggedRestaurantFavUserList) {
+            userRestaurantDAO.submitRestaurantFav(restaurantUserVO.getUserId(),
+                restaurantUserVO.getRestaurantId(), 0);
         }
     }
 }
