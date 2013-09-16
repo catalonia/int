@@ -10,7 +10,11 @@ import java.util.List;
 public class RestaurantsSearchResultsOnlineCalc {
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
-    // return list of restaurantIds based on different parameters
+    public RestaurantsSearchResultsOnlineCalc() {
+		super();
+	}
+
+	// return list of restaurantIds based on different parameters
     public List<String> showListOfRestaurantsSearchResults(String userId,
         String restaurantId, String neighborhoodId, String cityId,
         String stateName, String[] cuisineTier1IdArray, String[] priceIdList,
