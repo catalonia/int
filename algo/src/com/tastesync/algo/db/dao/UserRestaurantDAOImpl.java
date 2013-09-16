@@ -626,9 +626,8 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     }
 
     @Override
-    public void processRestUserMatchCounter(String flaggedUserId, String flaggedRestaurantId)
-        throws TasteSyncException {
-        
+    public void processRestUserMatchCounter(String flaggedUserId,
+        String flaggedRestaurantId) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -646,11 +645,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numNbrhoodMatch = 0;
 
             if (resultset.next()) {
-            	numNbrhoodMatch = resultset.getInt(1);
+                numNbrhoodMatch = resultset.getInt(1);
             }
 
             statement.close();
-            
+
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CUISINETIER2_RESTAURANT_CUISINE_SELECT_SQL);
 
             statement.setString(1, flaggedUserId);
@@ -660,7 +659,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numCuis2Match = 0;
 
             if (resultset.next()) {
-            	numCuis2Match = resultset.getInt(1);
+                numCuis2Match = resultset.getInt(1);
             }
 
             statement.close();
@@ -674,13 +673,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numPriceMatch = 0;
 
             if (resultset.next()) {
-            	numPriceMatch = resultset.getInt(1);
+                numPriceMatch = resultset.getInt(1);
             }
 
             statement.close();
 
-            
-            
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FOLLOW_DATA_USER_RESTAURANT_FAV_SELECT_SQL);
 
             statement.setString(1, flaggedUserId);
@@ -690,12 +687,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numFavFollowMatch = 0;
 
             if (resultset.next()) {
-            	numFavFollowMatch = resultset.getInt(1);
+                numFavFollowMatch = resultset.getInt(1);
             }
 
             statement.close();
-            
-            
+
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FOLLOW_DATA_USER_RESTAURANT_RECO_SELECT_SQL);
 
             statement.setString(1, flaggedUserId);
@@ -705,11 +701,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numRecoFollowMatch = 0;
 
             if (resultset.next()) {
-            	numRecoFollowMatch = resultset.getInt(1);
+                numRecoFollowMatch = resultset.getInt(1);
             }
 
             statement.close();
-            
+
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FRIEND_USER_RESTAURANT_FAV_SELECT_SQL);
 
             statement.setString(1, flaggedUserId);
@@ -719,11 +715,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numFavTrustedMatch = 0;
 
             if (resultset.next()) {
-            	numFavTrustedMatch = resultset.getInt(1);
+                numFavTrustedMatch = resultset.getInt(1);
             }
 
             statement.close();
-            
+
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FRIEND_RESTAURANT_RECO_SELECT_SQL);
 
             statement.setString(1, flaggedUserId);
@@ -733,12 +729,14 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             int numRecoTrustedMatch = 0;
 
             if (resultset.next()) {
-            	numRecoTrustedMatch = resultset.getInt(1);
+                numRecoTrustedMatch = resultset.getInt(1);
             }
 
             statement.close();
-            
-            int numUserRestaurantMatchCount = numNbrhoodMatch + numCuis2Match + numPriceMatch + numFavFollowMatch + numRecoFollowMatch + numFavTrustedMatch + numRecoTrustedMatch;
+
+            int numUserRestaurantMatchCount = numNbrhoodMatch + numCuis2Match +
+                numPriceMatch + numFavFollowMatch + numRecoFollowMatch +
+                numFavTrustedMatch + numRecoTrustedMatch;
 
             tsDataSource.begin();
 
@@ -753,19 +751,32 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement.executeUpdate();
             statement.close();
-            
-            
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
-                "Error while processRestUserMatchCounter= " +
-                e.getMessage());
+                "Error while processRestUserMatchCounter= " + e.getMessage());
         } finally {
             tsDataSource.close();
             tsDataSource.closeConnection(connection, statement, resultset);
         }
-        
-    	
+    }
+
+    @Override
+    public List<String> showListOfRestaurantsSearchResults(String userId,
+        String restaurantId, String neighborhoodId, String cityId,
+        String stateName, String[] cuisineTier1IdArray, String[] priceIdList,
+        String rating, String savedFlag, String favFlag, String dealFlag,
+        String chainFlag, String paginationId, String[] cuisineTier2IdArray,
+        String[] themeIdArray, String[] whoareyouwithIdArray,
+        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
+        throws TasteSyncException {
+        RestaurantsSearchResultsHelper restaurantsSearchResultsHelper = new RestaurantsSearchResultsHelper();
+
+        return restaurantsSearchResultsHelper.showListOfRestaurantsSearchResults(userId,
+            restaurantId, neighborhoodId, cityId, stateName,
+            cuisineTier1IdArray, priceIdList, rating, savedFlag, favFlag,
+            dealFlag, chainFlag, paginationId, cuisineTier2IdArray,
+            themeIdArray, whoareyouwithIdArray, typeOfRestaurantIdArray,
+            occasionIdArray);
     }
 }
