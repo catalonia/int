@@ -217,20 +217,14 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "           user_restaurant_reco.recommender_user_id " +
         "       AND user_friend_tastesync.friend_trusted_flag = 1 " +
         "       AND user_restaurant_reco.restaurant_id = ? ";
-
     public static String USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL = "" +
-    		  "INSERT INTO user_restaurant_match_counter "
-    		+ "            (user_restaurant_match_counter.calc_flag, "
-    		+ "             user_restaurant_match_counter.match_counter, "
-    		+ "             user_restaurant_match_counter.restaurant_id, "
-    		+ "             user_restaurant_match_counter.user_id) "
-    		+ "VALUES      ( ?, "
-    		+ "              ?, "
-    		+ "              ?, "
-    		+ "              ? ) "
-    		+ " ON DUPLICATE KEY UPDATE "
-    		+ " user_restaurant_match_counter.calc_flag = ?, "
-    		+ " user_restaurant_match_counter.match_counter = ?";
-
-    
+        "INSERT INTO user_restaurant_match_counter " +
+        "            (user_restaurant_match_counter.calc_flag, " +
+        "             user_restaurant_match_counter.match_counter, " +
+        "             user_restaurant_match_counter.restaurant_id, " +
+        "             user_restaurant_match_counter.user_id) " +
+        "VALUES      ( ?, " + "              ?, " + "              ?, " +
+        "              ? ) " + " ON DUPLICATE KEY UPDATE " +
+        " user_restaurant_match_counter.calc_flag = ?, " +
+        " user_restaurant_match_counter.match_counter = ?";
 }
