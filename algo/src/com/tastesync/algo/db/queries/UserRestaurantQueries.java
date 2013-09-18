@@ -3,10 +3,10 @@ package com.tastesync.algo.db.queries;
 public interface UserRestaurantQueries extends TSDBCommonQueries {
     public static String RESTAURANT_FLAGGED_SELECT_SQL = "" +
         "SELECT restaurant.restaurant_id, " + "restaurant.restaurant_city_id " +
-        "FROM   restaurant " + "WHERE  restaurant.algo_ind = 1";
+        "FROM   restaurant " + "WHERE  restaurant.algo_ind = ?";
     public static String FLAGGED_RESTAURANT_CITY_SELECT_SQL = "" +
         "SELECT DISTINCT restaurant.restaurant_city_id " +
-        "FROM   restaurant " + "WHERE  restaurant.algo_ind = 1";
+        "FROM   restaurant " + "WHERE  restaurant.algo_ind = ?";
     public static String CALCULATE_MEDIAN_USRS_NUMBER_FOR_CITY_SELECT_SQL = "" +
         " SELECT " + " t1.RESTAURANT_CITY_ID," + " t1.4SQ_USERS_COUNT" +
         " FROM " + " (SELECT" + " @rownum:=@rownum+1 as row_number," +
@@ -21,10 +21,10 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         " ORDER BY t0.RESTAURANT_CITY_ID, t0.4SQ_USERS_COUNT" + " ) t1," +
         " (" + " SELECT t10.RESTAURANT_CITY_ID, count(*) as total_rows" +
         " FROM" + " (" + " SELECT " + " restaurant.RESTAURANT_ID," +
-        " restaurant.RESTAURANT_CITY_ID, -- restaurantCityId" +
+        " restaurant.RESTAURANT_CITY_ID, " +
         " restaurant_factual_4sqvenue.4SQ_USERS_COUNT" +
         " FROM restaurant, restaurant_factual_4sqvenue" + " WHERE" +
-        " restaurant.RESTAURANT_CITY_ID = ? AND -- distinctFlaggedCityId" +
+        " restaurant.RESTAURANT_CITY_ID = ? AND " +
         " restaurant.RESTAURANT_ID = restaurant_factual_4sqvenue.RESTAURANT_ID" +
         " ) t10" + " group by " + " t10.RESTAURANT_CITY_ID" + " ) t2" +
         " WHERE" + " t1.RESTAURANT_CITY_ID = t2.RESTAURANT_CITY_ID AND" +
@@ -157,16 +157,23 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "UPDATE restaurant " + "SET    restaurant.algo_ind = ? " +
         "WHERE  restaurant.restaurant_id = ?";
     public static String RESTAURANT_FROM_NGBRHOOD_SELECT_SQL = "" +
-        "SELECT restaurant_neighbourhood.restaurant_id " +
-        "FROM   restaurant_neighbourhood " +
-        "WHERE  restaurant_neighbourhood.neighbourhood_id = ? ";
+        "SELECT restaurant_neighbourhood.restaurant_id, " +
+        "       restaurant_info_popularity_tier.tier_id " +
+        "FROM   restaurant_neighbourhood,restaurant_info_popularity_tier " +
+        "WHERE  restaurant_neighbourhood.neighbourhood_id = ? " +
+        "       AND restaurant_info_popularity_tier.restaurant_id = restaurant_neighbourhood.restaurant_id";
     public static String RESTAURANT_FROM_PRICERANGE_SELECT_SQL = "" +
-        "SELECT restaurant.restaurant_id " + "FROM   restaurant " +
-        "WHERE  restaurant.price_range = ? ";
+        "SELECT restaurant.restaurant_id " +
+        "       restaurant_info_popularity_tier.tier_id " +
+        "FROM   restaurant,restaurant_info_popularity_tier " +
+        "WHERE  restaurant.price_range = ? " +
+        "       AND restaurant_info_popularity_tier.restaurant_id = restaurant.restaurant_id";
     public static String RESTAURANT_FROM_CUISINE_SELECT_SQL = "" +
-        "SELECT restaurant_cuisine.restaurant_id " +
-        "FROM   restaurant_cuisine " +
-        "WHERE  restaurant_cuisine.tier2_cuisine_id = ? ";
+        "SELECT restaurant_cuisine.restaurant_id, " +
+        "       restaurant_info_popularity_tier.tier_id " +
+        "FROM   restaurant_cuisine,restaurant_info_popularity_tier " +
+        "WHERE  restaurant_cuisine.tier2_cuisine_id = ? " +
+        "       AND restaurant_info_popularity_tier.restaurant_id = restaurant_cuisine.restaurant_id";
     public static String COUNT_USER_CITY_RESTAURANT_NHBR_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   user_city_nbrhood_match, " +
         "       restaurant_neighbourhood " +
@@ -222,9 +229,31 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "            (user_restaurant_match_counter.calc_flag, " +
         "             user_restaurant_match_counter.match_counter, " +
         "             user_restaurant_match_counter.restaurant_id, " +
-        "             user_restaurant_match_counter.user_id) " +
+        "             user_restaurant_match_counter.user_id,) " +
+        "             user_restaurant_match_counter.user_restaurant_rank) " +
         "VALUES      ( ?, " + "              ?, " + "              ?, " +
-        "              ? ) " + " ON DUPLICATE KEY UPDATE " +
+        "              ?,  " + "              ? )" +
+        " ON DUPLICATE KEY UPDATE " +
         " user_restaurant_match_counter.calc_flag = ?, " +
-        " user_restaurant_match_counter.match_counter = ?";
+        " user_restaurant_match_counter.match_counter = ?" +
+        " user_restaurant_match_counter.user_restaurant_rank = ?";
+    public static String ALL_USERS_SELECT_SQL = "" + "SELECT users.user_id " +
+        "FROM   users ";
+    public static String USER_MATCH_COUNTER_SELECT_SQL = "" +
+        "SELECT user_restaurant_match_counter.match_counter " +
+        "FROM   user_restaurant_match_counter " +
+        "WHERE  user_restaurant_match_counter.user_id = ? " +
+        "       AND user_restaurant_match_counter.restaurant_id = ? ";
+    public static String RESTAURANT_INFO_POPULARITY_TIER_SELECT_SQL = "" +
+        "SELECT restaurant_info_popularity_tier.tier_id " +
+        "FROM   restaurant_info_popularity_tier " +
+        "WHERE  restaurant_info_popularity_tier.restaurant_id = ? ";
+    public static String RANK_USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL = "" +
+        "INSERT INTO user_restaurant_match_counter " +
+        "            (user_restaurant_match_counter.restaurant_id, " +
+        "             user_restaurant_match_counter.user_id, " +
+        "             user_restaurant_match_counter.user_restaurant_rank) " +
+        "VALUES      ( ?, " + "              ?, " + "              ? ) " +
+        " ON DUPLICATE KEY UPDATE " +
+        " user_restaurant_match_counter.user_restaurant_rank = ?";
 }

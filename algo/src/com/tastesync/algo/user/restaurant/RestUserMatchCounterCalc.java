@@ -3,6 +3,7 @@ package com.tastesync.algo.user.restaurant;
 import com.tastesync.algo.db.dao.UserRestaurantDAO;
 import com.tastesync.algo.db.dao.UserRestaurantDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
+import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 
 import java.util.ArrayList;
@@ -40,15 +41,32 @@ public class RestUserMatchCounterCalc {
             allflaggedRestaurantUserList.add(restaurantUserVO);
         }
 
+        RankRestaurantsSingleUserCalcHelper rankRestaurantsSingleUserCalcHelper = new RankRestaurantsSingleUserCalcHelper();
+
         //For each userId, multiple restaurant ids are associated!
+        int numUserRestaurantMatchCount = 0;
+
         for (RestaurantUserVO flaggedRestaurantUserVO : allflaggedRestaurantUserList) {
             //String chainFlag = userRestaurantDAO.getRestaurantInfoChained(flaggedRestaurantUserVO.getRestaurantId());
-            LinkedList<String> restaurantIdList = userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
+            LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
+                userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
 
-            for (String restaurantId : restaurantIdList) {
-                userRestaurantDAO.processRestUserMatchCounter(flaggedRestaurantUserVO.getUserId(),
-                    restaurantId);
+            for (int i = 0; i < restaurantPopularityTierVOList.size(); ++i) {
+                numUserRestaurantMatchCount = userRestaurantDAO.getRestUserMatchCounter(flaggedRestaurantUserVO.getUserId(),
+                        restaurantPopularityTierVOList.get(i));
+                //set numUserRestaurantMatchCount
+                restaurantPopularityTierVOList.get(i)
+                                              .setNumUserRestaurantMatchCount(String.valueOf(
+                        numUserRestaurantMatchCount));
+                // set userId
+                restaurantPopularityTierVOList.get(i)
+                                              .setUserId(flaggedRestaurantUserVO.getUserId());
             }
+
+            List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
+
+            // final insert
+            userRestaurantDAO.submitAssignedRankUserRestaurantForWhole(list1ofrestaurants);
         }
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantReplyUserList) {

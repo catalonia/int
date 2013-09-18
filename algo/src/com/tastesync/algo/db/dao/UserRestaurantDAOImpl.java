@@ -4,6 +4,7 @@ import com.tastesync.algo.db.pool.TSDataSource;
 import com.tastesync.algo.db.queries.UserRestaurantQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
+import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
 
@@ -77,8 +78,6 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         try {
             connection = tsDataSource.getConnection();
             statement = connection.prepareStatement(UserRestaurantQueries.FLAGGED_RESTAURANT_CITY_SELECT_SQL);
-
-            //int algoIndicator = 1;
             statement.setInt(1, algoIndicatorIdentifyRestaurantIdList);
             resultset = statement.executeQuery();
 
@@ -504,10 +503,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     }
 
     @Override
-    public LinkedList<String> getConsolidatedFlaggedRestaurantForSingleUser(
+    public LinkedList<RestaurantPopularityTierVO> getConsolidatedFlaggedRestaurantForSingleUser(
         RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException {
         //For each userId, multiple restaurant ids are associated!
-        // in a file, write user id with different restaurant ids
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -527,6 +525,8 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             String restaurantNbrhoodId = null;
 
             LinkedList<String> restaurantIdList = new LinkedList<String>();
+            LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
+                new LinkedList<RestaurantPopularityTierVO>();
 
             while (resultset.next()) {
                 restaurantNbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -537,13 +537,18 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 resultsetInner = statementInner.executeQuery();
 
                 String restaurantIdFromNgbrhoodId = null;
+                String popularityTierId = null;
 
                 while (resultsetInner.next()) {
                     restaurantIdFromNgbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                                 "restaurant_neighbourhood.restaurant_id"));
+                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "restaurant_info_popularity_tier.tier_id"));
 
                     if (!restaurantIdList.contains(restaurantIdFromNgbrhoodId)) {
                         restaurantIdList.add(restaurantIdFromNgbrhoodId);
+                        restaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
+                                restaurantIdFromNgbrhoodId, popularityTierId));
                     }
                 }
 
@@ -568,13 +573,18 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 resultsetInner = statementInner.executeQuery();
 
                 String restaurantIdFromPricerangeId = null;
+                String popularityTierId = null;
 
                 while (resultsetInner.next()) {
                     restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                                 "restaurant.restaurant_id"));
+                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "restaurant_info_popularity_tier.tier_id"));
 
                     if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
                         restaurantIdList.add(restaurantIdFromPricerangeId);
+                        restaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
+                                restaurantIdFromPricerangeId, popularityTierId));
                     }
                 }
 
@@ -598,13 +608,18 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 resultsetInner = statementInner.executeQuery();
 
                 String restaurantIdFromPricerangeId = null;
+                String popularityTierId = null;
 
                 while (resultsetInner.next()) {
                     restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                                 "restaurant_cuisine.restaurant_id"));
+                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                                "restaurant_info_popularity_tier.tier_id"));
 
                     if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
                         restaurantIdList.add(restaurantIdFromPricerangeId);
+                        restaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
+                                restaurantIdFromPricerangeId, popularityTierId));
                     }
                 }
 
@@ -612,8 +627,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             }
 
             statement.close();
+            restaurantIdList = null;
 
-            return restaurantIdList;
+            return restaurantPopularityTierVOList;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -626,8 +642,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     }
 
     @Override
-    public void processRestUserMatchCounter(String flaggedUserId,
-        String flaggedRestaurantId) throws TasteSyncException {
+    public int getRestUserMatchCounter(String flaggedUserId,
+        RestaurantPopularityTierVO flaggedRestaurantPopularityTierVO)
+        throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -738,19 +755,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 numPriceMatch + numFavFollowMatch + numRecoFollowMatch +
                 numFavTrustedMatch + numRecoTrustedMatch;
 
-            tsDataSource.begin();
-
-            statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
-
-            statement.setInt(1, 0);
-            statement.setInt(2, numUserRestaurantMatchCount);
-            statement.setString(3, flaggedRestaurantId);
-            statement.setString(4, flaggedUserId);
-            statement.setInt(5, 0);
-            statement.setInt(6, numUserRestaurantMatchCount);
-
-            statement.executeUpdate();
-            statement.close();
+            return numUserRestaurantMatchCount;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -778,5 +783,214 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             dealFlag, chainFlag, paginationId, cuisineTier2IdArray,
             themeIdArray, whoareyouwithIdArray, typeOfRestaurantIdArray,
             occasionIdArray);
+    }
+
+    @Override
+    public void submitAssignedRankUserRestaurantForWhole(
+        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
+                statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
+
+                statement.setInt(1, 0);
+                statement.setInt(2,
+                    Integer.valueOf(
+                        restaurantPopularityTierVO.getNumUserRestaurantMatchCount()));
+                statement.setString(3,
+                    restaurantPopularityTierVO.getRestaurantId());
+                statement.setString(4, restaurantPopularityTierVO.getUserId());
+                statement.setInt(5, restaurantPopularityTierVO.getRankNumber());
+
+                statement.setInt(6, 0);
+                statement.setInt(7,
+                    Integer.valueOf(
+                        restaurantPopularityTierVO.getNumUserRestaurantMatchCount()));
+                statement.setInt(8, restaurantPopularityTierVO.getRankNumber());
+
+                statement.executeUpdate();
+            }
+
+            statement.close();
+            tsDataSource.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while submitAssignedRankUserRestaurant= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public List<String> getAllUsers() throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserRestaurantQueries.ALL_USERS_SELECT_SQL);
+
+            resultset = statement.executeQuery();
+
+            List<String> usersList = new ArrayList<String>();
+
+            while (resultset.next()) {
+                usersList.add(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.user_id")));
+            }
+
+            statement.close();
+
+            return usersList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("Error while getAllUsers= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public int getUserMatchCounter(String userId, String restaurantId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserRestaurantQueries.USER_MATCH_COUNTER_SELECT_SQL);
+            statement.setString(1, userId);
+            statement.setString(2, restaurantId);
+            resultset = statement.executeQuery();
+
+            int userMatchCounter = 0;
+            String strUserMatchCounter = null;
+
+            //only one result
+            if (resultset.next()) {
+                strUserMatchCounter = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "user_restaurant_match_counter.match_counter"));
+            }
+
+            if (strUserMatchCounter != null) {
+                userMatchCounter = Integer.valueOf(userMatchCounter);
+            } else {
+                userMatchCounter = 0;
+                System.out.println("userMatchCounter is NULL. set to 0");
+            }
+
+            statement.close();
+
+            return userMatchCounter;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("Error while getUserMatchCounter= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public int getRestaurantInfoTierId(String userId, String restaurantId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_INFO_POPULARITY_TIER_SELECT_SQL);
+            statement.setString(1, restaurantId);
+            resultset = statement.executeQuery();
+
+            int pupularityTierId = 0;
+            String strPupularityTierId = null;
+
+            //only one result
+            if (resultset.next()) {
+                strPupularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_info_popularity_tier.tier_id"));
+            }
+
+            if (strPupularityTierId != null) {
+                pupularityTierId = Integer.valueOf(strPupularityTierId);
+            } else {
+                pupularityTierId = 0;
+                System.out.println("pupularityTierId is NULL. set to 0");
+            }
+
+            statement.close();
+
+            return pupularityTierId;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getRestaurantInfoTierId= " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public void submitAssignedRankUserRestaurant(
+        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
+                statement = connection.prepareStatement(UserRestaurantQueries.RANK_USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
+
+                statement.setString(1,
+                    restaurantPopularityTierVO.getRestaurantId());
+                statement.setString(2, restaurantPopularityTierVO.getUserId());
+                statement.setInt(3, restaurantPopularityTierVO.getRankNumber());
+
+                statement.setInt(4, restaurantPopularityTierVO.getRankNumber());
+
+                statement.executeUpdate();
+            }
+
+            statement.close();
+            tsDataSource.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while submitAssignedRankUserRestaurant= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
     }
 }

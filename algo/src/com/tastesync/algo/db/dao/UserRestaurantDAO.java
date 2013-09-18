@@ -2,6 +2,7 @@ package com.tastesync.algo.db.dao;
 
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
+import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 
 import java.util.LinkedList;
@@ -36,11 +37,12 @@ public interface UserRestaurantDAO extends BaseDAO {
     List<RestaurantUserVO> getFlaggedRestaurantFavUserList(int algoIndicator)
         throws TasteSyncException;
 
-    LinkedList<String> getConsolidatedFlaggedRestaurantForSingleUser(
+    LinkedList<RestaurantPopularityTierVO> getConsolidatedFlaggedRestaurantForSingleUser(
         RestaurantUserVO restaurantUserVO) throws TasteSyncException;
 
-    void processRestUserMatchCounter(String flaggedUserId,
-        String flaggedRestaurantId) throws TasteSyncException;
+    int getRestUserMatchCounter(String flaggedUserId,
+        RestaurantPopularityTierVO flaggedRestaurantPopularityTierVO)
+        throws TasteSyncException;
 
     public List<String> showListOfRestaurantsSearchResults(String userId,
         String restaurantId, String neighborhoodId, String cityId,
@@ -50,4 +52,19 @@ public interface UserRestaurantDAO extends BaseDAO {
         String[] themeIdArray, String[] whoareyouwithIdArray,
         String[] typeOfRestaurantIdArray, String[] occasionIdArray)
         throws TasteSyncException;
+
+    public void submitAssignedRankUserRestaurantForWhole(
+    		List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+        throws TasteSyncException;
+
+    public List<String> getAllUsers() throws TasteSyncException;
+    
+    public int getUserMatchCounter(String userId, String restaurantId) throws TasteSyncException;
+
+    public int getRestaurantInfoTierId(String userId, String restaurantId) throws TasteSyncException;
+
+    public void submitAssignedRankUserRestaurant(
+    		List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+            throws TasteSyncException;
+    
 }
