@@ -1,6 +1,6 @@
 package com.tastesync.algo.db.dao;
 
-import com.tastesync.algo.db.pool.TSDataSource;
+import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.algo.db.queries.UserUserQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RecorequestReplyUserVO;
@@ -549,7 +549,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     @Override
     public void submitUserRecoSupplyTier(String flaggedUserId,
         int userSupplyInvTier) throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -568,6 +568,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -590,7 +591,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     @Override
     public void submitRecorrequestUser(String flaggedUserId, int algoInd)
         throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -605,6 +606,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -627,7 +629,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     @Override
     public void submitRecorrequestAssigned(String flaggedUserId, int algoInd)
         throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -642,6 +644,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1200,7 +1203,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     @Override
     public void submitUserRecoDemandTierPrecalc(String flaggedUserId,
         int demandTierFlag) throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1222,6 +1225,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1407,7 +1411,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     @Override
     public void submitUserCityNbrHoodAndCusineTier2Match(
         RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1417,6 +1421,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
         try {
             connection = tsDataSource.getConnection();
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.RESTAURANT_NEIGHBOURHOOD_CITY_SELECT_SQL);
 
             statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
@@ -1482,8 +1487,16 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             }
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
             throw new TasteSyncException(
                 "Error while getRestaurantInfoChained= " + e.getMessage());
         } finally {

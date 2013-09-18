@@ -1,6 +1,6 @@
 package com.tastesync.algo.db.dao;
 
-import com.tastesync.algo.db.pool.TSDataSource;
+import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.InputRestaurantSearchVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;

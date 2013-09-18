@@ -1,6 +1,6 @@
 package com.tastesync.algo.db.dao;
 
-import com.tastesync.algo.db.pool.TSDataSource;
+import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.algo.db.queries.UserRestaurantQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
@@ -288,7 +288,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public void submitRestaurantInfoPopularityTier(String restaurantId,
         int tierId) throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -307,6 +307,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -823,6 +824,14 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            
             throw new TasteSyncException(
                 "Error while submitAssignedRankUserRestaurant= " +
                 e.getMessage());
@@ -985,6 +994,13 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
             throw new TasteSyncException(
                 "Error while submitAssignedRankUserRestaurant= " +
                 e.getMessage());
