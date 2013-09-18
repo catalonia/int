@@ -24,37 +24,44 @@ public class UserRestRankOrderCalc {
         RestaurantUserVO restaurantUserVO = null;
         String numUserRestaurantMatchCount = null;
         String restaurantTier = null;
+
         for (String userId : usersIdList) {
             List<RestaurantUserVO> restaurantUserVOList = new ArrayList<RestaurantUserVO>(flaggedRestaurantList.size());
 
             //get userid-restaurant id list for each user
             for (RestaurantCityVO restaurantCityVO : flaggedRestaurantList) {
-                //TODO
-                
-            	restaurantUserVO = new RestaurantUserVO(userId,
+                restaurantUserVO = new RestaurantUserVO(userId,
                         restaurantCityVO.getRestaurantId());
-            	
-            	
+
                 restaurantUserVOList.add(restaurantUserVO);
             }
 
             for (RestaurantUserVO flaggedRestaurantUserVO : restaurantUserVOList) {
-           
                 LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
                     userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
 
-              //numUserRestaurantMatchCount restaurantTier
-                for (int i = 0; i < restaurantPopularityTierVOList.size(); ++i) {
-                	numUserRestaurantMatchCount = String.valueOf(userRestaurantDAO.getUserMatchCounter(userId, flaggedRestaurantUserVO.getRestaurantId()));
-                 	restaurantPopularityTierVOList.get(i).setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
-                 	restaurantTier = String.valueOf(userRestaurantDAO.getRestaurantInfoTierId(userId, flaggedRestaurantUserVO.getRestaurantId()));
-                	restaurantPopularityTierVOList.get(i).setPopularityTierId(restaurantTier);
+                //numUserRestaurantMatchCount restaurantTier
+                for (int i = 0; i < restaurantPopularityTierVOList.size();
+                        ++i) {
+                    numUserRestaurantMatchCount = String.valueOf(userRestaurantDAO.getUserMatchCounter(
+                                userId,
+                                flaggedRestaurantUserVO.getRestaurantId()));
+                    restaurantPopularityTierVOList.get(i)
+                                                  .setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
+                    restaurantTier = String.valueOf(userRestaurantDAO.getRestaurantInfoTierId(
+                                userId,
+                                flaggedRestaurantUserVO.getRestaurantId()));
+                    restaurantPopularityTierVOList.get(i)
+                                                  .setPopularityTierId(restaurantTier);
                 }
-                
+
                 // check numUserRestaurantMatchCount
                 List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
                 // final insert
                 userRestaurantDAO.submitAssignedRankUserRestaurant(list1ofrestaurants);
+
+                userRestaurantDAO.submitFlaggedRestaurant(flaggedRestaurantUserVO.getRestaurantId(),
+                    -1);
             }
         }
     }
