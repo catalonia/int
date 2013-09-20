@@ -1,9 +1,10 @@
 package com.tastesync.algo.db.dao;
 
-import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.InputRestaurantSearchVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
+
+import com.tastesync.db.pool.TSDataSource;
 
 import org.apache.log4j.Logger;
 
@@ -19,7 +20,7 @@ import java.util.List;
 public class RestaurantsSearchResultsHelper {
     private static final Logger logger = Logger.getLogger(RestaurantsSearchResultsHelper.class);
     private static final String SEARCH_QUERY_PART1_SQL = "" +
-        " SELECT x.RESTAURANT_ID," + " y.user_restaurant_rank," + " FROM ( ";
+        " SELECT x.RESTAURANT_ID," + " y.user_restaurant_rank " + " FROM ( ";
     private static final String SEARCH_QUERY_PART2_1_SQL = "" +
         " SELECT distinct restaurant.RESTAURANT_ID" + " FROM restaurant ";
     private static final String SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL = "" +
@@ -28,7 +29,7 @@ public class RestaurantsSearchResultsHelper {
         "       user_restaurant_match_counter.user_restaurant_rank " +
         "FROM   user_restaurant_match_counter " +
         "WHERE  user_restaurant_match_counter.user_id = ? " + ") y " + "ON " +
-        " x.RESTAURANT_ID = y.RESTAURANT_ID" + "ORDER BY " +
+        " x.RESTAURANT_ID = y.RESTAURANT_ID" + " ORDER BY " +
         " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank ASC";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
     private static final boolean printDebugExtra = true;
@@ -248,11 +249,24 @@ public class RestaurantsSearchResultsHelper {
                     inputRestaurantSearchVO.getUserId());
             }
 
-            //TODO recheck
             if ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
                     (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0)) {
-                consolidatedSearchQuery.append(
-                    "AND restaurant_cuisine.tier2_cuisine_id=? ");
+                StringBuffer cuisineTier2IdParameters = new StringBuffer();
+
+                for (int i = 0;
+                        i < inputRestaurantSearchVO.getCuisineTier2IdArray().length;
+                        ++i) {
+                    cuisineTier2IdParameters.append(inputRestaurantSearchVO.getCuisineTier2IdArray()[i]);
+
+                    if (i != (inputRestaurantSearchVO.getCuisineTier2IdArray().length -
+                            1)) {
+                        cuisineTier2IdParameters.append(",");
+                    }
+                }
+
+                ++bindPosition;
+                statement.setString(bindPosition,
+                    cuisineTier2IdParameters.toString());
             }
 
             //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
@@ -322,10 +336,12 @@ public class RestaurantsSearchResultsHelper {
             String restaurantIdValue = null;
 
             while (resultset.next()) {
-                restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                restaurantIdValue = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "restaurant_id"));
 
-                restaurantIdList.add(restaurantIdValue);
+                if (restaurantIdValue != null) {
+                    restaurantIdList.add(restaurantIdValue);
+                }
             }
 
             statement.close();

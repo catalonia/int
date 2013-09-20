@@ -163,9 +163,9 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "WHERE  restaurant_neighbourhood.neighbourhood_id = ? " +
         "       AND restaurant_info_popularity_tier.restaurant_id = restaurant_neighbourhood.restaurant_id";
     public static String RESTAURANT_FROM_PRICERANGE_SELECT_SQL = "" +
-        "SELECT restaurant.restaurant_id " +
+        "SELECT restaurant.restaurant_id, " +
         "       restaurant_info_popularity_tier.tier_id " +
-        "FROM   restaurant,restaurant_info_popularity_tier " +
+        "FROM   restaurant, restaurant_info_popularity_tier " +
         "WHERE  restaurant.price_range = ? " +
         "       AND restaurant_info_popularity_tier.restaurant_id = restaurant.restaurant_id";
     public static String RESTAURANT_FROM_CUISINE_SELECT_SQL = "" +
@@ -229,13 +229,13 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "            (user_restaurant_match_counter.calc_flag, " +
         "             user_restaurant_match_counter.match_counter, " +
         "             user_restaurant_match_counter.restaurant_id, " +
-        "             user_restaurant_match_counter.user_id,) " +
+        "             user_restaurant_match_counter.user_id, " +
         "             user_restaurant_match_counter.user_restaurant_rank) " +
         "VALUES      ( ?, " + "              ?, " + "              ?, " +
         "              ?,  " + "              ? )" +
         " ON DUPLICATE KEY UPDATE " +
         " user_restaurant_match_counter.calc_flag = ?, " +
-        " user_restaurant_match_counter.match_counter = ?" +
+        " user_restaurant_match_counter.match_counter = ?," +
         " user_restaurant_match_counter.user_restaurant_rank = ?";
     public static String ALL_USERS_SELECT_SQL = "" + "SELECT users.user_id " +
         "FROM   users ";

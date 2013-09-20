@@ -1,6 +1,5 @@
 package com.tastesync.algo.db.dao;
 
-import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.algo.db.queries.UserUserQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RecorequestReplyUserVO;
@@ -9,6 +8,8 @@ import com.tastesync.algo.model.vo.RecorequestUserVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
 import com.tastesync.algo.util.TSConstants;
+
+import com.tastesync.db.pool.TSDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -55,8 +56,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecorequestUserFlaggedUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -94,8 +94,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecorequestTsAssignedFlaggedUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -133,8 +132,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecorequestReplyUserFlaggedUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -173,8 +171,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecorequestReplyUserForSameRecorequestIdFlaggedUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -210,8 +207,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getNumRecorequestsAssignedToday= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -247,8 +243,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getNumRecorequestsAssignedTodayReplied= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -287,8 +282,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getNumRecorequestsAssigned7Days= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -328,8 +322,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getNumRecorequestsAssigned7DaysReplied= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -364,8 +357,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getNumRecorequestsAssigned7DaysReplied= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -412,8 +404,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getLastNRecorequestsAssignedRecorequestId= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -460,8 +451,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getLastNRecorequestsAssignedRecorequestId= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -505,8 +495,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while recorequestsAssignedFirstReplyId= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -541,8 +530,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getNumRecorequestsAssigned7DaysReplied= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -568,7 +556,6 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement.executeUpdate();
             statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -583,8 +570,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException("Error while creating reco request " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -606,7 +592,6 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
             statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -621,8 +606,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while submitRecorrequestUser = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -644,7 +628,6 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
             statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -659,8 +642,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while submitRecorrequestAssigned = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -711,8 +693,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecoRequestsLastNDays = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -758,8 +739,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestCuisineTier1 = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -805,8 +785,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestCuisineTier2 = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -851,8 +830,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestOccasion = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -897,8 +875,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException("Error while getRecorequestPrice = " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -943,8 +920,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException("Error while getRecorequestTheme = " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -990,8 +966,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestTypeofRest = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1037,8 +1012,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestWhoarewithyou = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1087,8 +1061,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestLocation = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1141,8 +1114,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecoRequestsReplyAnsweredLastNDays = " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1195,8 +1167,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecoRequestsReplyUserAnsweredLastNDays = " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1225,7 +1196,6 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1241,8 +1211,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 "Error while getRecoRequestsReplyUserAnsweredLastNDays = " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1295,8 +1264,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestLocation = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1349,8 +1317,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestLocation = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1403,8 +1370,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             throw new TasteSyncException(
                 "Error while getRecorequestLocation = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -1487,9 +1453,9 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             }
 
             statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+
             if (tsDataSource != null) {
                 try {
                     tsDataSource.rollback();
@@ -1497,11 +1463,11 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                     e1.printStackTrace();
                 }
             }
+
             throw new TasteSyncException(
                 "Error while getRestaurantInfoChained= " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 }

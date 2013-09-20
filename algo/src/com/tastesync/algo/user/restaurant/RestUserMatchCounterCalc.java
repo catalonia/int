@@ -14,6 +14,10 @@ import java.util.List;
 public class RestUserMatchCounterCalc {
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
+    public RestUserMatchCounterCalc() {
+        super();
+    }
+
     public void processAllFlaggedRestaurantListRestUserMatchCounter()
         throws TasteSyncException {
         int algoIndicator = 1;

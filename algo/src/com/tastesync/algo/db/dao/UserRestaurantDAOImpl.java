@@ -1,12 +1,13 @@
 package com.tastesync.algo.db.dao;
 
-import com.tastesync.db.pool.TSDataSource;
 import com.tastesync.algo.db.queries.UserRestaurantQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
+
+import com.tastesync.db.pool.TSDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,8 +62,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getRecorequestUserFlaggedUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -96,8 +96,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             throw new TasteSyncException("Error while getFlaggedCityIdList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -118,6 +117,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             //int algoIndicator = 1;
             statement.setString(1, cityId);
+            statement.setString(2, cityId);
             resultset = statement.executeQuery();
 
             if (resultset.next()) {
@@ -134,8 +134,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getMedianvalueForSingleCityIdList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -280,8 +279,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getRecorequestUserFlaggedUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -307,7 +305,6 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement.executeUpdate();
             statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -323,8 +320,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while submitRestaurantInfoPopularityTier = " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -360,8 +356,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             throw new TasteSyncException(
                 "Error while submitFlaggedRestaurant = " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -406,8 +401,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getFlaggedRestaurantReplyUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -452,8 +446,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getFlaggedRestaurantTipsUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -498,8 +491,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getFlaggedRestaurantTipsUserList= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -521,6 +513,8 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_NEIGHBOURHOOD_CITY_SELECT_SQL);
 
             statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            statement.setString(2, flaggedRestaurantUserVO.getRestaurantId());
+
             resultset = statement.executeQuery();
 
             String restaurantNbrhoodId = null;
@@ -541,9 +535,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 String popularityTierId = null;
 
                 while (resultsetInner.next()) {
-                    restaurantIdFromNgbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                    restaurantIdFromNgbrhoodId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_neighbourhood.restaurant_id"));
-                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_info_popularity_tier.tier_id"));
 
                     if (!restaurantIdList.contains(restaurantIdFromNgbrhoodId)) {
@@ -560,6 +554,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_PRICERANGE_SELECT_SQL);
             statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            statement.setString(2, flaggedRestaurantUserVO.getRestaurantId());
             resultset = statement.executeQuery();
 
             String priceId = null;
@@ -577,9 +572,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 String popularityTierId = null;
 
                 while (resultsetInner.next()) {
-                    restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                    restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant.restaurant_id"));
-                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_info_popularity_tier.tier_id"));
 
                     if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
@@ -612,9 +607,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 String popularityTierId = null;
 
                 while (resultsetInner.next()) {
-                    restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                    restaurantIdFromPricerangeId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_cuisine.restaurant_id"));
-                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                    popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_info_popularity_tier.tier_id"));
 
                     if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
@@ -637,8 +632,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 "Error while getConsolidatedFlaggedRestaurantForSingleUser= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -656,7 +650,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             connection = tsDataSource.getConnection();
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CITY_RESTAURANT_NHBR_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -670,7 +666,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CUISINETIER2_RESTAURANT_CUISINE_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -684,7 +683,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_PRICE_RESTAURANT_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -698,7 +700,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FOLLOW_DATA_USER_RESTAURANT_FAV_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -712,7 +717,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FOLLOW_DATA_USER_RESTAURANT_RECO_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -726,7 +734,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FRIEND_USER_RESTAURANT_FAV_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -740,7 +751,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_FRIEND_RESTAURANT_RECO_SELECT_SQL);
 
-            statement.setString(1, flaggedUserId);
+            statement.setString(1,
+                flaggedRestaurantPopularityTierVO.getRestaurantId());
+
+            statement.setString(2, flaggedUserId);
 
             resultset = statement.executeQuery();
 
@@ -762,8 +776,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             throw new TasteSyncException(
                 "Error while processRestUserMatchCounter= " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -818,12 +831,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 statement.setInt(8, restaurantPopularityTierVO.getRankNumber());
 
                 statement.executeUpdate();
+                statement.close();
             }
-
-            statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+
             if (tsDataSource != null) {
                 try {
                     tsDataSource.rollback();
@@ -831,13 +843,12 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                     e1.printStackTrace();
                 }
             }
-            
+
             throw new TasteSyncException(
                 "Error while submitAssignedRankUserRestaurant= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -870,8 +881,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             throw new TasteSyncException("Error while getAllUsers= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -915,8 +925,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             throw new TasteSyncException("Error while getUserMatchCounter= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -959,8 +968,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             throw new TasteSyncException(
                 "Error while getRestaurantInfoTierId= " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
@@ -988,12 +996,11 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 statement.setInt(4, restaurantPopularityTierVO.getRankNumber());
 
                 statement.executeUpdate();
+                statement.close();
             }
-
-            statement.close();
-            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+
             if (tsDataSource != null) {
                 try {
                     tsDataSource.rollback();
@@ -1001,12 +1008,12 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                     e1.printStackTrace();
                 }
             }
+
             throw new TasteSyncException(
                 "Error while submitAssignedRankUserRestaurant= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 }

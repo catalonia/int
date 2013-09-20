@@ -12,7 +12,11 @@ import java.util.List;
 public class RestInfoPopularityTierCalc {
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
-    // get restaurant if based on alog_ind
+    public RestInfoPopularityTierCalc() {
+		super();
+	}
+
+	// get restaurant if based on alog_ind
     //TODO need to be updated/reset whenever data from factual is updated
     public void processAllFlaggedRestaurantListRestInfoPopularityTier()
         throws TasteSyncException {

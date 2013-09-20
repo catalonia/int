@@ -53,10 +53,12 @@ public class UserRestRankOrderCalc {
                                 flaggedRestaurantUserVO.getRestaurantId()));
                     restaurantPopularityTierVOList.get(i)
                                                   .setPopularityTierId(restaurantTier);
+                    restaurantPopularityTierVOList.get(i).setUserId(userId);
                 }
 
                 // check numUserRestaurantMatchCount
                 List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
+
                 // final insert
                 userRestaurantDAO.submitAssignedRankUserRestaurant(list1ofrestaurants);
 
