@@ -237,8 +237,6 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         " user_restaurant_match_counter.calc_flag = ?, " +
         " user_restaurant_match_counter.match_counter = ?," +
         " user_restaurant_match_counter.user_restaurant_rank = ?";
-    public static String ALL_USERS_SELECT_SQL = "" + "SELECT users.user_id " +
-        "FROM   users ";
     public static String USER_MATCH_COUNTER_SELECT_SQL = "" +
         "SELECT user_restaurant_match_counter.match_counter " +
         "FROM   user_restaurant_match_counter " +

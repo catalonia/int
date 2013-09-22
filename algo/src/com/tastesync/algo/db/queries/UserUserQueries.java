@@ -159,12 +159,12 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "SELECT restaurant_tips_tastesync.user_id, " +
         "       restaurant_tips_tastesync.restaurant_id " +
         "FROM   restaurant_tips_tastesync " +
-        "WHERE  restaurant_tips_tastesync.algo_ind = 2 ";
-    public static String USER_RSTAURANT_FAV_SELECT_SQL = "" +
+        "WHERE  restaurant_tips_tastesync.algo_ind = ? ";
+    public static String USER_RESTAURANT_FAV_SELECT_SQL = "" +
         "SELECT user_restaurant_fav.user_id, " +
         "       user_restaurant_fav.restaurant_id " +
         "FROM   user_restaurant_fav " +
-        "WHERE  user_restaurant_fav.algo_ind = 3";
+        "WHERE  user_restaurant_fav.algo_ind = ?";
     public static String USER_CITY_NBRHOOD_INSERT_SQL = "" +
         "INSERT INTO user_city_nbrhood_match " +
         "            (user_city_nbrhood_match.city_id, " +
@@ -193,21 +193,17 @@ public interface UserUserQueries extends TSDBCommonQueries {
     public static String USER_FOLLOW_DATA_SELECT_SQL = "" +
         "SELECT user_follow_data.followee_user_id, " +
         "       user_follow_data.follower_user_id " +
-        "FROM   user_restaurant_fav " +
-        "WHERE  user_restaurant_fav.algo_ind = ?";
-    public static String USER_FOLLOW_DATA_FOLLOWEE_FOLLOWER_SELECT_SQL = "" +
-        "SELECT user_follow_data.id " + "FROM   user_follow_data " +
+        "FROM   user_follow_data " + "WHERE  user_follow_data.algo_ind = ?";
+    public static String COUNT_USER_FOLLOW_DATA_FOLLOWEE_FOLLOWER_SELECT_SQL = "" +
+        "SELECT count(*) " + "FROM   user_follow_data " +
         "WHERE  user_follow_data.followee_user_id = ? " +
         "       AND user_follow_data.follower_user_id = ? ";
-    public static String COUNT_USER_RESTAURANT_FAV_UNCHAIN_EXTENDED_INFO = "" +
-        "SELECT count(*) " +
-        "FROM   (SELECT user_restaurant_fav.restaurant_id " +
-        "        FROM   user_restaurant_fav, " +
-        "               restaurant_extended_info " +
-        "        WHERE  user_restaurant_fav.user_id = ? " +
-        "               AND user_restaurant_fav.restaurant_id = " +
-        "                   restaurant_extended_info.restaurant_id " +
-        "               AND restaurant_extended_info.chain_id IS NULL) x ";
+    public static String USER_RESTAURANT_FAV_UNCHAIN_EXTENDED_INFO = "" +
+        "SELECT user_restaurant_fav.restaurant_id " +
+        "FROM   user_restaurant_fav, " + "       restaurant_extended_info " +
+        "WHERE  user_restaurant_fav.user_id = ? " +
+        "AND user_restaurant_fav.restaurant_id = restaurant_extended_info.restaurant_id " +
+        "AND restaurant_extended_info.chain_id IS NULL ";
     public static String RESTAURANT_NEIGHBOURHOOD_SELECT_SQL = "" +
         "SELECT restaurant_neighbourhood.restaurant_id, " +
         "       restaurant_neighbourhood.neighbourhood_id " +
@@ -220,16 +216,14 @@ public interface UserUserQueries extends TSDBCommonQueries {
     public static String USER_CUISINE_SELECT_SQL = "" +
         "SELECT user_cuisine.cuisine_id " + "FROM   user_cuisine " +
         "WHERE  user_cuisine.user_id = ? ";
-    public static String COUNT_USER_RESTAURANT_FAV_CHAIN_EXTENDED_INFO = "" +
-        "SELECT Count(*) " +
-        "FROM   (SELECT user_restaurant_fav.restaurant_id " +
-        "        FROM   user_restaurant_fav, " +
-        "               restaurant_extended_info " +
-        "        WHERE  user_restaurant_fav.user_id = ? " +
-        "               AND user_restaurant_fav.restaurant_id = " +
-        "                   restaurant_extended_info.restaurant_id " +
-        "               AND restaurant_extended_info.chain_id IS NOT NULL) x ";
-    public static String var1 = "" + "INSERT INTO user_user_match_tier " +
+    public static String USER_RESTAURANT_FAV_CHAIN_EXTENDED_INFO = "" +
+        "SELECT user_restaurant_fav.restaurant_id " +
+        "FROM   user_restaurant_fav, " + "       restaurant_extended_info " +
+        "WHERE  user_restaurant_fav.user_id = ? " +
+        "AND user_restaurant_fav.restaurant_id = restaurant_extended_info.restaurant_id " +
+        "AND restaurant_extended_info.chain_id IS NOT NULL ";
+    public static String USER_USER_MATCH_TIER_INSERT_SQL = "" +
+        "INSERT INTO user_user_match_tier " +
         "            (user_user_match_tier.calc_flag, " +
         "             user_user_match_tier.match_tier, " +
         "             user_user_match_tier.user_a_id, " +
@@ -237,12 +231,8 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "              ?, " + "              ?, " + "              ? ) " +
         " ON DUPLICATE KEY UPDATE" + " user_user_match_tier.calc_flag = ?" +
         " user_user_match_tier.match_tier = ?";
-    public static String USER_RESTAURANT_FAV_UPDATE_SQL = "" +
-        "UPDATE user_restaurant_fav " +
-        "SET    user_restaurant_fav.algo_ind = ? " +
-        "WHERE  user_restaurant_fav.user_id = ? ";
     public static String USER_FOLLOW_DATA_UPDATE_SQL = "" +
-        "UPDATE user_follow_data " + "SET    user_follow_data.algo_ind = 0 " +
+        "UPDATE user_follow_data " + "SET    user_follow_data.algo_ind = ? " +
         "WHERE  user_follow_data.followee_user_id = ? " +
         "       AND user_follow_data.follower_user_id = ? ";
 }

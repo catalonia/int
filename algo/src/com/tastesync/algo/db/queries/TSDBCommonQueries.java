@@ -32,9 +32,15 @@ public interface TSDBCommonQueries {
         "SET    restaurant_tips_tastesync.algo_ind = ? " +
         "WHERE  restaurant_tips_tastesync.user_id = ? " +
         "       AND restaurant_tips_tastesync.restaurant_id = ? ";
+    public static String USER_RESTAURANT_FAV_UPDATE_SQL = "" +
+            "UPDATE user_restaurant_fav " +
+            "SET    user_restaurant_fav.algo_ind = ? " +
+            "WHERE  user_restaurant_fav.user_id = ? ";
     public static String USER_RESTAURANT_FAV_RESTAURANT_UPDATE_SQL = "" +
         "UPDATE user_restaurant_fav " +
         "SET    user_restaurant_fav.algo_ind = ? " +
         "WHERE  user_restaurant_fav.user_id = ? " +
-        "       AND user_restaurant_fav.restaurant_id = ? ";
+        "AND user_restaurant_fav.restaurant_id = ? ";
+    public static String ALL_USERS_SELECT_SQL = "" + "SELECT users.user_id " +
+            "FROM   users ";
 }
