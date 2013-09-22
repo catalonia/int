@@ -4,7 +4,9 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RecorequestReplyUserVO;
 import com.tastesync.algo.model.vo.RecorequestTsAssignedVO;
 import com.tastesync.algo.model.vo.RecorequestUserVO;
+import com.tastesync.algo.model.vo.RestaurantNeighbourhoodVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
+import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
 
 import java.util.List;
 
@@ -101,8 +103,30 @@ public interface UserUserDAO extends BaseDAO {
         int algoIndicatorIdentifyUseridListFour) throws TasteSyncException;
 
     List<RestaurantUserVO> getUserRestaurantFav(
-        int algoIndicatorIdentifyUseridListFive) throws TasteSyncException;
+        int algoIndicatorIdentifyUseridList) throws TasteSyncException;
 
     void submitUserCityNbrHoodAndCusineTier2Match(
         RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException;
+
+    List<UserFolloweeUserFollowerVO> getUserFolloweeUserFollowerFollowData(
+        int algoIndicatorIdentifyUseridList) throws TasteSyncException;
+
+    int getUserFollowerFirstFollowingUserFolloweeTwo(String userFolloweeId,
+        String userFollowerId) throws TasteSyncException;
+
+    List<String> getUserXFavNCRest(String userIdX) throws TasteSyncException;
+
+    RestaurantNeighbourhoodVO getRestaurantNeighbourhoodList(
+        String restaurantId) throws TasteSyncException;
+
+    List<String> getRestaurantClusterIdList(String restaurantId)
+        throws TasteSyncException;
+
+    List<String> getUserCuisineIdList(String userId) throws TasteSyncException;
+
+    List<String> getUserXFavCRest(String userIdX) throws TasteSyncException;
+
+    void sumbitAssignedUserUserMatchTier(String userIdA, String userIdB,
+        int matchTier) throws TasteSyncException;
+    void submitUserFollowDataUpdate(String userIdA, String userIdB, int algoInd) throws TasteSyncException;
 }

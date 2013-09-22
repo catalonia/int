@@ -5,6 +5,7 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
+import com.tastesync.algo.model.vo.RestaurantsSearchResultsVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
@@ -286,7 +287,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public void submitRestaurantInfoPopularityTier(String restaurantId,
         int tierId) throws TasteSyncException {
-        com.tastesync.db.pool.TSDataSource tsDataSource = TSDataSource.getInstance();
+        TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -781,7 +782,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     }
 
     @Override
-    public List<String> showListOfRestaurantsSearchResults(String userId,
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(String userId,
         String restaurantId, String neighborhoodId, String cityId,
         String stateName, String[] cuisineTier1IdArray, String[] priceIdList,
         String rating, String savedFlag, String favFlag, String dealFlag,
@@ -852,38 +853,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         }
     }
 
-    @Override
-    public List<String> getAllUsers() throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-
-        try {
-            connection = tsDataSource.getConnection();
-            statement = connection.prepareStatement(UserRestaurantQueries.ALL_USERS_SELECT_SQL);
-
-            resultset = statement.executeQuery();
-
-            List<String> usersList = new ArrayList<String>();
-
-            while (resultset.next()) {
-                usersList.add(CommonFunctionsUtil.getModifiedValueString(
-                        resultset.getString("users.user_id")));
-            }
-
-            statement.close();
-
-            return usersList;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new TasteSyncException("Error while getAllUsers= " +
-                e.getMessage());
-        } finally {
-            tsDataSource.closeConnection(null, statement, resultset);
-        }
-    }
+    
 
     @Override
     public int getUserMatchCounter(String userId, String restaurantId)

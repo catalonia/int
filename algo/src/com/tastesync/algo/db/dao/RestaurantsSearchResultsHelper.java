@@ -2,7 +2,9 @@ package com.tastesync.algo.db.dao;
 
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.InputRestaurantSearchVO;
+import com.tastesync.algo.model.vo.RestaurantsSearchResultsVO;
 import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -19,6 +21,8 @@ import java.util.List;
 
 public class RestaurantsSearchResultsHelper {
     private static final Logger logger = Logger.getLogger(RestaurantsSearchResultsHelper.class);
+    private static final String COUNT_SEARCH_QUERY_PART1_SQL = "" +
+        " SELECT Count(*) FROM ( ";
     private static final String SEARCH_QUERY_PART1_SQL = "" +
         " SELECT x.RESTAURANT_ID," + " y.user_restaurant_rank " + " FROM ( ";
     private static final String SEARCH_QUERY_PART2_1_SQL = "" +
@@ -30,7 +34,8 @@ public class RestaurantsSearchResultsHelper {
         "FROM   user_restaurant_match_counter " +
         "WHERE  user_restaurant_match_counter.user_id = ? " + ") y " + "ON " +
         " x.RESTAURANT_ID = y.RESTAURANT_ID" + " ORDER BY " +
-        " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank ASC";
+        " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank ASC ";
+    private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
     private static final boolean printDebugExtra = true;
 
@@ -39,20 +44,25 @@ public class RestaurantsSearchResultsHelper {
     }
 
     // return list of restaurantIds based on different parameters
-    public List<String> showListOfRestaurantsSearchResults(String userId,
-        String restaurantId, String neighborhoodId, String cityId,
-        String stateName, String[] cuisineTier1IdArray, String[] priceIdList,
-        String rating, String savedFlag, String favFlag, String dealFlag,
-        String chainFlag, String paginationId, String[] cuisineTier2IdArray,
-        String[] themeIdArray, String[] whoareyouwithIdArray,
-        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
-        throws TasteSyncException {
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
+        String userId, String restaurantId, String neighborhoodId,
+        String cityId, String stateName, String[] cuisineTier1IdArray,
+        String[] priceIdList, String rating, String savedFlag, String favFlag,
+        String dealFlag, String chainFlag, String paginationId,
+        String[] cuisineTier2IdArray, String[] themeIdArray,
+        String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
+        String[] occasionIdArray) throws TasteSyncException {
         InputRestaurantSearchVO inputRestaurantSearchVO = new InputRestaurantSearchVO(userId,
                 restaurantId, neighborhoodId, cityId, stateName,
                 cuisineTier1IdArray, priceIdList, rating, savedFlag, favFlag,
                 dealFlag, chainFlag, paginationId, cuisineTier2IdArray,
                 themeIdArray, whoareyouwithIdArray, typeOfRestaurantIdArray,
                 occasionIdArray);
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
 
         if (printDebugExtra) {
             if (logger.isDebugEnabled()) {
@@ -64,9 +74,83 @@ public class RestaurantsSearchResultsHelper {
                 inputRestaurantSearchVO);
         }
 
+        //once do count(*), second time do select using limit derived from paginationId
+        try {
+            //true 	if calculating count(*)
+            boolean executingCount = true;
+
+            StringBuffer consolidatedSearchQuery = buildConsolidatedQuery(executingCount,
+                    inputRestaurantSearchVO);
+            // query is built. now bind the parameters!
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(consolidatedSearchQuery.toString());
+
+            resultset = bindParametersForConsolidatedQuery(executingCount,
+                    userId, rating, inputRestaurantSearchVO, statement,
+                    consolidatedSearchQuery);
+
+            int rowCount = 0;
+
+            if (resultset.next()) {
+                rowCount = resultset.getInt(1);
+            }
+
+            statement.close();
+
+            //reassigned
+            int maxPaginationId = (rowCount / TSConstants.PAGINATION_GAP) + 1;
+
+            //false 	if doing general select
+            executingCount = false;
+
+            consolidatedSearchQuery = buildConsolidatedQuery(executingCount,
+                    inputRestaurantSearchVO);
+            // query is built. now bind the parameters!
+            statement = connection.prepareStatement(consolidatedSearchQuery.toString());
+
+            resultset = bindParametersForConsolidatedQuery(executingCount,
+                    userId, rating, inputRestaurantSearchVO, statement,
+                    consolidatedSearchQuery);
+
+            List<String> restaurantIdList = new ArrayList<String>(TSConstants.PAGINATION_GAP);
+            String restaurantIdValue = null;
+
+            while (resultset.next()) {
+                restaurantIdValue = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_id"));
+
+                if (restaurantIdValue != null) {
+                    restaurantIdList.add(restaurantIdValue);
+                }
+            }
+
+            statement.close();
+
+            return new RestaurantsSearchResultsVO(String.valueOf(rowCount),
+                restaurantIdList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while showListOfRestaurantsSearchResults= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    private StringBuffer buildConsolidatedQuery(boolean executingCount,
+        InputRestaurantSearchVO inputRestaurantSearchVO)
+        throws TasteSyncException {
         // build query based on various input parameters
         StringBuffer consolidatedSearchQuery = new StringBuffer();
-        consolidatedSearchQuery.append(SEARCH_QUERY_PART1_SQL);
+
+        if (executingCount) {
+            consolidatedSearchQuery.append(COUNT_SEARCH_QUERY_PART1_SQL);
+        } else {
+            consolidatedSearchQuery.append(SEARCH_QUERY_PART1_SQL);
+        }
+
         consolidatedSearchQuery.append(SEARCH_QUERY_PART2_1_SQL);
 
         // add different tables for select part
@@ -200,6 +284,10 @@ public class RestaurantsSearchResultsHelper {
         // Left outer join
         consolidatedSearchQuery.append(SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL);
 
+        if (!executingCount) {
+            consolidatedSearchQuery.append(SEARCH_QUERY_PART4_SQL);
+        }
+
         if (printDebugExtra) {
             if (logger.isDebugEnabled()) {
                 logger.debug("consolidatedSearchQuery=" +
@@ -210,151 +298,143 @@ public class RestaurantsSearchResultsHelper {
                 consolidatedSearchQuery.toString());
         }
 
-        // query is built. now bind the parameters!
-        TSDataSource tsDataSource = TSDataSource.getInstance();
+        return consolidatedSearchQuery;
+    }
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
+    private ResultSet bindParametersForConsolidatedQuery(
+        boolean executingCount, String userId, String rating,
+        InputRestaurantSearchVO inputRestaurantSearchVO,
+        PreparedStatement statement, StringBuffer consolidatedSearchQuery)
+        throws SQLException {
+        ResultSet resultset;
+        int bindPosition = 0;
 
-        try {
-            connection = tsDataSource.getConnection();
-            statement = connection.prepareStatement(consolidatedSearchQuery.toString());
+        if (inputRestaurantSearchVO.getCityId() != null) {
+            ++bindPosition;
+            statement.setString(bindPosition,
+                inputRestaurantSearchVO.getCityId());
+        }
 
-            int bindPosition = 0;
+        if (inputRestaurantSearchVO.getNeighborhoodId() != null) {
+            ++bindPosition;
+            statement.setString(bindPosition,
+                inputRestaurantSearchVO.getNeighborhoodId());
+        }
 
-            if (inputRestaurantSearchVO.getCityId() != null) {
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    inputRestaurantSearchVO.getCityId());
-            }
+        //TODO recheck
+        if (inputRestaurantSearchVO.getSavedFlag() != null) {
+            ++bindPosition;
+            statement.setString(bindPosition,
+                inputRestaurantSearchVO.getUserId());
+        }
 
-            if (inputRestaurantSearchVO.getNeighborhoodId() != null) {
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    inputRestaurantSearchVO.getNeighborhoodId());
-            }
+        //TODO recheck
+        if (inputRestaurantSearchVO.getFavFlag() != null) {
+            ++bindPosition;
+            statement.setString(bindPosition,
+                inputRestaurantSearchVO.getUserId());
+        }
 
-            //TODO recheck
-            if (inputRestaurantSearchVO.getSavedFlag() != null) {
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    inputRestaurantSearchVO.getUserId());
-            }
+        if ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
+                (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0)) {
+            StringBuffer cuisineTier2IdParameters = new StringBuffer();
 
-            //TODO recheck
-            if (inputRestaurantSearchVO.getFavFlag() != null) {
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    inputRestaurantSearchVO.getUserId());
-            }
+            for (int i = 0;
+                    i < inputRestaurantSearchVO.getCuisineTier2IdArray().length;
+                    ++i) {
+                cuisineTier2IdParameters.append(inputRestaurantSearchVO.getCuisineTier2IdArray()[i]);
 
-            if ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
-                    (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0)) {
-                StringBuffer cuisineTier2IdParameters = new StringBuffer();
-
-                for (int i = 0;
-                        i < inputRestaurantSearchVO.getCuisineTier2IdArray().length;
-                        ++i) {
-                    cuisineTier2IdParameters.append(inputRestaurantSearchVO.getCuisineTier2IdArray()[i]);
-
-                    if (i != (inputRestaurantSearchVO.getCuisineTier2IdArray().length -
-                            1)) {
-                        cuisineTier2IdParameters.append(",");
-                    }
+                if (i != (inputRestaurantSearchVO.getCuisineTier2IdArray().length -
+                        1)) {
+                    cuisineTier2IdParameters.append(",");
                 }
-
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    cuisineTier2IdParameters.toString());
             }
-
-            //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
-            if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
-                    (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
-                StringBuffer cuisineTier1IdParameters = new StringBuffer();
-
-                for (int i = 0;
-                        i < inputRestaurantSearchVO.getCuisineTier1IdArray().length;
-                        ++i) {
-                    cuisineTier1IdParameters.append(inputRestaurantSearchVO.getCuisineTier1IdArray()[i]);
-
-                    if (i != (inputRestaurantSearchVO.getCuisineTier1IdArray().length -
-                            1)) {
-                        cuisineTier1IdParameters.append(",");
-                    }
-                }
-
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    cuisineTier1IdParameters.toString());
-            }
-
-            //-- IF restaurantSearchParameters{listOfPrice{priceId}} OR recoRequestParameters{listOfPrice{priceId}} is not null 
-            if ((inputRestaurantSearchVO.getPriceIdList() != null) &&
-                    (inputRestaurantSearchVO.getPriceIdList().length != 0)) {
-                StringBuffer priceIdParameters = new StringBuffer();
-
-                for (int i = 0;
-                        i < inputRestaurantSearchVO.getPriceIdList().length;
-                        ++i) {
-                    priceIdParameters.append(inputRestaurantSearchVO.getPriceIdList()[i]);
-
-                    if (i != (inputRestaurantSearchVO.getPriceIdList().length -
-                            1)) {
-                        priceIdParameters.append(",");
-                    }
-                }
-
-                ++bindPosition;
-                statement.setString(bindPosition, priceIdParameters.toString());
-            }
-
-            //-- IF restaurantSearchParameters{rating} is not null 
-            if ((inputRestaurantSearchVO.getRating() != null)) {
-                ++bindPosition;
-                statement.setDouble(bindPosition, new Double(rating));
-            }
-
-            // -- IF restaurantSearchParameters{chainFlag} = 0 (0 means "Hide" Chain Restaurants)
-            if (HIDE_CHAINED_RESTAURANT.equals(
-                        inputRestaurantSearchVO.getChainFlag())) {
-                ++bindPosition;
-                statement.setDouble(bindPosition, new Double(rating));
-            }
-
-            //Fixed part
-            // Left outer join
-            consolidatedSearchQuery.append(SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL);
 
             ++bindPosition;
-            statement.setString(bindPosition, userId);
+            statement.setString(bindPosition,
+                cuisineTier2IdParameters.toString());
+        }
 
-            resultset = statement.executeQuery();
+        //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
+        if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
+                (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
+            StringBuffer cuisineTier1IdParameters = new StringBuffer();
 
-            List<String> restaurantIdList = new ArrayList<String>(50);
-            String restaurantIdValue = null;
+            for (int i = 0;
+                    i < inputRestaurantSearchVO.getCuisineTier1IdArray().length;
+                    ++i) {
+                cuisineTier1IdParameters.append(inputRestaurantSearchVO.getCuisineTier1IdArray()[i]);
 
-            while (resultset.next()) {
-                restaurantIdValue = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "restaurant_id"));
-
-                if (restaurantIdValue != null) {
-                    restaurantIdList.add(restaurantIdValue);
+                if (i != (inputRestaurantSearchVO.getCuisineTier1IdArray().length -
+                        1)) {
+                    cuisineTier1IdParameters.append(",");
                 }
             }
 
-            statement.close();
-
-            return restaurantIdList;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new TasteSyncException(
-                "Error while showListOfRestaurantsSearchResults= " +
-                e.getMessage());
-        } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            ++bindPosition;
+            statement.setString(bindPosition,
+                cuisineTier1IdParameters.toString());
         }
+
+        //-- IF restaurantSearchParameters{listOfPrice{priceId}} OR recoRequestParameters{listOfPrice{priceId}} is not null 
+        if ((inputRestaurantSearchVO.getPriceIdList() != null) &&
+                (inputRestaurantSearchVO.getPriceIdList().length != 0)) {
+            StringBuffer priceIdParameters = new StringBuffer();
+
+            for (int i = 0;
+                    i < inputRestaurantSearchVO.getPriceIdList().length; ++i) {
+                priceIdParameters.append(inputRestaurantSearchVO.getPriceIdList()[i]);
+
+                if (i != (inputRestaurantSearchVO.getPriceIdList().length - 1)) {
+                    priceIdParameters.append(",");
+                }
+            }
+
+            ++bindPosition;
+            statement.setString(bindPosition, priceIdParameters.toString());
+        }
+
+        //-- IF restaurantSearchParameters{rating} is not null 
+        if ((inputRestaurantSearchVO.getRating() != null)) {
+            ++bindPosition;
+            statement.setDouble(bindPosition, new Double(rating));
+        }
+
+        // -- IF restaurantSearchParameters{chainFlag} = 0 (0 means "Hide" Chain Restaurants)
+        if (HIDE_CHAINED_RESTAURANT.equals(
+                    inputRestaurantSearchVO.getChainFlag())) {
+            ++bindPosition;
+            statement.setDouble(bindPosition, new Double(rating));
+        }
+
+        //Fixed part
+        // Left outer join
+        consolidatedSearchQuery.append(SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL);
+
+        ++bindPosition;
+        statement.setString(bindPosition, userId);
+
+        if (!executingCount) {
+            ++bindPosition;
+
+            int pagintionIndex = 0;
+
+            if (inputRestaurantSearchVO.getPaginationId() != null) {
+                pagintionIndex = (Integer.valueOf(inputRestaurantSearchVO.getPaginationId()) -
+                    1) * TSConstants.PAGINATION_GAP;
+            }
+
+            if (pagintionIndex < 0) {
+                pagintionIndex = 0;
+            }
+
+            statement.setInt(bindPosition, pagintionIndex);
+            ++bindPosition;
+            statement.setInt(bindPosition, TSConstants.PAGINATION_GAP);
+        }
+
+        resultset = statement.executeQuery();
+
+        return resultset;
     }
 }

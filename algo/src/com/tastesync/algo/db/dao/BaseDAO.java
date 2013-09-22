@@ -1,5 +1,7 @@
 package com.tastesync.algo.db.dao;
 
+import java.util.List;
+
 import com.tastesync.algo.exception.TasteSyncException;
 
 
@@ -15,4 +17,7 @@ public interface BaseDAO {
 
     void submitRestaurantFav(String flaggedUserId, String restaurantId,
         int algoInd) throws TasteSyncException;
+    
+    public List<String> getAllUsers() throws TasteSyncException;
+
 }
