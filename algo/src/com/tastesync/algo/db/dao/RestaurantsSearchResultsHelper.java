@@ -34,10 +34,10 @@ public class RestaurantsSearchResultsHelper {
         "FROM   user_restaurant_match_counter " +
         "WHERE  user_restaurant_match_counter.user_id = ? " + ") y " + "ON " +
         " x.RESTAURANT_ID = y.RESTAURANT_ID" + " ORDER BY " +
-        " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank ASC ";
+        " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank, x.restaurant_id ASC ";
     private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
-    private static final boolean printDebugExtra = true;
+    private static final boolean printDebugExtra = false;
 
     public RestaurantsSearchResultsHelper() {
         super();
@@ -126,7 +126,7 @@ public class RestaurantsSearchResultsHelper {
 
             statement.close();
 
-            return new RestaurantsSearchResultsVO(String.valueOf(rowCount),
+            return new RestaurantsSearchResultsVO(String.valueOf(maxPaginationId),
                 restaurantIdList);
         } catch (SQLException e) {
             e.printStackTrace();
