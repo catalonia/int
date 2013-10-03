@@ -3,10 +3,10 @@ package com.tastesync.algo.db.queries;
 public interface UserRestaurantQueries extends TSDBCommonQueries {
     public static String RESTAURANT_FLAGGED_SELECT_SQL = "" +
         "SELECT restaurant.restaurant_id, " + "restaurant.restaurant_city_id " +
-        "FROM   restaurant " + "WHERE  restaurant.algo_ind = ?";
+        "FROM   restaurant " + "WHERE  restaurant.algo2_ind = ?";
     public static String FLAGGED_RESTAURANT_CITY_SELECT_SQL = "" +
         "SELECT DISTINCT restaurant.restaurant_city_id " +
-        "FROM   restaurant " + "WHERE  restaurant.algo_ind = ?";
+        "FROM   restaurant " + "WHERE  restaurant.algo2_ind = ?";
     public static String CALCULATE_MEDIAN_USRS_NUMBER_FOR_CITY_SELECT_SQL = "" +
         " SELECT " + " t1.RESTAURANT_CITY_ID," + " t1.4SQ_USERS_COUNT" +
         " FROM " + " (SELECT" + " @rownum:=@rownum+1 as row_number," +
@@ -72,18 +72,18 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "SELECT recorequest_reply_user.reply_user_id, " +
         "       restaurant_reply.restaurant_id " +
         "FROM   recorequest_reply_user, " + "       restaurant_reply " +
-        "WHERE  recorequest_reply_user.algo_ind = ? " +
+        "WHERE  recorequest_reply_user.algo2_ind = ? " +
         "       AND recorequest_reply_user.reply_id = restaurant_reply.reply_id ";
     public static String RESTAURANT_TIPS_TASTESYNC_SELECT_SQL = "" +
         "SELECT restaurant_tips_tastesync.user_id, " +
         "       restaurant_tips_tastesync.restaurant_id " +
         "FROM   restaurant_tips_tastesync " +
-        "WHERE  restaurant_tips_tastesync.algo_ind = ? ";
+        "WHERE  restaurant_tips_tastesync.algo2_ind = ? ";
     public static String USER_RESTAURANT_FAV_SELECT_SQL = "" +
         "SELECT user_restaurant_fav.user_id, " +
         "       user_restaurant_fav.restaurant_id " +
         "FROM   user_restaurant_fav " +
-        "WHERE  user_restaurant_fav.algo_ind = ? ";
+        "WHERE  user_restaurant_fav.algo2_ind = ? ";
     public static String RESTAURANT_NEIGHBOURHOOD_BASEDON_NEIGHBOURHOODID_SELECT_SQL =
         "" + "SELECT restaurant_neighbourhood.restaurant_id " +
         "FROM   restaurant_neighbourhood " +
@@ -154,7 +154,7 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "VALUES      ( ?, " + "              ?, " + "              ?, " +
         "              ? ) ";
     public static String RESTAURANT_FLAGGED_UPDATE_SQL = "" +
-        "UPDATE restaurant " + "SET    restaurant.algo_ind = ? " +
+        "UPDATE restaurant " + "SET    restaurant.algo2_ind = ? " +
         "WHERE  restaurant.restaurant_id = ?";
     public static String RESTAURANT_FROM_NGBRHOOD_SELECT_SQL = "" +
         "SELECT restaurant_neighbourhood.restaurant_id, " +

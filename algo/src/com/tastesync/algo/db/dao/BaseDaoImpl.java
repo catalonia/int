@@ -60,7 +60,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
     }
 
     @Override
-    public void submitRecorrequestReplyUser(String flaggedUserId, int algoInd)
+    public void submitRecorrequestReplyUserAlgo1(String flaggedUserId, int algoInd)
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
@@ -72,7 +72,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
 
-            statement = connection.prepareStatement(TSDBCommonQueries.RECOREQUEST_REPLY_USER_UPDATE_SQL);
+            statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_RECOREQUEST_REPLY_USER_UPDATE_SQL);
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
@@ -96,7 +96,43 @@ public abstract class BaseDaoImpl implements BaseDAO {
     }
 
     @Override
-    public void submitRestaurantTipsTastesync(String flaggedUserId,
+    public void submitRecorrequestReplyUserAlgo2(String flaggedUserId, int algoInd)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_RECOREQUEST_REPLY_USER_UPDATE_SQL);
+            statement.setInt(1, algoInd);
+            statement.setString(2, flaggedUserId);
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while submitRecorrequestReplyUser = " + e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+    }
+    
+    @Override
+    public void submitRestaurantTipsTastesyncAlgo1(String flaggedUserId,
         String restaurantId, int algoInd) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
@@ -108,7 +144,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
 
-            statement = connection.prepareStatement(TSDBCommonQueries.RESTAURANT_TIPS_TASTESYNC_UPDATE_SQL);
+            statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_RESTAURANT_TIPS_TASTESYNC_UPDATE_SQL);
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
             statement.setString(3, restaurantId);
@@ -126,12 +162,49 @@ public abstract class BaseDaoImpl implements BaseDAO {
             }
 
             throw new TasteSyncException(
-                "Error while submitRecorrequestUser = " + e.getMessage());
+                "Error while submitRestaurantTipsTastesyncAlgo1 = " + e.getMessage());
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
+    @Override
+    public void submitRestaurantTipsTastesyncAlgo2(String flaggedUserId,
+        String restaurantId, int algoInd) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_RESTAURANT_TIPS_TASTESYNC_UPDATE_SQL);
+            statement.setInt(1, algoInd);
+            statement.setString(2, flaggedUserId);
+            statement.setString(3, restaurantId);
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            if (tsDataSource != null) {
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+
+            throw new TasteSyncException(
+                "Error while submitRestaurantTipsTastesyncAlgo2 = " + e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+    }
+    
     @Override
     public void submitRestaurantFav(String flaggedUserId, String restaurantId,
         int algoInd) throws TasteSyncException {
@@ -145,16 +218,16 @@ public abstract class BaseDaoImpl implements BaseDAO {
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
 
-            if (restaurantId != null && !restaurantId .isEmpty()) {
-                statement = connection.prepareStatement(TSDBCommonQueries.USER_RESTAURANT_FAV_RESTAURANT_UPDATE_SQL);
+            if ((restaurantId != null) && !restaurantId.isEmpty()) {
+                statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_USER_RESTAURANT_FAV_RESTAURANT_UPDATE_SQL);
             } else {
-                statement = connection.prepareStatement(TSDBCommonQueries.USER_RESTAURANT_FAV_UPDATE_SQL);
+                statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_USER_RESTAURANT_FAV_UPDATE_SQL);
             }
 
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
 
-            if (restaurantId != null && !restaurantId .isEmpty()) {
+            if ((restaurantId != null) && !restaurantId.isEmpty()) {
                 statement.setString(3, restaurantId);
             }
 
@@ -205,6 +278,40 @@ public abstract class BaseDaoImpl implements BaseDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException("Error while getAllUsers= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+    }
+
+    @Override
+    public String getFBUserId(String userId) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(TSDBCommonQueries.USERS_FB_ID_SELECT_SQL);
+
+            statement.setString(1, userId);
+            resultset = statement.executeQuery();
+
+            String fbUserId = null;
+
+            if (resultset.next()) {
+                fbUserId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "users.user_fb_id"));
+            }
+
+            statement.close();
+
+            return fbUserId;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("Error while getFBUserId= " +
                 e.getMessage());
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);

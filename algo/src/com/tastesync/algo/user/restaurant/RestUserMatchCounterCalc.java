@@ -74,12 +74,12 @@ public class RestUserMatchCounterCalc {
         }
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantReplyUserList) {
-            userRestaurantDAO.submitRecorrequestReplyUser(restaurantUserVO.getUserId(),
+            userRestaurantDAO.submitRecorrequestReplyUserAlgo2(restaurantUserVO.getUserId(),
                 0);
         }
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantTipsUserList) {
-            userRestaurantDAO.submitRestaurantTipsTastesync(restaurantUserVO.getUserId(),
+            userRestaurantDAO.submitRestaurantTipsTastesyncAlgo2(restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 0);
         }
 

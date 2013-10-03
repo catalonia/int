@@ -1835,4 +1835,6 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         }
         
 	}
+
+
 }

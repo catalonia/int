@@ -4,25 +4,25 @@ public interface UserUserQueries extends TSDBCommonQueries {
     //2 for calculation 1.
     public static String RECOREQUEST_USER_ALGO_SELECT_SQL = "" +
         "SELECT DISTINCT recorequest_user.initiator_user_id " +
-        "FROM   recorequest_user " + "WHERE  recorequest_user.algo_ind = ? ";
+        "FROM   recorequest_user " + "WHERE  recorequest_user.algo1_ind = ? ";
 
     //1 for calculation 1
     public static String RECOREQUEST_TS_ASSIGNED_ALGO_SELECT_SQL = "" +
         "SELECT DISTINCT recorequest_ts_assigned.assigned_user_id " +
         "FROM   recorequest_ts_assigned " +
-        "WHERE  recorequest_ts_assigned.algo_ind = ? ";
+        "WHERE  recorequest_ts_assigned.algo1_ind = ? ";
 
     //4 for calculation 1
     public static String RECOREQUEST_REPLY_USER_ALGO_SELECT_SQL = "" +
         "SELECT DISTINCT recorequest_reply_user.reply_user_id " +
         "FROM   recorequest_reply_user " +
-        "WHERE  recorequest_reply_user.algo_ind = ? ";
+        "WHERE  recorequest_reply_user.algo1_ind = ? ";
 
     //4 for calculation 1
     public static String RECOREQUEST_REPLY_USER_USER_ALGO_SELECT_SQL = "" +
         "SELECT DISTINCT recorequest_user.initiator_user_id " +
         "FROM   recorequest_reply_user, " + "       recorequest_user " +
-        "WHERE  recorequest_reply_user.algo_ind = ? " +
+        "WHERE  recorequest_reply_user.algo1_ind = ? " +
         "       AND recorequest_reply_user.recorequest_id = " +
         "           recorequest_user.recorequest_id ";
     public static String COUNT_RECOREQUEST_TS_ASSIGNED_DATETIME_SELECT_SQL = "" +
@@ -87,11 +87,11 @@ public interface UserUserQueries extends TSDBCommonQueries {
         " user_reco_supply_tier.user_supply_inv_tier = ?, " +
         " user_reco_supply_tier.user_tier_calc_flag = ? ";
     public static String RECOREQUEST_USER_UPDATE_SQL = "" +
-        "UPDATE recorequest_user " + "SET    recorequest_user.algo_ind = ? " +
+        "UPDATE recorequest_user " + "SET    recorequest_user.algo1_ind = ? " +
         "WHERE  recorequest_user.initiator_user_id = ? ";
     public static String RECOREQUEST_TS_ASSIGNED_UPDATE_SQL = "" +
         "UPDATE recorequest_ts_assigned " +
-        "SET    recorequest_ts_assigned.algo_ind = ? " +
+        "SET    recorequest_ts_assigned.algo1_ind = ? " +
         "WHERE  recorequest_ts_assigned.assigned_user_id = ? ";
     public static String RECOREQUEST_USER_NDAYS_SELECT_SQL = "" +
         "SELECT recorequest_user.recorequest_id " + "FROM   recorequest_user " +
@@ -153,18 +153,18 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "SELECT recorequest_reply_user.reply_user_id, " +
         "       restaurant_reply.restaurant_id " +
         "FROM   recorequest_reply_user, " + "       restaurant_reply " +
-        "WHERE  recorequest_reply_user.algo_ind = ? " +
+        "WHERE  recorequest_reply_user.algo1_ind = ? " +
         "       AND recorequest_reply_user.reply_id = restaurant_reply.reply_id ";
     public static String RESTAURANT_TIPS_TASTESNC_SELECT_SQL = "" +
         "SELECT restaurant_tips_tastesync.user_id, " +
         "       restaurant_tips_tastesync.restaurant_id " +
         "FROM   restaurant_tips_tastesync " +
-        "WHERE  restaurant_tips_tastesync.algo_ind = ? ";
+        "WHERE  restaurant_tips_tastesync.algo1_ind = ? ";
     public static String USER_RESTAURANT_FAV_SELECT_SQL = "" +
         "SELECT user_restaurant_fav.user_id, " +
         "       user_restaurant_fav.restaurant_id " +
         "FROM   user_restaurant_fav " +
-        "WHERE  user_restaurant_fav.algo_ind = ?";
+        "WHERE  user_restaurant_fav.algo1_ind = ?";
     public static String USER_CITY_NBRHOOD_INSERT_SQL = "" +
         "INSERT INTO user_city_nbrhood_match " +
         "            (user_city_nbrhood_match.city_id, " +
@@ -193,7 +193,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
     public static String USER_FOLLOW_DATA_SELECT_SQL = "" +
         "SELECT user_follow_data.followee_user_id, " +
         "       user_follow_data.follower_user_id " +
-        "FROM   user_follow_data " + "WHERE  user_follow_data.algo_ind = ?";
+        "FROM   user_follow_data " + "WHERE  user_follow_data.algo1_ind = ?";
     public static String COUNT_USER_FOLLOW_DATA_FOLLOWEE_FOLLOWER_SELECT_SQL = "" +
         "SELECT count(*) " + "FROM   user_follow_data " +
         "WHERE  user_follow_data.followee_user_id = ? " +
@@ -232,7 +232,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         " ON DUPLICATE KEY UPDATE" + " user_user_match_tier.calc_flag = ?" +
         " user_user_match_tier.match_tier = ?";
     public static String USER_FOLLOW_DATA_UPDATE_SQL = "" +
-        "UPDATE user_follow_data " + "SET    user_follow_data.algo_ind = ? " +
+        "UPDATE user_follow_data " + "SET    user_follow_data.algo1_ind = ? " +
         "WHERE  user_follow_data.followee_user_id = ? " +
         "       AND user_follow_data.follower_user_id = ? ";
 }
