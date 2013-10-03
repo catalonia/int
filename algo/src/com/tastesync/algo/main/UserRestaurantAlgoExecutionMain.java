@@ -3,31 +3,34 @@ package com.tastesync.algo.main;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.user.reco.UserRecoAssigned;
 
+
 public class UserRestaurantAlgoExecutionMain {
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        UserRecoAssigned userRecoAssigned = new UserRecoAssigned();
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
+        //
+        String recoRequestId = null;
 
-		UserRecoAssigned userRecoAssigned = new UserRecoAssigned();
-		//
-		String recoRequestId = null;
-		if (args.length == 0) {
-			System.out.println("Input parameters - recoRequestId is needed  "); 
-			return;
-		}
-		recoRequestId = args[0];
-		recoRequestId ="23";
-		System.out.println("Input parameters - recoRequestId="+recoRequestId); 
+        if (args.length == 0) {
+            System.out.println("Input parameters - recoRequestId is needed  ");
 
-		
-		int recorequestIteration = 1;
-		try {
-			userRecoAssigned.processAssignRecorequestToUsers(recoRequestId, recorequestIteration);
-		} catch (TasteSyncException e) {
-			e.printStackTrace();
-		}
-	}
+            return;
+        }
 
+        recoRequestId = args[0];
+
+        System.out.println("Input parameters - recoRequestId=" + recoRequestId);
+
+        int recorequestIteration = 1;
+
+        try {
+            userRecoAssigned.processAssignRecorequestToUsers(recoRequestId,
+                recorequestIteration);
+        } catch (TasteSyncException e) {
+            e.printStackTrace();
+        }
+    }
 }
