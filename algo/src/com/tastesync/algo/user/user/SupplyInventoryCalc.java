@@ -171,7 +171,7 @@ public class SupplyInventoryCalc {
         }
 
         for (String flaggedUserId : recorequestReplyUserFlaggedUserList) {
-            userUserDAO.submitRecorrequestReplyUser(flaggedUserId, 3);
+            userUserDAO.submitRecorrequestReplyUserAlgo1(flaggedUserId, 3);
         }
     }
 }

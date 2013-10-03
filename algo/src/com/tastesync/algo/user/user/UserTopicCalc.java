@@ -55,14 +55,14 @@ public class UserTopicCalc {
             ArrayList<String> userIdListDone = new ArrayList<String>();
 
             if (!userIdListDone.contains(restaurantUserVO.getUserId())) {
-                userUserDAO.submitRecorrequestReplyUser(restaurantUserVO.getUserId(),
+                userUserDAO.submitRecorrequestReplyUserAlgo1(restaurantUserVO.getUserId(),
                     1);
                 userIdListDone.add(restaurantUserVO.getUserId());
             }
         }
 
         for (RestaurantUserVO restaurantUserVO : restaurantTipsTastesyncUsersList) {
-            userUserDAO.submitRestaurantTipsTastesync(restaurantUserVO.getUserId(),
+            userUserDAO.submitRestaurantTipsTastesyncAlgo1(restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 1);
         }
 

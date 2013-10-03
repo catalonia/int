@@ -228,11 +228,15 @@ public class UserUserCalc {
                     ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) == 1.0)) {
                 userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                     userAUserBVOValue.getUserB(), 1);
+                userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                        userAUserBVOValue.getUserA(), 1);
             } else {
                 // -- Tier 2 logic
                 if ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) >= 0.7) {
                     userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                         userAUserBVOValue.getUserB(), 2);
+                    userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                            userAUserBVOValue.getUserA(), 2);
                 } else {
                     // -- Tier 3 logic TODO
                     if ((numCommonFavNativeCuisines >= 1) ||
@@ -242,9 +246,14 @@ public class UserUserCalc {
                             numUserBFavChainRest)) >= 0.5))) {
                         userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                             userAUserBVOValue.getUserB(), 3);
+                        userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                                userAUserBVOValue.getUserA(), 3);
+                        
                     } else {
                         userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                             userAUserBVOValue.getUserB(), 4);
+                        userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                                userAUserBVOValue.getUserA(), 4);
                     }
                 }
             }
