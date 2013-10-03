@@ -36,7 +36,7 @@ public interface UserRecoDAO extends BaseDAO {
         throws TasteSyncException;
 
     int getNumberOfSameParamRequests(String initiatorUserId,
-        String recoRequestId, String mergedText) throws TasteSyncException;
+        String recoRequestId) throws TasteSyncException;
 
     int getDemandTierForSingleUser(String userId) throws TasteSyncException;
 

@@ -18,9 +18,18 @@ public class UserRecoAssigned {
     private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
     private boolean printDebugExtra = true;
 
+    public UserRecoAssigned() {
+        super();
+    }
+
     public void processAssignRecorequestToUsers(String recoRequestId,
         int recorequestIteration) throws TasteSyncException {
         String initiatorUserId = userRecoDAO.getInitiatorUserIdFromRecorequestId(recoRequestId);
+
+        if (initiatorUserId == null) {
+            throw new TasteSyncException("For recoRequestId=" + recoRequestId +
+                " Unknown userId= " + initiatorUserId);
+        }
 
         List<String> cuisineTier2IdList = userRecoDAO.getRecorequestCuisineTier2IdList(recoRequestId);
 
@@ -77,13 +86,12 @@ public class UserRecoAssigned {
         }
 
         //dependency. build the string as it is done in web services
-        String mergedText = getMergedtext(cuisineTier2IdList,
-                cuisineTier1IdList, priceIdList, themeIdList,
-                whoareyouwithIdList, typeOfRestaurantIdList, occasionIdList,
-                cityId, neighborhoodId);
-
+        //        String mergedText = getMergedtext(cuisineTier2IdList,
+        //                cuisineTier1IdList, priceIdList, themeIdList,
+        //                whoareyouwithIdList, typeOfRestaurantIdList, occasionIdList,
+        //                cityId, neighborhoodId);
         int numSameParamRequests = userRecoDAO.getNumberOfSameParamRequests(initiatorUserId,
-                recoRequestId, mergedText);
+                recoRequestId);
 
         // -- this implies Demand Tier 4
         if (numSameParamRequests > 1) {
@@ -605,8 +613,8 @@ public class UserRecoAssigned {
                         //TODO Go to project PI
                     }
                 }
-                //TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
 
+                //TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if (assigneduserUserId == null) {
                     //TODO Go to project PI
                 }

@@ -2,7 +2,7 @@ package com.tastesync.algo.db.queries;
 
 public interface UserRecoQueries extends UserUserQueries {
     public static String RECOREQUEST_USER_SELECT_SQL = "" +
-        "SELECT recorequest_user.initiator_user_id" +
+        "SELECT recorequest_user.initiator_user_id " +
         "FROM   recorequest_user " +
         "WHERE  recorequest_user.recorequest_id = ?";
     public static String RECOREQUEST_RESTAURANT_CUISINE_SELECT_SQL = "" +
@@ -40,7 +40,7 @@ public interface UserRecoQueries extends UserUserQueries {
         "" + "SELECT Count(*) " + "FROM   recorequest_user " +
         "WHERE  recorequest_user.RECOREQUEST_SENT_DATETIME > SYSDATE() - INTERVAL ? DAY " +
         "       AND recorequest_user.initiator_user_id = ? " +
-        "       AND recorequest_user.recorequest_parameter_selection_merged = ? " +
+        "       AND recorequest_user.recorequest_parameter_selection_merged = " +
         "( " +
         "SELECT recorequest_user.recorequest_parameter_selection_merged " +
         "FROM   recorequest_user " +

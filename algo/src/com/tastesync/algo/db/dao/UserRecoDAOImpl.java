@@ -391,7 +391,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
     @Override
     public int getNumberOfSameParamRequests(String initiatorUserId,
-        String recoRequestId, String mergedText) throws TasteSyncException {
+        String recoRequestId) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -404,8 +404,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.setInt(1, 2);
             statement.setString(2, initiatorUserId);
-            statement.setString(3, mergedText);
-            statement.setString(4, initiatorUserId);
+            statement.setString(3, recoRequestId);
             resultset = statement.executeQuery();
 
             int numSameParamRequests = 0;
