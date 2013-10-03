@@ -14,7 +14,7 @@ import java.util.Random;
 
 
 public class UserRecoAssigned {
-    private static final String NOT_USER_TOPIC_MATCH = "not_user_topic_match_4";
+    private static final String NOT_USER_TOPIC_MATCH_4 = "not_user_topic_match_4";
     private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
     private boolean printDebugExtra = true;
 
@@ -111,11 +111,11 @@ public class UserRecoAssigned {
 
                 for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
                     userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
-                    numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(initiatorUserId,
+                    numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(userRecoSupplyTierVO.getUserId(),
                             cityId, neighborhoodId);
 
                     if (numUserCityNbrhoodMatchTopicFound > 0) {
-                        temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH);
+                        temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH_4);
                     } else {
                         temp1usersTemp1Field.add(null);
                     }
@@ -227,7 +227,7 @@ public class UserRecoAssigned {
                     List<String> tranche7usersUserId = new ArrayList<String>(userRecoSupplyTierVOList.size());
 
                     for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
-                        if (NOT_USER_TOPIC_MATCH.equals(
+                        if (NOT_USER_TOPIC_MATCH_4.equals(
                                     temp1usersTemp1Field.get(i))) {
                             userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
                             matchCount = 1;
@@ -377,31 +377,31 @@ public class UserRecoAssigned {
                     tranche6usersUserId = null;
 
                     tranche7usersUserId = null;
+                }
 
-                    if (assigneduserUserId != null) {
-                        userRecoDAO.submitRecorequestTsAssigned(recoRequestId,
+                if (assigneduserUserId != null) {
+                    userRecoDAO.submitRecorequestTsAssigned(recoRequestId,
+                        assigneduserUserId);
+                    userRecoDAO.submitUserRecoSupplyTier(assigneduserUserId, 0,
+                        1);
+
+                    //TODO
+                    int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
                             assigneduserUserId);
-                        userRecoDAO.submitUserRecoSupplyTier(assigneduserUserId,
-                            0, 1);
 
-                        //TODO
-                        int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
-                                assigneduserUserId);
-
-                        if ((numReplyFromAssignedUser == 0) &&
-                                (recorequestIteration == 1)) {
-                            recorequestIteration = 2;
-                            processAssignRecorequestToUsers(recoRequestId,
-                                recorequestIteration);
-                        } else if ((numReplyFromAssignedUser == 0) &&
-                                (recorequestIteration == 2)) {
-                            //TODO Go to project PI
-                        }
-                    }
-
-                    if (assigneduserUserId == null) {
+                    if ((numReplyFromAssignedUser == 0) &&
+                            (recorequestIteration == 1)) {
+                        recorequestIteration = 2;
+                        processAssignRecorequestToUsers(recoRequestId,
+                            recorequestIteration);
+                    } else if ((numReplyFromAssignedUser == 0) &&
+                            (recorequestIteration == 2)) {
                         //TODO Go to project PI
                     }
+                }
+
+                if (assigneduserUserId == null) {
+                    //TODO Go to project PI
                 }
 
                 // Go to project PI
@@ -432,7 +432,7 @@ public class UserRecoAssigned {
                             cityId, neighborhoodId);
 
                     if (numUserCityNbrhoodMatchTopicFound > 0) {
-                        temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH);
+                        temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH_4);
                     } else {
                         temp1usersTemp1Field.add(null);
                     }
@@ -524,7 +524,7 @@ public class UserRecoAssigned {
                     List<String> tranche3usersUserId = new ArrayList<String>(userRecoSupplyTierVOList.size());
 
                     for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
-                        if (NOT_USER_TOPIC_MATCH.equals(
+                        if (NOT_USER_TOPIC_MATCH_4.equals(
                                     temp1usersTemp1Field.get(i))) {
                             userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
                             matchCount = 1;
