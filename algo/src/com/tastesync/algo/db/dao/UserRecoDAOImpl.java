@@ -353,7 +353,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
         try {
             connection = tsDataSource.getConnection();
-            statement = connection.prepareStatement(UserRecoQueries.RECOREQUEST_OCCASION_SELECT_SQL);
+            statement = connection.prepareStatement(UserRecoQueries.RECOREQUEST_LOCATION_SELECT_SQL);
 
             statement.setString(1, recoRequestId);
             resultset = statement.executeQuery();
@@ -1173,12 +1173,13 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             tsDataSource.begin();
 
             statement = connection.prepareStatement(UserRecoQueries.RECOREQUEST_TS_ASSIGNED_INSERT_SQL);
-            statement.setString(1, "N");
+            statement.setTimestamp(1, CommonFunctionsUtil.getCurrentDateTimestamp());
             statement.setString(2, "N");
-            statement.setString(3, assigneduserUserId);
-            statement.setString(4, "Y");
-            statement.setString(5, "system-assigned-other");
-            statement.setString(6, recoRequestId);
+            statement.setString(3, "N");
+            statement.setString(4, assigneduserUserId);
+            statement.setString(5, "Y");
+            statement.setString(6, "system-assigned-other");
+            statement.setString(7, recoRequestId);
 
             statement.executeUpdate();
             statement.close();
