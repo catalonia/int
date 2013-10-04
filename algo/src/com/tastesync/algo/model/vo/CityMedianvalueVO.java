@@ -5,8 +5,8 @@ import java.io.Serializable;
 
 public class CityMedianvalueVO implements Serializable {
     private static final long serialVersionUID = 7106605551869915215L;
-    String cityId;
-    int medianValue;
+    private String cityId;
+    private int medianValue;
 
     public CityMedianvalueVO(String cityId, int medianValue) {
         super();

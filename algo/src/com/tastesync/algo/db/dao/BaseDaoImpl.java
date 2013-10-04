@@ -25,7 +25,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -64,7 +64,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -80,12 +80,10 @@ public abstract class BaseDaoImpl implements BaseDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -100,7 +98,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -116,12 +114,10 @@ public abstract class BaseDaoImpl implements BaseDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -136,7 +132,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         String restaurantId, int algoInd) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -153,12 +149,10 @@ public abstract class BaseDaoImpl implements BaseDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -173,7 +167,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         String restaurantId, int algoInd) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -190,12 +184,10 @@ public abstract class BaseDaoImpl implements BaseDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -210,7 +202,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         int algoInd) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -236,12 +228,10 @@ public abstract class BaseDaoImpl implements BaseDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -255,7 +245,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
     public List<String> getAllUsers() throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -288,7 +278,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
     public String getFBUserId(String userId) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 

@@ -7,9 +7,9 @@ import java.util.List;
 
 public class CityNeighbourhoodVO implements Serializable {
     private static final long serialVersionUID = -8532547896675729703L;
-    String cityId;
-    String neighbourhoodId;
-    List<String> neighbourhoodIdList;
+    private String cityId;
+    private String neighbourhoodId;
+    private List<String> neighbourhoodIdList;
 
     public CityNeighbourhoodVO(String cityId, String neighbourhoodId) {
         super();

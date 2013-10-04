@@ -5,11 +5,11 @@ import java.io.Serializable;
 
 public class RestaurantPopularityTierVO implements Serializable {
     private static final long serialVersionUID = 4886210352528952164L;
-    String restaurantId;
-    String popularityTierId;
-    String userId;
-    String numUserRestaurantMatchCount;
-    int rankNumber;
+    private String restaurantId;
+    private String popularityTierId;
+    private String userId;
+    private String numUserRestaurantMatchCount;
+    private int rankNumber;
 
     public RestaurantPopularityTierVO(String restaurantId,
         String popularityTierId, String userId,

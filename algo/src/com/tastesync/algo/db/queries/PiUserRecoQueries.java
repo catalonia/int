@@ -15,8 +15,7 @@ public interface PiUserRecoQueries extends UserRecoQueries {
         "WHERE  users_category.category_id = ? " +
         "       AND user_city_nbrhood_match.user_id = users_category.user_id " +
         "       AND user_city_nbrhood_match.match_count >= ? " +
-        "       AND user_city_nbrhood_match.city_id = ? " +
-        "       AND user_city_nbrhood_match.neighborhood_id = ? ";
+        "       AND user_city_nbrhood_match.city_id = ? ";
     public static String PI_RECO_LOG_SELECT_SQL = "" +
         "SELECT pi_reco_log.pi_user_id " + "FROM   pi_reco_log " +
         "WHERE  pi_reco_log.user_id = ? ";

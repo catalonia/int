@@ -6,7 +6,7 @@ import com.tastesync.algo.user.reco.UserRecoAssigned;
 
 public class UserRestaurantAlgoExecutionMain {
     /**
-     * @param args
+     * @param args   input arguments - first argument - reco request id
      */
     public static void main(String[] args) {
         UserRecoAssigned userRecoAssigned = new UserRecoAssigned();

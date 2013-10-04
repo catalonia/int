@@ -39,21 +39,19 @@ public class UserUserOfflineAlgo1CalcMain {
             userTopicCalc.processAllUserFlaggedUserListUserTopic();
             tsDataSource.commit();
             tsDataSource.begin();
+
             UserUserCalc userUserCalc = new UserUserCalc();
             userUserCalc.processAllUserFlaggedUserListUserUser();
             tsDataSource.commit();
         } catch (TasteSyncException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
         } finally {
             if (tsDataSource != null) {

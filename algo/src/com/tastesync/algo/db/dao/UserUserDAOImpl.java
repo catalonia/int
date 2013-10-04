@@ -29,7 +29,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         int algoIndicatorIdentifyUseridListOne) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -561,12 +561,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException("Error while creating reco request " +
@@ -597,12 +595,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -633,12 +629,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -684,12 +678,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -730,12 +722,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -776,12 +766,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -821,12 +809,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -866,12 +852,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException("Error while getRecorequestPrice = " +
@@ -911,12 +895,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException("Error while getRecorequestTheme = " +
@@ -957,12 +939,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1003,12 +983,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1052,12 +1030,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1104,12 +1080,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1157,12 +1131,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1201,12 +1173,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1255,12 +1225,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1308,12 +1276,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1361,12 +1327,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1458,12 +1422,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1512,12 +1474,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -1783,12 +1743,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(

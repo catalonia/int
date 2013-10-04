@@ -25,7 +25,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         String nbrHoodId) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -51,7 +51,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             resultset = statement.executeQuery();
 
             List<String> piUsersCategoryIdList = new LinkedList<String>();
-            String piUsersCategoryId = null;
+            String piUsersCategoryId;
 
             while (resultset.next()) {
                 piUsersCategoryId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -77,7 +77,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -90,7 +90,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             resultset = statement.executeQuery();
 
             List<String> piUsersAlreadyAssignedIdList = new LinkedList<String>();
-            String piUsersAlreadyAssignedId = null;
+            String piUsersAlreadyAssignedId;
 
             while (resultset.next()) {
                 piUsersAlreadyAssignedId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -119,7 +119,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -180,7 +180,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -242,7 +242,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -303,7 +303,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -364,7 +364,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -427,7 +427,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -489,7 +489,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         }
 
         TSDataSource tsDataSource = TSDataSource.getInstance();
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -547,7 +547,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
     public List<String> getAllReccomendationIds() throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -557,7 +557,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             resultset = statement.executeQuery();
 
             List<String> allRecommendationIdsList = new LinkedList<String>();
-            String reccomendationId = null;
+            String reccomendationId;
 
             while (resultset.next()) {
                 reccomendationId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -582,7 +582,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -593,7 +593,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             resultset = statement.executeQuery();
 
             List<String> excludedRecommendationIdsList = new LinkedList<String>();
-            String reccomendationId = null;
+            String reccomendationId;
 
             while (resultset.next()) {
                 reccomendationId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -619,7 +619,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         String recommendationId) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
+        Connection connection;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -630,8 +630,8 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             resultset = statement.executeQuery();
 
             PiRestaurantRecommendationVO piRestaurantRecommendationVO = null;
-            String restaurantId = null;
-            String recommendationText = null;
+            String restaurantId;
+            String recommendationText;
 
             if (resultset.next()) {
                 restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -790,7 +790,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
 
             resultset = statement.executeQuery();
 
-            int rowCount = 0;
+            int rowCount;
 
             if (resultset.next()) {
                 rowCount = resultset.getInt(1);

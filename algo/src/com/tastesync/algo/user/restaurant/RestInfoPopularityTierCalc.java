@@ -37,7 +37,7 @@ public class RestInfoPopularityTierCalc {
         for (String cityId : cityIdList) {
             medianValueForSingleCityId = userRestaurantDAO.getMedianvalueForSingleCityIdList(cityId);
             cityMedianHashMap.put(cityId,
-                Integer.valueOf(medianValueForSingleCityId));
+                    medianValueForSingleCityId);
         }
 
         int algoIndicatorDone = 0;

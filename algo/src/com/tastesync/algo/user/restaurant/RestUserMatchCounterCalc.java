@@ -55,16 +55,16 @@ public class RestUserMatchCounterCalc {
             LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
                 userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
 
-            for (int i = 0; i < restaurantPopularityTierVOList.size(); ++i) {
+            for (RestaurantPopularityTierVO aRestaurantPopularityTierVOList : restaurantPopularityTierVOList) {
                 numUserRestaurantMatchCount = userRestaurantDAO.getRestUserMatchCounter(flaggedRestaurantUserVO.getUserId(),
-                        restaurantPopularityTierVOList.get(i));
+                        aRestaurantPopularityTierVOList);
                 //set numUserRestaurantMatchCount
-                restaurantPopularityTierVOList.get(i)
-                                              .setNumUserRestaurantMatchCount(String.valueOf(
-                        numUserRestaurantMatchCount));
+                aRestaurantPopularityTierVOList
+                        .setNumUserRestaurantMatchCount(String.valueOf(
+                                numUserRestaurantMatchCount));
                 // set userId
-                restaurantPopularityTierVOList.get(i)
-                                              .setUserId(flaggedRestaurantUserVO.getUserId());
+                aRestaurantPopularityTierVOList
+                        .setUserId(flaggedRestaurantUserVO.getUserId());
             }
 
             List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);

@@ -309,12 +309,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -346,12 +344,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -767,11 +763,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement.close();
 
-            int numUserRestaurantMatchCount = numNbrhoodMatch + numCuis2Match +
-                numPriceMatch + numFavFollowMatch + numRecoFollowMatch +
-                numFavTrustedMatch + numRecoTrustedMatch;
-
-            return numUserRestaurantMatchCount;
+            return (numNbrhoodMatch + numCuis2Match +
+                    numPriceMatch + numFavFollowMatch + numRecoFollowMatch +
+                    numFavTrustedMatch + numRecoTrustedMatch);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -837,12 +831,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
@@ -881,7 +873,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             }
 
             if (strUserMatchCounter != null) {
-                userMatchCounter = Integer.valueOf(userMatchCounter);
+                userMatchCounter = Integer.valueOf(strUserMatchCounter);
             } else {
                 userMatchCounter = 0;
                 System.out.println("userMatchCounter is NULL. set to 0");
@@ -971,12 +963,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(

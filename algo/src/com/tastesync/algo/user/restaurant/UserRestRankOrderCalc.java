@@ -41,19 +41,18 @@ public class UserRestRankOrderCalc {
                     userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
 
                 //numUserRestaurantMatchCount restaurantTier
-                for (int i = 0; i < restaurantPopularityTierVOList.size();
-                        ++i) {
+                for (RestaurantPopularityTierVO aRestaurantPopularityTierVOList : restaurantPopularityTierVOList) {
                     numUserRestaurantMatchCount = String.valueOf(userRestaurantDAO.getUserMatchCounter(
-                                userId,
-                                flaggedRestaurantUserVO.getRestaurantId()));
-                    restaurantPopularityTierVOList.get(i)
-                                                  .setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
+                            userId,
+                            flaggedRestaurantUserVO.getRestaurantId()));
+                    aRestaurantPopularityTierVOList
+                            .setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
                     restaurantTier = String.valueOf(userRestaurantDAO.getRestaurantInfoTierId(
-                                userId,
-                                flaggedRestaurantUserVO.getRestaurantId()));
-                    restaurantPopularityTierVOList.get(i)
-                                                  .setPopularityTierId(restaurantTier);
-                    restaurantPopularityTierVOList.get(i).setUserId(userId);
+                            userId,
+                            flaggedRestaurantUserVO.getRestaurantId()));
+                    aRestaurantPopularityTierVOList
+                            .setPopularityTierId(restaurantTier);
+                    aRestaurantPopularityTierVOList.setUserId(userId);
                 }
 
                 // check numUserRestaurantMatchCount

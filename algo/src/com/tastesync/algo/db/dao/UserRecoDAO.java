@@ -67,7 +67,7 @@ public interface UserRecoDAO extends BaseDAO {
         double matchCount) throws TasteSyncException;
 
     int getCountUserWhoareyouwithMatch(String userId,
-        List<String> whoareyouwithIdList) throws TasteSyncException;
+        List<String> whoareyouwithIdList, double matchCount) throws TasteSyncException;
 
     int getCountUserTypeofrestMatch(String userId,
         List<String> typeOfRestaurantIdList, double matchCount)

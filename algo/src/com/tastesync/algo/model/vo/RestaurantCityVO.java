@@ -5,8 +5,8 @@ import java.io.Serializable;
 
 public class RestaurantCityVO implements Serializable {
     private static final long serialVersionUID = -4990373645902947387L;
-    String cityId;
-    String restaurantId;
+    private String cityId;
+    private String restaurantId;
 
     public RestaurantCityVO(String cityId, String restaurantId) {
         super();

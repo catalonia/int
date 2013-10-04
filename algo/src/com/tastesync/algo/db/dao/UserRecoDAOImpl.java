@@ -452,7 +452,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.close();
 
-            //TODO wht should be the default
+            // wht should be the default
             if (demandTier == null) {
                 throw new TasteSyncException(
                     "Not available Demand Tier (null) for the userId= " +
@@ -533,14 +533,22 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
         try {
             connection = tsDataSource.getConnection();
-            statement = connection.prepareStatement(UserRecoQueries.COUNT_NOT_USER_TOPIC_MATCH_4_SELECT_SQL);
+
+            String sql = UserRecoQueries.COUNT_NOT_USER_TOPIC_MATCH_4_SELECT_SQL;
+
+            if ((neighborhoodId != null) && !neighborhoodId.isEmpty()) {
+                sql = UserRecoQueries.COUNT_NOT_USER_TOPIC_MATCH_4_WITH_NBRHD_SELECT_SQL;
+            }
+
+            statement = connection.prepareStatement(sql);
 
             statement.setInt(1, 1);
             statement.setString(2, cityId);
+            statement.setString(3, userId);
 
-            statement.setString(3, neighborhoodId);
-
-            statement.setString(4, userId);
+            if ((neighborhoodId != null) && !neighborhoodId.isEmpty()) {
+                statement.setString(4, neighborhoodId);
+            }
 
             resultset = statement.executeQuery();
 
@@ -927,7 +935,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
     @Override
     public int getCountUserWhoareyouwithMatch(String userId,
-        List<String> whoareyouwithIdList) throws TasteSyncException {
+        List<String> whoareyouwithIdList, double matchCount)
+        throws TasteSyncException {
         if ((whoareyouwithIdList == null) || (whoareyouwithIdList.size() == 0)) {
             return 0;
         }
@@ -960,6 +969,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             int bindposition = 0;
             ++bindposition;
             statement.setString(bindposition, userId);
+            ++bindposition;
+            statement.setDouble(bindposition, matchCount);
 
             for (String whoareyouwithId : whoareyouwithIdList) {
                 ++bindposition;
@@ -1173,7 +1184,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             tsDataSource.begin();
 
             statement = connection.prepareStatement(UserRecoQueries.RECOREQUEST_TS_ASSIGNED_INSERT_SQL);
-            statement.setTimestamp(1, CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setTimestamp(1,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
             statement.setString(2, "N");
             statement.setString(3, "N");
             statement.setString(4, assigneduserUserId);
@@ -1184,29 +1196,27 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             statement.executeUpdate();
             statement.close();
             tsDataSource.commit();
-            
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
                 "Error while submitAssignedRankUserRestaurant= " +
                 e.getMessage());
         } finally {
-        	if (connection != null) {
-            	try {
-					connection.setAutoCommit(true);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-        	}
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }
@@ -1235,24 +1245,23 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(
                 "Error while suubmitUserRecoSupplyTier= " + e.getMessage());
         } finally {
-        	if (connection != null) {
-            	try {
-					connection.setAutoCommit(true);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-        	}
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }

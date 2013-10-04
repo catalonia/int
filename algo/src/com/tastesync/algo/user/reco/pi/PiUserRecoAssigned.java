@@ -20,6 +20,10 @@ public class PiUserRecoAssigned {
     private PiUserRecoDAO piUserRecoDAO = new PiUserRecoDAOImpl();
     private boolean printDebugExtra = false;
 
+    public PiUserRecoAssigned() {
+        super();
+    }
+
     public void processingPiAssignRecorequestToUsers(String recoRequestId,
         int recorequestIteration, String cityId, String nbrHoodId,
         String initiatorUserId, List<String> cuisineTier2IdList,
@@ -31,8 +35,8 @@ public class PiUserRecoAssigned {
         List<String> temp1PiUsersUserIdList = piUserRecoDAO.getPiUsersCategoryCityNbrhoodList(cityId,
                 nbrHoodId);
 
-        String temp1PiUsersUserId = null;
-        boolean userReported = false;
+        String temp1PiUsersUserId;
+        boolean userReported;
         List<Integer> indexElementToBeRemovedFrmUserRecoSupplyTierVOList = new ArrayList<Integer>();
 
         //7B
@@ -71,10 +75,13 @@ public class PiUserRecoAssigned {
 
         if (printDebugExtra) {
             String[] temp1PiUsersUserIdListResult = new String[temp1PiUsersUserIdList.size()];
+            temp1PiUsersUserIdListResult = temp1PiUsersUserIdList.toArray(temp1PiUsersUserIdListResult);
+
             System.out.println("temp1PiUsersUserIdListResult=" +
                 Arrays.toString(temp1PiUsersUserIdListResult));
 
             String[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = new String[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
+            indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = indexElementToBeRemovedFrmUserRecoSupplyTierVOList.toArray(indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult);
             System.out.println(
                 "indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult=" +
                 Arrays.toString(
@@ -92,85 +99,88 @@ public class PiUserRecoAssigned {
             if (temp1PiUsersUserIdList.size() == 1) {
                 assigneduserUserId = temp1PiUsersUserIdList.get(0);
             } else {
-                int matchCount = 0;
+                int matchCount;
 
                 int topicMatchCounter = 0;
-                double topicMatchRate = 0;
+                double topicMatchRate;
                 temp1PiUsersUserId = null;
 
                 int numRecorequestParams = cuisineTier2IdList.size() +
                     cuisineTier1IdList.size() + priceIdList.size() +
                     themeIdList.size() + whoareyouwithIdList.size();
-                double userAUserBMatchTier = 0;
+                double userAUserBMatchTier;
 
                 List<String> tranche1PiUsersUserId = new ArrayList<String>(temp1PiUsersUserIdList.size());
                 List<String> tranche2PiUsersUserId = new ArrayList<String>(temp1PiUsersUserIdList.size());
                 List<String> tranche3PiUsersUserId = new ArrayList<String>(temp1PiUsersUserIdList.size());
 
-                for (int i = 0; i < temp1PiUsersUserIdList.size(); ++i) {
-                    temp1PiUsersUserId = temp1PiUsersUserIdList.get(i);
+                for (String aTemp1PiUsersUserIdList : temp1PiUsersUserIdList) {
+                    temp1PiUsersUserId = aTemp1PiUsersUserIdList;
 
                     matchCount = 1;
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserCuistier2Match(temp1PiUsersUserIdList.get(
-                                i), cuisineTier2IdList, matchCount);
+                        piUserRecoDAO.getCountUserCuistier2Match(aTemp1PiUsersUserIdList,
+                            cuisineTier2IdList, matchCount);
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserCuistier2MatchMapper(temp1PiUsersUserIdList.get(
-                                i), cuisineTier1IdList, matchCount);
+                        piUserRecoDAO.getCountUserCuistier2MatchMapper(aTemp1PiUsersUserIdList,
+                            cuisineTier1IdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserPriceMatch(temp1PiUsersUserIdList.get(
-                                i), priceIdList, matchCount);
+                        piUserRecoDAO.getCountUserPriceMatch(aTemp1PiUsersUserIdList,
+                            priceIdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserThemeMatch(temp1PiUsersUserIdList.get(
-                                i), themeIdList, matchCount);
+                        piUserRecoDAO.getCountUserThemeMatch(aTemp1PiUsersUserIdList,
+                            themeIdList, matchCount);
 
                     //TODO check mathcocunt not required?
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserWhoareyouwithMatch(temp1PiUsersUserIdList.get(
-                                i), whoareyouwithIdList);
+                        piUserRecoDAO.getCountUserWhoareyouwithMatch(aTemp1PiUsersUserIdList,
+                            whoareyouwithIdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserTypeofrestMatch(temp1PiUsersUserIdList.get(
-                                i), typeOfRestaurantIdList, matchCount);
+                        piUserRecoDAO.getCountUserTypeofrestMatch(aTemp1PiUsersUserIdList,
+                            typeOfRestaurantIdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserOccasionMatch(temp1PiUsersUserIdList.get(
-                                i), occasionIdList, matchCount);
+                        piUserRecoDAO.getCountUserOccasionMatch(aTemp1PiUsersUserIdList,
+                            occasionIdList, matchCount);
 
                     topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
 
                     userAUserBMatchTier = piUserRecoDAO.getUserAUserBMatchTier(initiatorUserId,
-                            temp1PiUsersUserIdList.get(i));
+                            aTemp1PiUsersUserIdList);
 
                     if ((topicMatchRate >= 0.6) &&
                             ((userAUserBMatchTier == 1) ||
                             (userAUserBMatchTier == 2))) {
-                        tranche1PiUsersUserId.add(temp1PiUsersUserIdList.get(i));
+                        tranche1PiUsersUserId.add(aTemp1PiUsersUserIdList);
                     }
 
                     if ((topicMatchRate >= 1) &&
                             ((userAUserBMatchTier == 1) ||
                             (userAUserBMatchTier == 2))) {
-                        tranche2PiUsersUserId.add(temp1PiUsersUserIdList.get(i));
+                        tranche2PiUsersUserId.add(aTemp1PiUsersUserIdList);
                     }
 
                     if (userAUserBMatchTier != 4) {
-                        tranche3PiUsersUserId.add(temp1PiUsersUserIdList.get(i));
+                        tranche3PiUsersUserId.add(aTemp1PiUsersUserIdList);
                     }
                 }
 
                 if (printDebugExtra) {
                     String[] tranche1PiUsersUserIdResult = new String[tranche1PiUsersUserId.size()];
+                    tranche1PiUsersUserIdResult = tranche1PiUsersUserId.toArray(tranche1PiUsersUserIdResult);
                     System.out.println("tranche1PiUsersUserIdResult=" +
                         Arrays.toString(tranche1PiUsersUserIdResult));
 
                     String[] tranche2PiUsersUserIdResult = new String[tranche2PiUsersUserId.size()];
+                    tranche2PiUsersUserIdResult = tranche2PiUsersUserId.toArray(tranche2PiUsersUserIdResult);
                     System.out.println("tranche2PiUsersUserIdResult=" +
                         Arrays.toString(tranche2PiUsersUserIdResult));
 
                     String[] tranche3PiUsersUserIdResult = new String[tranche3PiUsersUserId.size()];
+                    tranche3PiUsersUserIdResult = tranche3PiUsersUserId.toArray(tranche3PiUsersUserIdResult);
                     System.out.println("tranche3PiUsersUserIdResult=" +
                         Arrays.toString(tranche3PiUsersUserIdResult));
 
@@ -180,7 +190,7 @@ public class PiUserRecoAssigned {
                 }
 
                 Random randomGenerator = new Random();
-                int index = 0;
+                int index;
 
                 if (!tranche1PiUsersUserId.isEmpty()) {
                     index = randomGenerator.nextInt(tranche1PiUsersUserId.size());
@@ -210,7 +220,7 @@ public class PiUserRecoAssigned {
 
             // TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
 
-            // TODO invoke web service
+            //  invoke underlying implementation as part of web service
             piUserRecoDAO.submitRecommendationRequestAnswer(recoRequestId,
                 assigneduserUserId,
                 CommonFunctionsUtil.convertStringListAsArrayList(
@@ -234,7 +244,7 @@ public class PiUserRecoAssigned {
         throws TasteSyncException {
         List<String> allRecommendationIdsList = piUserRecoDAO.getAllReccomendationIds();
         int topicMatchCounter = 0;
-        double topicMatchRate = 0;
+        double topicMatchRate;
         int numRecorequestParams = cuisineTier2IdList.size() +
             cuisineTier1IdList.size() + priceIdList.size() +
             themeIdList.size() + whoareyouwithIdList.size();
@@ -285,8 +295,7 @@ public class PiUserRecoAssigned {
                 public int compare(PiRecommendationsTopicMatchRateVO o1,
                     PiRecommendationsTopicMatchRateVO o2) {
                     return Double.valueOf(o1.getTopicMatchRate())
-                                 .compareTo(Double.valueOf(
-                            o2.getTopicMatchRate()));
+                                 .compareTo(o2.getTopicMatchRate());
                 }
             });
 

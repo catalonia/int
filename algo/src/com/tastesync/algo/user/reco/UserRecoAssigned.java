@@ -5,6 +5,7 @@ import com.tastesync.algo.db.dao.UserRecoDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.CityNeighbourhoodVO;
 import com.tastesync.algo.model.vo.UserRecoSupplyTierVO;
+import com.tastesync.algo.user.reco.pi.PiUserRecoAssigned;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,10 +49,22 @@ public class UserRecoAssigned {
         //single city, single neighboourhoodid
         CityNeighbourhoodVO cityNeighbourhoodVO = userRecoDAO.getRecorequestCityIdNbrIdList(recoRequestId);
 
-        String cityId = (cityNeighbourhoodVO != null)
-            ? cityNeighbourhoodVO.getCityId() : null;
-        String neighborhoodId = (cityNeighbourhoodVO != null)
-            ? cityNeighbourhoodVO.getNeighbourhoodId() : null;
+        String cityId = null;
+
+        if ((cityNeighbourhoodVO != null) &&
+                (cityNeighbourhoodVO.getCityId() != null) &&
+                !cityNeighbourhoodVO.getCityId().isEmpty()) {
+            cityId = cityNeighbourhoodVO.getCityId();
+        }
+
+        String neighborhoodId = null;
+
+        if ((cityNeighbourhoodVO != null) &&
+                (cityNeighbourhoodVO.getNeighbourhoodId() != null) &&
+                !cityNeighbourhoodVO.getNeighbourhoodId().isEmpty()) {
+            cityId = cityNeighbourhoodVO.getNeighbourhoodId();
+        }
+
         int numRecorequestParams = cuisineTier2IdList.size() +
             cuisineTier1IdList.size() + priceIdList.size() +
             themeIdList.size() + whoareyouwithIdList.size();
@@ -92,10 +105,15 @@ public class UserRecoAssigned {
         //                cityId, neighborhoodId);
         int numSameParamRequests = userRecoDAO.getNumberOfSameParamRequests(initiatorUserId,
                 recoRequestId);
+        PiUserRecoAssigned piUserRecoAssigned = new PiUserRecoAssigned();
 
         // -- this implies Demand Tier 4
         if (numSameParamRequests > 1) {
-            //TODO project pie logics
+            piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                recorequestIteration, cityId, neighborhoodId, initiatorUserId,
+                cuisineTier2IdList, cuisineTier1IdList, priceIdList,
+                themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
+                occasionIdList);
         } else {
             int demandTier = userRecoDAO.getDemandTierForSingleUser(initiatorUserId);
 
@@ -109,8 +127,8 @@ public class UserRecoAssigned {
                 List<String> temp1usersTemp1Field = new ArrayList<String>(userRecoSupplyTierVOList.size());
                 int numUserCityNbrhoodMatchTopicFound = 0;
 
-                for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
-                    userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
+                for (UserRecoSupplyTierVO anUserRecoSupplyTierVOList : userRecoSupplyTierVOList) {
+                    userRecoSupplyTierVO = anUserRecoSupplyTierVOList;
                     numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(userRecoSupplyTierVO.getUserId(),
                             cityId, neighborhoodId);
 
@@ -164,11 +182,14 @@ public class UserRecoAssigned {
 
                 if (printDebugExtra) {
                     String[] temp1usersTemp1FieldResult = new String[temp1usersTemp1Field.size()];
+                    temp1usersTemp1FieldResult = temp1usersTemp1Field.toArray(temp1usersTemp1FieldResult);
+
                     System.out.println("temp1usersTemp1FieldResult=" +
                         Arrays.toString(temp1usersTemp1FieldResult));
 
                     String[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult =
                         new String[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
+                    indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = indexElementToBeRemovedFrmUserRecoSupplyTierVOList.toArray(indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult);
                     System.out.println(
                         "indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult=" +
                         Arrays.toString(
@@ -202,9 +223,16 @@ public class UserRecoAssigned {
 
                 //4C(i).
                 String assigneduserUserId = null;
+                boolean piassignedDone = false;
 
                 if (temp1usersTemp1FieldValue == 0) {
-                    //TODO go to PI
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                        recorequestIteration, cityId, neighborhoodId,
+                        initiatorUserId, cuisineTier2IdList,
+                        cuisineTier1IdList, priceIdList, themeIdList,
+                        whoareyouwithIdList, typeOfRestaurantIdList,
+                        occasionIdList);
+                    piassignedDone = true;
                 } else if (temp1usersTemp1FieldValue == 1) {
                     //single user
                     assigneduserUserId = userRecoSupplyTierVOList.get(temp1usersTemp1FieldValueFirstMatchIndex)
@@ -246,10 +274,9 @@ public class UserRecoAssigned {
                                 userRecoDAO.getCountUserThemeMatch(userRecoSupplyTierVO.getUserId(),
                                     themeIdList, matchCount);
 
-                            //TODO check mathcocunt not required?
                             topicMatchCounter = topicMatchCounter +
                                 userRecoDAO.getCountUserWhoareyouwithMatch(userRecoSupplyTierVO.getUserId(),
-                                    whoareyouwithIdList);
+                                    whoareyouwithIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
                                 userRecoDAO.getCountUserTypeofrestMatch(userRecoSupplyTierVO.getUserId(),
@@ -307,30 +334,37 @@ public class UserRecoAssigned {
                     //randomly select anyone
                     if (printDebugExtra) {
                         String[] tranche1usersUserIdResult = new String[tranche1usersUserId.size()];
+                        tranche1usersUserIdResult = tranche1usersUserId.toArray(tranche1usersUserIdResult);
                         System.out.println("tranche1usersUserIdResult=" +
                             Arrays.toString(tranche1usersUserIdResult));
 
                         String[] tranche2usersUserIdResult = new String[tranche2usersUserId.size()];
+                        tranche2usersUserIdResult = tranche2usersUserId.toArray(tranche2usersUserIdResult);
                         System.out.println("tranche2usersUserIdResult=" +
                             Arrays.toString(tranche2usersUserIdResult));
 
                         String[] tranche3usersUserIdResult = new String[tranche3usersUserId.size()];
+                        tranche3usersUserIdResult = tranche3usersUserId.toArray(tranche3usersUserIdResult);
                         System.out.println("tranche3usersUserIdResult=" +
                             Arrays.toString(tranche3usersUserIdResult));
 
                         String[] tranche4usersUserIdResult = new String[tranche4usersUserId.size()];
+                        tranche4usersUserIdResult = tranche4usersUserId.toArray(tranche4usersUserIdResult);
                         System.out.println("tranche4usersUserIdResult=" +
                             Arrays.toString(tranche4usersUserIdResult));
 
                         String[] tranche5usersUserIdResult = new String[tranche5usersUserId.size()];
+                        tranche5usersUserIdResult = tranche5usersUserId.toArray(tranche5usersUserIdResult);
                         System.out.println("tranche5usersUserIdResult=" +
                             Arrays.toString(tranche5usersUserIdResult));
 
                         String[] tranche6usersUserIdResult = new String[tranche6usersUserId.size()];
+                        tranche6usersUserIdResult = tranche6usersUserId.toArray(tranche6usersUserIdResult);
                         System.out.println("tranche6usersUserIdResult=" +
                             Arrays.toString(tranche6usersUserIdResult));
 
                         String[] tranche7usersUserIdResult = new String[tranche7usersUserId.size()];
+                        tranche7usersUserIdResult = tranche7usersUserId.toArray(tranche7usersUserIdResult);
                         System.out.println("tranche7usersUserIdResult=" +
                             Arrays.toString(tranche7usersUserIdResult));
 
@@ -385,7 +419,6 @@ public class UserRecoAssigned {
                     userRecoDAO.submitUserRecoSupplyTier(assigneduserUserId, 0,
                         1);
 
-                    //TODO
                     int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
                             assigneduserUserId);
 
@@ -396,17 +429,22 @@ public class UserRecoAssigned {
                             recorequestIteration);
                     } else if ((numReplyFromAssignedUser == 0) &&
                             (recorequestIteration == 2)) {
-                        //TODO Go to project PI
+                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                            recorequestIteration, cityId, neighborhoodId,
+                            initiatorUserId, cuisineTier2IdList,
+                            cuisineTier1IdList, priceIdList, themeIdList,
+                            whoareyouwithIdList, typeOfRestaurantIdList,
+                            occasionIdList);
                     }
                 }
 
-                if (assigneduserUserId == null) {
-                    //TODO Go to project PI
-                }
-
-                // Go to project PI
-                if (assigneduserUserId == null) {
-                    //TODO Go to project PI or THROW exception??
+                if ((assigneduserUserId == null) && !piassignedDone) {
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                        recorequestIteration, cityId, neighborhoodId,
+                        initiatorUserId, cuisineTier2IdList,
+                        cuisineTier1IdList, priceIdList, themeIdList,
+                        whoareyouwithIdList, typeOfRestaurantIdList,
+                        occasionIdList);
                 }
             } else {
                 // GO to STEP 5. -- this implies Demand Tier 3 (Low)
@@ -426,8 +464,8 @@ public class UserRecoAssigned {
                 List<String> temp1usersTemp1Field = new ArrayList<String>(userRecoSupplyTierVOList.size());
                 int numUserCityNbrhoodMatchTopicFound = 0;
 
-                for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
-                    userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
+                for (UserRecoSupplyTierVO anUserRecoSupplyTierVOList : userRecoSupplyTierVOList) {
+                    userRecoSupplyTierVO = anUserRecoSupplyTierVOList;
                     numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(initiatorUserId,
                             cityId, neighborhoodId);
 
@@ -506,9 +544,16 @@ public class UserRecoAssigned {
 
                 //4C(i).
                 String assigneduserUserId = null;
+                boolean piassignedDone = false;
 
                 if (temp1usersTemp1FieldValue == 0) {
-                    //TODO go to PI
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                        recorequestIteration, cityId, neighborhoodId,
+                        initiatorUserId, cuisineTier2IdList,
+                        cuisineTier1IdList, priceIdList, themeIdList,
+                        whoareyouwithIdList, typeOfRestaurantIdList,
+                        occasionIdList);
+                    piassignedDone = true;
                 } else if (temp1usersTemp1FieldValue == 1) {
                     //single user
                     assigneduserUserId = userRecoSupplyTierVOList.get(temp1usersTemp1FieldValueFirstMatchIndex)
@@ -543,10 +588,9 @@ public class UserRecoAssigned {
                                 userRecoDAO.getCountUserThemeMatch(userRecoSupplyTierVO.getUserId(),
                                     themeIdList, matchCount);
 
-                            //TODO check mathcocunt not required?
                             topicMatchCounter = topicMatchCounter +
                                 userRecoDAO.getCountUserWhoareyouwithMatch(userRecoSupplyTierVO.getUserId(),
-                                    whoareyouwithIdList);
+                                    whoareyouwithIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
                                 userRecoDAO.getCountUserTypeofrestMatch(userRecoSupplyTierVO.getUserId(),
@@ -610,13 +654,25 @@ public class UserRecoAssigned {
                             recorequestIteration);
                     } else if ((numReplyFromAssignedUser == 0) &&
                             (recorequestIteration == 2)) {
-                        //TODO Go to project PI
+                        //TODO check
+                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                            recorequestIteration, cityId, neighborhoodId,
+                            initiatorUserId, cuisineTier2IdList,
+                            cuisineTier1IdList, priceIdList, themeIdList,
+                            whoareyouwithIdList, typeOfRestaurantIdList,
+                            occasionIdList);
+                        piassignedDone = true;
                     }
                 }
 
                 //TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
-                if (assigneduserUserId == null) {
-                    //TODO Go to project PI
+                if ((assigneduserUserId == null) && !piassignedDone) {
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                        recorequestIteration, cityId, neighborhoodId,
+                        initiatorUserId, cuisineTier2IdList,
+                        cuisineTier1IdList, priceIdList, themeIdList,
+                        whoareyouwithIdList, typeOfRestaurantIdList,
+                        occasionIdList);
                 }
             }
         }

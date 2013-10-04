@@ -17,8 +17,7 @@ public class RankRestaurantsSingleUserCalcHelper {
     }
 
     public List<RestaurantPopularityTierVO> personalisedRestaurantsResultsForSingleUser(
-        LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
-        throws TasteSyncException {
+        LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList) {
         // divide into 10 buckets...
         List<RestaurantPopularityTierVO> numTier1Match0 = new LinkedList<RestaurantPopularityTierVO>();
         List<RestaurantPopularityTierVO> numTier1Match1 = new LinkedList<RestaurantPopularityTierVO>();
@@ -95,52 +94,52 @@ public class RankRestaurantsSingleUserCalcHelper {
         //shuffle
         Collections.shuffle(numTier1Match0);
 
-        for (int i = 0; i < numTier1Match0.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier1Match0 : numTier1Match0) {
             ++currentRankNumber;
             // set rank number
-            numTier1Match0.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(numTier1Match0.get(i));
+            aNumTier1Match0.setRankNumber(currentRankNumber);
+            restaurantsRankMatch0List.add(aNumTier1Match0);
         }
 
         //shuffle
         Collections.shuffle(numTier2Match1);
 
-        for (int i = 0; i < numTier2Match0.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier2Match0 : numTier2Match0) {
             ++currentRankNumber;
             // set rank number
-            numTier2Match0.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(numTier2Match0.get(i));
+            aNumTier2Match0.setRankNumber(currentRankNumber);
+            restaurantsRankMatch0List.add(aNumTier2Match0);
         }
 
         //shuffle
         Collections.shuffle(numTier3Match0);
 
-        for (int i = 0; i < numTier3Match0.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier3Match0 : numTier3Match0) {
             ++currentRankNumber;
             // set rank number
-            numTier3Match0.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(numTier3Match0.get(i));
+            aNumTier3Match0.setRankNumber(currentRankNumber);
+            restaurantsRankMatch0List.add(aNumTier3Match0);
         }
 
         //shuffle
         Collections.shuffle(numTier4Match0);
 
-        for (int i = 0; i < numTier4Match0.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier4Match0 : numTier4Match0) {
             ++currentRankNumber;
             // set rank number
-            numTier4Match0.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(numTier4Match0.get(i));
+            aNumTier4Match0.setRankNumber(currentRankNumber);
+            restaurantsRankMatch0List.add(aNumTier4Match0);
         }
 
         //shuffle
         Collections.shuffle(numTier5Match0);
 
-        for (int i = 0; i < numTier5Match0.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier5Match0 : numTier5Match0) {
             ++currentRankNumber;
 
             // set rank number
-            numTier5Match0.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(numTier5Match0.get(i));
+            aNumTier5Match0.setRankNumber(currentRankNumber);
+            restaurantsRankMatch0List.add(aNumTier5Match0);
         }
 
         currentRankNumber = 0;
@@ -157,45 +156,45 @@ public class RankRestaurantsSingleUserCalcHelper {
         //shuffle
         Collections.shuffle(numTier2Match1);
 
-        for (int i = 0; i < numTier2Match1.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier2Match1 : numTier2Match1) {
             ++currentRankNumber;
 
             // set rank number
-            numTier2Match1.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(numTier2Match1.get(i));
+            aNumTier2Match1.setRankNumber(currentRankNumber);
+            restaurantsRankMatch1List.add(aNumTier2Match1);
         }
 
         //shuffle
         Collections.shuffle(numTier3Match1);
 
-        for (int i = 0; i < numTier3Match1.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier3Match1 : numTier3Match1) {
             ++currentRankNumber;
 
             // set rank number
-            numTier3Match1.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(numTier3Match1.get(i));
+            aNumTier3Match1.setRankNumber(currentRankNumber);
+            restaurantsRankMatch1List.add(aNumTier3Match1);
         }
 
         //shuffle
         Collections.shuffle(numTier4Match1);
 
-        for (int i = 0; i < numTier4Match1.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier4Match1 : numTier4Match1) {
             ++currentRankNumber;
 
             // set rank number
-            numTier4Match1.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(numTier4Match1.get(i));
+            aNumTier4Match1.setRankNumber(currentRankNumber);
+            restaurantsRankMatch1List.add(aNumTier4Match1);
         }
 
         //shuffle
         Collections.shuffle(numTier5Match1);
 
-        for (int i = 0; i < numTier5Match1.size(); ++i) {
+        for (RestaurantPopularityTierVO aNumTier5Match1 : numTier5Match1) {
             ++currentRankNumber;
 
             // set rank number
-            numTier5Match1.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(numTier5Match1.get(i));
+            aNumTier5Match1.setRankNumber(currentRankNumber);
+            restaurantsRankMatch1List.add(aNumTier5Match1);
         }
 
         // free memory
