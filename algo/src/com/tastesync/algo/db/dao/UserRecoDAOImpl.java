@@ -1218,6 +1218,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             statement.setString(1, userId);
             statement.setInt(2, usrSupplyInvTier);
             statement.setInt(3, userTierCalcFlag);
+            statement.setInt(4, userTierCalcFlag);
 
             statement.executeUpdate();
             statement.close();

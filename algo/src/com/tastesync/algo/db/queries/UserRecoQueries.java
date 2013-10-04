@@ -129,6 +129,7 @@ public interface UserRecoQueries extends UserUserQueries {
     		+ "              ?, "
     		+ "              ?, "
     		+ "              ?, "
+    		+ "              ?, "
     		+ "              ? ) "
     		+ "ON DUPLICATE KEY UPDATE "
     		+ "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
@@ -139,11 +140,11 @@ public interface UserRecoQueries extends UserUserQueries {
     		+ "             user_reco_supply_tier.user_supply_inv_tier, "
     		+ "             user_reco_supply_tier.user_tier_calc_flag) "
     		+ "VALUES      ( ?, "
-    		+ "              0, "
-    		+ "              1 ) "
+    		+ "              ?, "
+    		+ "              ? ) "
     		+ "ON DUPLICATE KEY UPDATE "
     		+ "user_reco_supply_tier.user_supply_inv_tier = user_reco_supply_tier.user_supply_inv_tier, " 
-            + "user_reco_supply_tier.user_tier_calc_flag = 1";
+            + "user_reco_supply_tier.user_tier_calc_flag = ?";
     
     public static String COUNT_RECOREQUEST_REPLY_USER_SELECT_SQL = ""
     		+ "SELECT Count(*) "
