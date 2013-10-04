@@ -1183,6 +1183,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
+            
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1198,6 +1200,13 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
                 "Error while submitAssignedRankUserRestaurant= " +
                 e.getMessage());
         } finally {
+        	if (connection != null) {
+            	try {
+					connection.setAutoCommit(true);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+        	}
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }
@@ -1222,6 +1231,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1236,6 +1246,13 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             throw new TasteSyncException(
                 "Error while suubmitUserRecoSupplyTier= " + e.getMessage());
         } finally {
+        	if (connection != null) {
+            	try {
+					connection.setAutoCommit(true);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+        	}
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }

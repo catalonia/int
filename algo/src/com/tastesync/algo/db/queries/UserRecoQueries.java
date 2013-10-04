@@ -112,6 +112,7 @@ public interface UserRecoQueries extends UserUserQueries {
         "       AND user_occasion_match.occasion_id IN ( 1_REPLACE_PARAM ) ";
     public static String USER_USER_MATCH_TIER_SELECT_SQL = ""
     		+ "SELECT user_user_match_tier.match_tier "
+    		+ "FROM   user_user_match_tier "
     		+ "WHERE  user_user_match_tier.user_a_id = ? "
     		+ "       AND user_user_match_tier.user_b_id = ? ";
 
