@@ -4,5 +4,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/apns-0.1.6.jar" sourcepath="/Users/webonline/.m2/repository/com/notnoop/apns/apns/0.1.6/apns-0.1.6-sources.jar"/>
 	<classpathentry kind="lib" path="lib/tsdbconnection.jar"/>
+	<classpathentry kind="lib" path="libExtras/jackson-core-asl-1.6.3.jar"/>
+	<classpathentry kind="lib" path="libExtras/jackson-mapper-asl-1.6.3.jar"/>
+	<classpathentry kind="lib" path="libExtras/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="libExtras/resteasy-jackson-provider-2.2.1.GA.jar"/>
+	<classpathentry kind="lib" path="libExtras/slf4j-api-1.7.5.jar"/>
+	<classpathentry kind="lib" path="libExtras/slf4j-log4j12-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
