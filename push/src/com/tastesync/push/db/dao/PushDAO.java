@@ -15,6 +15,6 @@ public interface PushDAO extends BaseDAO {
         throws TasteSyncException;
 
     void updateNotificationsSentStatus(
-    		List<UserNotificationsPushVO> userNotificationsPushVOList)
+    		List<UserNotificationsPushVO> userNotificationsPushVOList, int statusFlag)
         throws TasteSyncException;
 }

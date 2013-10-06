@@ -109,7 +109,7 @@ public class PushDAOImpl implements PushDAO {
 
     @Override
     public void updateNotificationsSentStatus(
-        List<UserNotificationsPushVO> userNotificationsPushVOList)
+        List<UserNotificationsPushVO> userNotificationsPushVOList, int statusFlag)
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
@@ -123,10 +123,11 @@ public class PushDAOImpl implements PushDAO {
             statement = connection.prepareStatement(PushQueries.PUSH_NOTIFICATIONS_ALL_UPDATE_SQL);
 
             for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
-                statement.setString(1, userNotificationsPushVO.getUserId());
-                statement.setString(2,
+                statement.setInt(1, statusFlag);
+                statement.setString(2, userNotificationsPushVO.getUserId());
+                statement.setString(3,
                     userNotificationsPushVO.getNotificationType());
-                statement.setString(3, userNotificationsPushVO.getLinkedId());
+                statement.setString(4, userNotificationsPushVO.getLinkedId());
 
                 statement.executeUpdate();
             }

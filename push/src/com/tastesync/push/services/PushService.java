@@ -11,6 +11,8 @@ import com.tastesync.push.model.vo.UserNotificationsPushVO;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -27,6 +29,8 @@ public class PushService {
 
         ApnsService apnsService = getApnsServiceInstance();
 
+        List<UserNotificationsPushVO> deviceTokenNotFoundUserNotificationsPushVOList = new LinkedList<UserNotificationsPushVO>();
+        
         for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
             //TODO based on notification type, get template text.
             String notificationMsg = "Test msg";
@@ -36,23 +40,23 @@ public class PushService {
             // based on userId, get all device tokens
             deviceTokenList = pushDAO.getAllDeviceTokensForSingleUser(userNotificationsPushVO.getUserId());
 
-            apnsService.push(deviceTokenList, payload);
+            if (deviceTokenList != null && !deviceTokenList.isEmpty()) {
+                apnsService.push(deviceTokenList, payload);
+            } else {
+            	deviceTokenNotFoundUserNotificationsPushVOList.add(userNotificationsPushVO);
+            }
         }
 
-        // TODO update sent status
-        pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList);
+        // update sent status
+        pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList, 1);
+        pushDAO.updateNotificationsSentStatus(deviceTokenNotFoundUserNotificationsPushVOList,2);
     }
 
     private ApnsService getApnsServiceInstance() {
-        InputStream inputStream = this.getClass().getClassLoader()
-                                      .getResourceAsStream("Certificates_push.p12");
-        
-
-//        InputStream inputStream = this.getClass().getClassLoader()
-//                .getResourceAsStream("TasteSync.p12");
-        
-        ApnsService service = APNS.newService().withCert(inputStream, "123")
-                                  .withSandboxDestination().build();
+      InputStream inputStream = this.getClass().getClassLoader()
+      .getResourceAsStream("TasteSync.p12");
+      ApnsService service = APNS.newService().withCert(inputStream, "dev123")
+      .withSandboxDestination().build();
 
         return service;
     }
@@ -67,6 +71,12 @@ public class PushService {
         service = APNS.newService().withCert(inputStream, "123")
                       .withSandboxDestination().build();
 
+//        InputStream inputStream = this.getClass().getClassLoader()
+//                .getResourceAsStream("TasteSync.p12");
+//        service = APNS.newService().withCert(inputStream, "dev123")
+//                .withSandboxDestination().build();
+
+        
         String payload = APNS.newPayload().alertBody(msg).build();
         
         String token = "64a383f0 84ee1d6d 5c2f8119 1bd4f8f4 d36f26f4 4a214821 7987c3d6 26907f8e";
