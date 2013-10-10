@@ -37,7 +37,7 @@ public class RestaurantsSearchResultsHelper {
         " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank, x.restaurant_id ASC ";
     private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
-    private static final boolean printDebugExtra = true;
+    private static final boolean printDebugExtra = false;
 
     public RestaurantsSearchResultsHelper() {
         super();
