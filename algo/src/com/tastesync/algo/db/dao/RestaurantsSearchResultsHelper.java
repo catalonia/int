@@ -37,7 +37,7 @@ public class RestaurantsSearchResultsHelper {
         " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank, x.restaurant_id ASC ";
     private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
-    private static final boolean printDebugExtra = false;
+    private static final boolean printDebugExtra = true;
 
     public RestaurantsSearchResultsHelper() {
         super();
@@ -240,14 +240,41 @@ public class RestaurantsSearchResultsHelper {
         if ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0)) {
             consolidatedSearchQuery.append(
-                "AND restaurant_cuisine.tier2_cuisine_id=? ");
+                "AND restaurant_cuisine.tier2_cuisine_id IN ( ");
+
+            for (int i = 0;
+                    i < inputRestaurantSearchVO.getCuisineTier2IdArray().length;
+                    ++i) {
+                if (i != (inputRestaurantSearchVO.getCuisineTier2IdArray().length -
+                        1)) {
+                    consolidatedSearchQuery.append("?,");
+                } else {
+                    consolidatedSearchQuery.append("?");
+                }
+            }
+
+            consolidatedSearchQuery.append(" ) ");
         }
 
         //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
         if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
             consolidatedSearchQuery.append(
-                "AND cuisine_tier_mapper.tier1_cuisine_id IN (?) ");
+                "AND cuisine_tier_mapper.tier1_cuisine_id IN ( ");
+
+            for (int i = 0;
+                    i < inputRestaurantSearchVO.getCuisineTier1IdArray().length;
+                    ++i) {
+                if (i != (inputRestaurantSearchVO.getCuisineTier1IdArray().length -
+                        1)) {
+                    consolidatedSearchQuery.append("?,");
+                } else {
+                    consolidatedSearchQuery.append("?");
+                }
+            }
+
+            consolidatedSearchQuery.append(" ) ");
+
             consolidatedSearchQuery.append(
                 "AND restaurant_cuisine.tier2_cuisine_id = cuisine_tier_mapper.tier2_cuisine_id ");
         }
@@ -263,7 +290,18 @@ public class RestaurantsSearchResultsHelper {
         //-- IF restaurantSearchParameters{listOfPrice{priceId}} OR recoRequestParameters{listOfPrice{priceId}} is not null 
         if ((inputRestaurantSearchVO.getPriceIdList() != null) &&
                 (inputRestaurantSearchVO.getPriceIdList().length != 0)) {
-            consolidatedSearchQuery.append("AND restaurant.PRICE_RANGE IN (?) ");
+            consolidatedSearchQuery.append("AND restaurant.PRICE_RANGE IN ( ");
+
+            for (int i = 0;
+                    i < inputRestaurantSearchVO.getPriceIdList().length; ++i) {
+                if (i != (inputRestaurantSearchVO.getPriceIdList().length - 1)) {
+                    consolidatedSearchQuery.append("?,");
+                } else {
+                    consolidatedSearchQuery.append("?");
+                }
+            }
+
+            consolidatedSearchQuery.append(" ) ");
         }
 
         //-- IF restaurantSearchParameters{rating} is not null 
@@ -338,61 +376,36 @@ public class RestaurantsSearchResultsHelper {
 
         if ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0)) {
-            StringBuffer cuisineTier2IdParameters = new StringBuffer();
-
             for (int i = 0;
                     i < inputRestaurantSearchVO.getCuisineTier2IdArray().length;
                     ++i) {
-                cuisineTier2IdParameters.append(inputRestaurantSearchVO.getCuisineTier2IdArray()[i]);
-
-                if (i != (inputRestaurantSearchVO.getCuisineTier2IdArray().length -
-                        1)) {
-                    cuisineTier2IdParameters.append(",");
-                }
+                ++bindPosition;
+                statement.setString(bindPosition,
+                    inputRestaurantSearchVO.getCuisineTier2IdArray()[i]);
             }
-
-            ++bindPosition;
-            statement.setString(bindPosition,
-                cuisineTier2IdParameters.toString());
         }
 
         //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
         if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
-            StringBuffer cuisineTier1IdParameters = new StringBuffer();
-
             for (int i = 0;
                     i < inputRestaurantSearchVO.getCuisineTier1IdArray().length;
                     ++i) {
-                cuisineTier1IdParameters.append(inputRestaurantSearchVO.getCuisineTier1IdArray()[i]);
-
-                if (i != (inputRestaurantSearchVO.getCuisineTier1IdArray().length -
-                        1)) {
-                    cuisineTier1IdParameters.append(",");
-                }
+                ++bindPosition;
+                statement.setString(bindPosition,
+                    inputRestaurantSearchVO.getCuisineTier1IdArray()[i]);
             }
-
-            ++bindPosition;
-            statement.setString(bindPosition,
-                cuisineTier1IdParameters.toString());
         }
 
         //-- IF restaurantSearchParameters{listOfPrice{priceId}} OR recoRequestParameters{listOfPrice{priceId}} is not null 
         if ((inputRestaurantSearchVO.getPriceIdList() != null) &&
                 (inputRestaurantSearchVO.getPriceIdList().length != 0)) {
-            StringBuffer priceIdParameters = new StringBuffer();
-
             for (int i = 0;
                     i < inputRestaurantSearchVO.getPriceIdList().length; ++i) {
-                priceIdParameters.append(inputRestaurantSearchVO.getPriceIdList()[i]);
-
-                if (i != (inputRestaurantSearchVO.getPriceIdList().length - 1)) {
-                    priceIdParameters.append(",");
-                }
+                ++bindPosition;
+                statement.setString(bindPosition,
+                    inputRestaurantSearchVO.getPriceIdList()[i]);
             }
-
-            ++bindPosition;
-            statement.setString(bindPosition, priceIdParameters.toString());
         }
 
         //-- IF restaurantSearchParameters{rating} is not null 
