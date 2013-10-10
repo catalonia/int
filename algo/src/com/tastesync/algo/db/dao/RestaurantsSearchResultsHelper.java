@@ -126,8 +126,8 @@ public class RestaurantsSearchResultsHelper {
 
             statement.close();
 
-            return new RestaurantsSearchResultsVO(String.valueOf(maxPaginationId),
-                restaurantIdList);
+            return new RestaurantsSearchResultsVO(String.valueOf(
+                    maxPaginationId), restaurantIdList);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -159,17 +159,18 @@ public class RestaurantsSearchResultsHelper {
         //OR recoRequestParameters{recoRequestLocation{neighborhoodId}} is not NULL
         if (inputRestaurantSearchVO.getNeighborhoodId() != null) {
             consolidatedSearchQuery.append(", ")
-                                   .append("restaurant_neighbourhood");
+                                   .append("restaurant_neighbourhood ");
         }
 
         //-- IF restaurantSearchParameters{savedFlag} is not null 
         if (inputRestaurantSearchVO.getSavedFlag() != null) {
-            consolidatedSearchQuery.append(",  ").append("user_restaurant_saved");
+            consolidatedSearchQuery.append(",  ")
+                                   .append("user_restaurant_saved ");
         }
 
         //-- IF restaurantSearchParameters{favFlag} is not null
         if (inputRestaurantSearchVO.getFavFlag() != null) {
-            consolidatedSearchQuery.append(", ").append("user_restaurant_fav");
+            consolidatedSearchQuery.append(", ").append("user_restaurant_fav ");
         }
 
         //-- IF recoRequestParameters{listOfCuisTier2{cuisineTier2Id}} OR restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} 
@@ -178,21 +179,21 @@ public class RestaurantsSearchResultsHelper {
                 (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) ||
                 ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0))) {
-            consolidatedSearchQuery.append(", ").append("restaurant_cuisine");
+            consolidatedSearchQuery.append(", ").append("restaurant_cuisine ");
         }
 
         //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} 
         //OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
         if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
-            consolidatedSearchQuery.append(", ").append("cuisine_tier_mapper");
+            consolidatedSearchQuery.append(", ").append("cuisine_tier_mapper ");
         }
 
         // -- IF restaurantSearchParameters{chainFlag} = 0 (0 means "Hide" Chain Restaurants)
         if (HIDE_CHAINED_RESTAURANT.equals(
                     inputRestaurantSearchVO.getChainFlag())) {
             consolidatedSearchQuery.append(", ")
-                                   .append("restaurant_extended_info");
+                                   .append("restaurant_extended_info ");
         }
 
         // add different tables for where part
@@ -401,11 +402,11 @@ public class RestaurantsSearchResultsHelper {
         }
 
         // -- IF restaurantSearchParameters{chainFlag} = 0 (0 means "Hide" Chain Restaurants)
-        if (HIDE_CHAINED_RESTAURANT.equals(
-                    inputRestaurantSearchVO.getChainFlag())) {
-            ++bindPosition;
-            statement.setDouble(bindPosition, new Double(rating));
-        }
+        //        if (HIDE_CHAINED_RESTAURANT.equals(
+        //                    inputRestaurantSearchVO.getChainFlag())) {
+        //            ++bindPosition;
+        //            statement.setDouble(bindPosition, new Double(rating));
+        //        }
 
         //Fixed part
         // Left outer join
