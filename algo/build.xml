@@ -1,4 +1,4 @@
-<project name="algo" basedir="." default="createServerJar">
+<project name="tsalgo" basedir="." default="createServerJar">
     <property environment="env" />
     <property name="build.dir" value="build" />
     <property name="debuglevel" value="source,lines,vars" />
@@ -9,8 +9,8 @@
     <property name="dist" value="dist" />
     <property name="docsfolder" value="docs" />
     <property name="temp" value="${dist}/temp" />
-    <property name="server.jar" value="algo.jar" />
-    <property name="PROJECT_WS_NAME" value="algo" />
+    <property name="server.jar" value="tsalgo.jar" />
+    <property name="PROJECT_WS_NAME" value="tsalgo" />
     <path id="webAppLibrary.classpath">
         <fileset dir="${basedir}/lib">
             <include name="*.jar" />
@@ -19,7 +19,7 @@
             <include name="*.jar" />
         </fileset>
     </path>
-    <path id="algo.classpath">
+    <path id="tsalgo.classpath">
         <pathelement location="build/classes" />
         <path refid="webAppLibrary.classpath" />
         <!-- <path refid="EAR Libraries.libraryclasspath"/> -->
@@ -44,7 +44,7 @@
             failonerror="true" verbose="false" deprecation="on"
             destdir="build/classes" source="${source}" target="${target}">
             <src path="src" />
-            <classpath refid="algo.classpath" />
+            <classpath refid="tsalgo.classpath" />
         </javac>
     </target>
     <target name="serverJar" depends="compileProject">
