@@ -52,6 +52,19 @@ public class RestaurantsSearchResultsHelper {
         String[] cuisineTier2IdArray, String[] themeIdArray,
         String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
         String[] occasionIdArray) throws TasteSyncException {
+        neighborhoodId = CommonFunctionsUtil.converStringAsNullIfNeeded(neighborhoodId);
+        userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
+        restaurantId = CommonFunctionsUtil.converStringAsNullIfNeeded(restaurantId);
+        neighborhoodId = CommonFunctionsUtil.converStringAsNullIfNeeded(neighborhoodId);
+        cityId = CommonFunctionsUtil.converStringAsNullIfNeeded(cityId);
+        stateName = CommonFunctionsUtil.converStringAsNullIfNeeded(stateName);
+        rating = CommonFunctionsUtil.converStringAsNullIfNeeded(rating);
+        savedFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(savedFlag);
+        favFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(favFlag);
+        dealFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(dealFlag);
+        chainFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(chainFlag);
+        paginationId = CommonFunctionsUtil.converStringAsNullIfNeeded(paginationId);
+
         InputRestaurantSearchVO inputRestaurantSearchVO = new InputRestaurantSearchVO(userId,
                 restaurantId, neighborhoodId, cityId, stateName,
                 cuisineTier1IdArray, priceIdList, rating, savedFlag, favFlag,
