@@ -471,7 +471,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
     }
 
     @Override
-    public List<UserRecoSupplyTierVO> getUserRecoSupplyTierVO(String userId)
+    public List<UserRecoSupplyTierVO> getUserRecoSupplyTierVO(String userId, String recorequestId)
         throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
@@ -1252,7 +1252,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             }
 
             throw new TasteSyncException(
-                "Error while suubmitUserRecoSupplyTier= " + e.getMessage());
+                "Error while submitUserRecoSupplyTier= " + e.getMessage());
         } finally {
             if (connection != null) {
                 try {

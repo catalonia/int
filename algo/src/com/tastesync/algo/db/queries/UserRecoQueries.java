@@ -57,19 +57,24 @@ public interface UserRecoQueries extends UserUserQueries {
         "          OR ( user_reco_supply_tier.user_supply_inv_tier = 2 ) " +
         "          OR ( user_reco_supply_tier.user_supply_inv_tier = 3 ) ) " +
         "       AND Date_format(Now(), '%H') BETWEEN 9 AND 23 " +
-        "       AND user_reco_supply_tier.user_id != ?";
+        "       AND user_reco_supply_tier.user_id != ? " +
+        "       AND  user_reco_supply_tier.user_id NOT IN " +
+        "       ( SELECT users_category.USER_ID FROM users_category " +
+        "        WHERE users_category.CATEGORY_ID = 5 " +
+        "       ) AND user_reco_supply_tier.user_id NOT IN " +
+        "       ( SELECT recorequest_ts_assigned.ASSIGNED_USER_ID " +
+        "        FROM recorequest_ts_assigned WHERE recorequest_ts_assigned.RECOREQUEST_ID = ? )";
     public static String COUNT_NOT_USER_TOPIC_MATCH_4_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   user_city_nbrhood_match " +
         "WHERE  user_city_nbrhood_match.match_count >= ? " +
         "       AND user_city_nbrhood_match.city_id = ? " +
         "       AND user_city_nbrhood_match.user_id = ? ";
-    
     public static String COUNT_NOT_USER_TOPIC_MATCH_4_WITH_NBRHD_SELECT_SQL = "" +
-            "SELECT Count(*) " + "FROM   user_city_nbrhood_match " +
-            "WHERE  user_city_nbrhood_match.match_count >= ? " +
-            "       AND user_city_nbrhood_match.city_id = ? " +
-            "       AND user_city_nbrhood_match.user_id = ? " +
-            "       AND user_city_nbrhood_match.neighborhood_id = ? ";
+        "SELECT Count(*) " + "FROM   user_city_nbrhood_match " +
+        "WHERE  user_city_nbrhood_match.match_count >= ? " +
+        "       AND user_city_nbrhood_match.city_id = ? " +
+        "       AND user_city_nbrhood_match.user_id = ? " +
+        "       AND user_city_nbrhood_match.neighborhood_id = ? ";
     public static String COUNT_USER_FRIEND_FB_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   user_friend_fb " +
         "WHERE  user_friend_fb.user_id = ? " +

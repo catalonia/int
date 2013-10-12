@@ -6,6 +6,7 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.CityNeighbourhoodVO;
 import com.tastesync.algo.model.vo.UserRecoSupplyTierVO;
 import com.tastesync.algo.user.reco.pi.PiUserRecoAssigned;
+import com.tastesync.algo.util.TSConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -119,7 +120,7 @@ public class UserRecoAssigned {
 
             if ((demandTier == 1) || (demandTier == 2)) {
                 //4A
-                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(initiatorUserId);
+                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(initiatorUserId, recoRequestId);
                 String fbUserId = userRecoDAO.getFBUserId(initiatorUserId);
 
                 //4B
@@ -413,12 +414,24 @@ public class UserRecoAssigned {
                     tranche7usersUserId = null;
                 }
 
+                System.out.println("assigneduserUserId="+assigneduserUserId);
                 if (assigneduserUserId != null) {
+                	
                     userRecoDAO.submitRecorequestTsAssigned(recoRequestId,
                         assigneduserUserId);
                     userRecoDAO.submitUserRecoSupplyTier(assigneduserUserId, 0,
                         1);
-
+                    
+                    //sleep for remaining time!!
+                    try {
+                        System.out.println("SLEEP (in ms) for " +
+                            TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                        Thread.currentThread();
+                        Thread.sleep(TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    
                     int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
                             assigneduserUserId);
 
@@ -456,7 +469,7 @@ public class UserRecoAssigned {
                 //            	- After that, Execute: ELSE {GO to PROJECT PI LOGIC}
                 //            	-- This means that we are time-delaying Demand Tier 3 and then assigning to user ONLY if there is a Supply Tier 1 user avl. Else PROJECT PI
                 //4A
-                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(initiatorUserId);
+                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(initiatorUserId, recoRequestId);
                 String fbUserId = userRecoDAO.getFBUserId(initiatorUserId);
 
                 //4B

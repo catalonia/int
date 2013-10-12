@@ -40,7 +40,7 @@ public interface UserRecoDAO extends BaseDAO {
 
     int getDemandTierForSingleUser(String userId) throws TasteSyncException;
 
-    List<UserRecoSupplyTierVO> getUserRecoSupplyTierVO(String userId)
+    List<UserRecoSupplyTierVO> getUserRecoSupplyTierVO(String userId, String recorequestId)
         throws TasteSyncException;
 
     int getNumUserCityNbrhoodMatchTopicFound(String userId, String cityId,
