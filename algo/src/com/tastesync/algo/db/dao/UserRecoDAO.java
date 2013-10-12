@@ -82,6 +82,9 @@ public interface UserRecoDAO extends BaseDAO {
     void submitRecorequestTsAssigned(String recoRequestId, String assigneduserUserId)
         throws TasteSyncException;
 
+    void submitPiRecorequestTsAssigned(String recoRequestId, String assigneduserUserId)
+            throws TasteSyncException;
+    
     void submitUserRecoSupplyTier(String userId, int usrSupplyInvTier,
         int userTierCalcFlag) throws TasteSyncException;
 

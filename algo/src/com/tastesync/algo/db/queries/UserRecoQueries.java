@@ -141,6 +141,22 @@ public interface UserRecoQueries extends UserUserQueries {
         "              ?, " + "              ?, " + "              ?, " +
         "              ?,    ? ) " + "ON DUPLICATE KEY UPDATE " +
         "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
+    
+    public static String PI_RECOREQUEST_TS_ASSIGNED_INSERT_SQL = "" +
+            "INSERT INTO recorequest_ts_assigned " +
+            "            (recorequest_ts_assigned.assigned_datetime, " +
+            "             recorequest_ts_assigned.assigned_prepopulated_yn, " +
+            "             recorequest_ts_assigned.assigned_trusted_type, " +
+            "             recorequest_ts_assigned.assigned_user_id, " +
+            "             recorequest_ts_assigned.assigned_user_registered_yn, " +
+            "             recorequest_ts_assigned.assigned_usertype, " +
+            "             recorequest_ts_assigned.recorequest_id) " +
+            "VALUES      ( ?, " + "              ?, " + "              ?, " +
+            "              ?, " + "              ?, " + "              ?, " +
+            "              ? ) " + "ON DUPLICATE KEY UPDATE " +
+            "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
+        
+    
     public static String USER_RECO_SUPPLY_TIER_INSERT_SQL = "" +
         "INSERT INTO user_reco_supply_tier " +
         "            (user_reco_supply_tier.user_id, " +

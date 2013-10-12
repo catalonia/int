@@ -210,7 +210,7 @@ public class PiUserRecoAssigned {
         }
 
         if (assigneduserUserId != null) {
-            piUserRecoDAO.submitRecorequestTsAssigned(recoRequestId,
+            piUserRecoDAO.submitPiRecorequestTsAssigned(recoRequestId,
                 assigneduserUserId);
 
             PiRestaurantRecommendationVO piRestaurantRecommendationVO = getPiRestaurantRecommendation(initiatorUserId,

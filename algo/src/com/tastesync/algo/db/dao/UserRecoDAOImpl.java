@@ -1223,6 +1223,57 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }
+    
+    @Override
+    public void submitPiRecorequestTsAssigned(String recoRequestId,
+        String assigneduserUserId) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            tsDataSource.begin();
+
+            statement = connection.prepareStatement(UserRecoQueries.PI_RECOREQUEST_TS_ASSIGNED_INSERT_SQL);
+            statement.setTimestamp(1,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setString(2, "N");
+            statement.setString(3, "N");
+            statement.setString(4, assigneduserUserId);
+            statement.setString(5, "Y");
+            statement.setString(6, "system-assigned-other");
+            statement.setString(7, recoRequestId);
+
+            statement.executeUpdate();
+            statement.close();
+            tsDataSource.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException(
+                "Error while submitAssignedRankUserRestaurant= " +
+                e.getMessage());
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+    }
+    
 
     @Override
     public void submitUserRecoSupplyTier(String userId, int usrSupplyInvTier,
