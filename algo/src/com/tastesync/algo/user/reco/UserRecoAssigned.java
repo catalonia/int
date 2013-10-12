@@ -188,8 +188,8 @@ public class UserRecoAssigned {
                     System.out.println("temp1usersTemp1FieldResult=" +
                         Arrays.toString(temp1usersTemp1FieldResult));
 
-                    String[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult =
-                        new String[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
+                    Integer[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult =
+                        new Integer[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
                     indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = indexElementToBeRemovedFrmUserRecoSupplyTierVOList.toArray(indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult);
                     System.out.println(
                         "indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult=" +

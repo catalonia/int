@@ -69,7 +69,6 @@ public class PiUserRecoAssigned {
 
         for (Integer index : indexElementToBeRemovedFrmUserRecoSupplyTierVOList) {
             temp1PiUsersUserIdList.remove(index - currentRemovedCounter);
-            temp1PiUsersUserIdList.remove(index - currentRemovedCounter);
             ++currentRemovedCounter;
         }
 
@@ -80,7 +79,7 @@ public class PiUserRecoAssigned {
             System.out.println("temp1PiUsersUserIdListResult=" +
                 Arrays.toString(temp1PiUsersUserIdListResult));
 
-            String[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = new String[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
+            Integer[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = new Integer[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
             indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = indexElementToBeRemovedFrmUserRecoSupplyTierVOList.toArray(indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult);
             System.out.println(
                 "indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult=" +
@@ -94,6 +93,7 @@ public class PiUserRecoAssigned {
         // no users
         if ((temp1PiUsersUserIdList == null) ||
                 (temp1PiUsersUserIdList.size() == 0)) {
+        	System.out.println("No Pi Users list found. temp1PiUsersUserIdList="+temp1PiUsersUserIdList);
             return;
         } else {
             if (temp1PiUsersUserIdList.size() == 1) {
