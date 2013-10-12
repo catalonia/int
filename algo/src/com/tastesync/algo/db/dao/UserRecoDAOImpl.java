@@ -471,8 +471,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
     }
 
     @Override
-    public List<UserRecoSupplyTierVO> getUserRecoSupplyTierVO(String userId, String recorequestId)
-        throws TasteSyncException {
+    public List<UserRecoSupplyTierVO> getUserRecoSupplyTierVO(String userId,
+        String recorequestId) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -484,6 +484,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             statement = connection.prepareStatement(UserRecoQueries.USER_RECO_SUPPLY_TIER_SELECT_SQL);
 
             statement.setString(1, userId);
+            statement.setString(2, recorequestId);
+
             resultset = statement.executeQuery();
 
             List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = new LinkedList<UserRecoSupplyTierVO>();
@@ -1191,7 +1193,8 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
             statement.setString(4, assigneduserUserId);
             statement.setString(5, "Y");
             statement.setString(6, "system-assigned-other");
-            statement.setString(7, recoRequestId);
+            statement.setInt(7, 1);
+            statement.setString(8, recoRequestId);
 
             statement.executeUpdate();
             statement.close();

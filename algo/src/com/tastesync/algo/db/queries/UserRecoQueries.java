@@ -135,10 +135,11 @@ public interface UserRecoQueries extends UserUserQueries {
         "             recorequest_ts_assigned.assigned_user_id, " +
         "             recorequest_ts_assigned.assigned_user_registered_yn, " +
         "             recorequest_ts_assigned.assigned_usertype, " +
+        "             recorequest_ts_assigned.algo1_ind, " +
         "             recorequest_ts_assigned.recorequest_id) " +
         "VALUES      ( ?, " + "              ?, " + "              ?, " +
         "              ?, " + "              ?, " + "              ?, " +
-        "              ? ) " + "ON DUPLICATE KEY UPDATE " +
+        "              ?,    ? ) " + "ON DUPLICATE KEY UPDATE " +
         "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
     public static String USER_RECO_SUPPLY_TIER_INSERT_SQL = "" +
         "INSERT INTO user_reco_supply_tier " +
