@@ -1,6 +1,6 @@
 package com.tastesync.push.db.queries;
 
-public class PushQueries {
+public interface PushQueries {
     public static String SINGLE_PUSH_NOTIFICATIONS_ALL_SELECT_SQL = "" +
         "SELECT NOTIFICATIONS_ALL.USER_ID, " +
         "       NOTIFICATIONS_ALL.NOTIFICATION_TYPE, " +
