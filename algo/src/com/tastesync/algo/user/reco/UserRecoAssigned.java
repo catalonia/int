@@ -148,7 +148,7 @@ public class UserRecoAssigned {
                 boolean userIdLinkedWithFbFriend = false;
                 boolean userReported = false;
 
-                //TODO filter list of temp1users{userId}
+                // filter list of temp1users{userId}
                 for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
                     userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
                     userIdLinkedWithFbFriend = userRecoDAO.isUserIdLinkedWithFbFriend(userRecoSupplyTierVO.getUserId(),
@@ -522,7 +522,7 @@ public class UserRecoAssigned {
                 boolean userIdLinkedWithFbFriend = false;
                 boolean userReported = false;
 
-                //TODO filter list of temp1users{userId}
+                // filter list of temp1users{userId}
                 for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
                     userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
                     userIdLinkedWithFbFriend = userRecoDAO.isUserIdLinkedWithFbFriend(userRecoSupplyTierVO.getUserId(),
@@ -662,13 +662,19 @@ public class UserRecoAssigned {
                     }
 
                     // tranch user list available
-                    //randomly select anyone TODO
+                    //randomly select anyone
+                    Random randomGenerator = new Random();
+                    int index = 0;
+
                     if (!tranche1usersUserId.isEmpty()) {
-                        assigneduserUserId = tranche1usersUserId.get(0);
+                        index = randomGenerator.nextInt(tranche1usersUserId.size());
+                        assigneduserUserId = tranche1usersUserId.get(index);
                     } else if (!tranche2usersUserId.isEmpty()) {
-                        assigneduserUserId = tranche2usersUserId.get(0);
+                        index = randomGenerator.nextInt(tranche2usersUserId.size());
+                        assigneduserUserId = tranche2usersUserId.get(index);
                     } else if (!tranche3usersUserId.isEmpty()) {
-                        assigneduserUserId = tranche3usersUserId.get(0);
+                        index = randomGenerator.nextInt(tranche3usersUserId.size());
+                        assigneduserUserId = tranche3usersUserId.get(index);
                     }
 
                     tranche1usersUserId = null;
@@ -716,60 +722,5 @@ public class UserRecoAssigned {
                 }
             }
         }
-    }
-
-    private String getMergedtext(List<String> cuisineTier2IdList,
-        List<String> cuisineTier1IdList, List<String> priceIdList,
-        List<String> themeIdList, List<String> whoareyouwithIdList,
-        List<String> typeOfRestaurantIdList, List<String> occasionIdList,
-        String cityId, String neighborhoodId) {
-        StringBuffer mergedTextBuffer = new StringBuffer();
-
-        for (String cuisineId : cuisineTier1IdList) {
-            mergedTextBuffer.append("cuisine tier1 s:");
-            mergedTextBuffer.append(cuisineId).append("");
-        }
-
-        for (String cuisineId : cuisineTier2IdList) {
-            mergedTextBuffer.append("cuisine tier2 s:");
-            mergedTextBuffer.append(cuisineId).append("");
-        }
-
-        for (String priceId : priceIdList) {
-            mergedTextBuffer.append("priceId s:");
-            mergedTextBuffer.append(priceId).append("");
-        }
-
-        for (String themeId : themeIdList) {
-            mergedTextBuffer.append("themeId s:");
-            mergedTextBuffer.append(themeId).append("");
-        }
-
-        for (String whoareyouwithId : whoareyouwithIdList) {
-            mergedTextBuffer.append("whoareyouwithId s:");
-            mergedTextBuffer.append(whoareyouwithId).append("");
-        }
-
-        for (String typeOfRestaurantId : typeOfRestaurantIdList) {
-            mergedTextBuffer.append("typeOfRestaurantId s:");
-            mergedTextBuffer.append(typeOfRestaurantId).append("");
-        }
-
-        for (String occasionId : occasionIdList) {
-            mergedTextBuffer.append("occasionId s:");
-            mergedTextBuffer.append(occasionId).append("");
-        }
-
-        if (cityId != null) {
-            mergedTextBuffer.append("cityId s:");
-            mergedTextBuffer.append(cityId).append("");
-
-            if (neighborhoodId != null) {
-                mergedTextBuffer.append("neighborhoodId s:");
-                mergedTextBuffer.append(neighborhoodId).append("");
-            }
-        }
-
-        return mergedTextBuffer.toString();
     }
 }
