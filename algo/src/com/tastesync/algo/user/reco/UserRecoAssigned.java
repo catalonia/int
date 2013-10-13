@@ -448,9 +448,10 @@ public class UserRecoAssigned {
                             cuisineTier1IdList, priceIdList, themeIdList,
                             whoareyouwithIdList, typeOfRestaurantIdList,
                             occasionIdList);
+                        piassignedDone = true;
                     }
                 }
-
+                //TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
                     piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,
@@ -460,6 +461,16 @@ public class UserRecoAssigned {
                         occasionIdList);
                 }
             } else {
+                //sleep for remaining time!!
+                try {
+                    System.out.println("SLEEP (in ms) for " +
+                        TSConstants.DEMAND_TIER3_START_SLEEP_TIME);
+                    Thread.currentThread();
+                    Thread.sleep(TSConstants.DEMAND_TIER3_START_SLEEP_TIME);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                
                 // GO to STEP 5. -- this implies Demand Tier 3 (Low)
                 //            	TIME DELAY by 5 minutes i.e. when this recorequest is submitted, start countdown for 5 mins. 
                 //            	At end of countdown, execute below logic:
@@ -651,12 +662,20 @@ public class UserRecoAssigned {
                 }
 
                 if (assigneduserUserId != null) {
-                    //TODO check
                     userRecoDAO.submitRecorequestTsAssigned(initiatorUserId,
                         assigneduserUserId);
                     userRecoDAO.submitUserRecoSupplyTier(initiatorUserId, 0, 1);
 
-                    //TODO
+                  //sleep for remaining time!!
+                    try {
+                        System.out.println("SLEEP (in ms) for " +
+                            TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                        Thread.currentThread();
+                        Thread.sleep(TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    
                     int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
                             assigneduserUserId);
 
@@ -667,8 +686,8 @@ public class UserRecoAssigned {
                             recorequestIteration);
                     } else if ((numReplyFromAssignedUser == 0) &&
                             (recorequestIteration == 2)) {
-                        //TODO check
-                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+
+                    	piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
                             recorequestIteration, cityId, neighborhoodId,
                             initiatorUserId, cuisineTier2IdList,
                             cuisineTier1IdList, priceIdList, themeIdList,
