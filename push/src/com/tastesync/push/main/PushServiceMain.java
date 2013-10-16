@@ -10,8 +10,6 @@ import java.io.IOException;
 public class PushServiceMain {
     public static void main(String[] args) {
         PushService pushService = new PushService();
-        String msg = "test msg";
-        String deviceToken = "devicetoken";
 
         try {
         	pushService.sendAllPushNotifucations();
