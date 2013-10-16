@@ -6,13 +6,17 @@ import com.notnoop.apns.ApnsService;
 import com.tastesync.push.db.dao.PushDAO;
 import com.tastesync.push.db.dao.PushDAOImpl;
 import com.tastesync.push.exception.TasteSyncException;
+import com.tastesync.push.model.vo.NotificationsPushTextDataVO;
 import com.tastesync.push.model.vo.UserNotificationsPushVO;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 
 public class PushService {
@@ -33,7 +37,7 @@ public class PushService {
 
         for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
             //TODO based on notification type, get template text.
-            String notificationMsg = "Test msg";
+            String notificationMsg = getNotificationMsg(userNotificationsPushVO);
 
             String payload = APNS.newPayload().alertBody(notificationMsg).build();
 
@@ -53,9 +57,110 @@ public class PushService {
             2);
     }
 
+    public String getNotificationMsg(
+        UserNotificationsPushVO userNotificationsPushVO)
+        throws TasteSyncException {
+        String notificationMsg = null;
+        InputStream ifile = null;
+        Properties prop = new Properties();
+
+        try {
+            ClassLoader loader = this.getClass().getClassLoader();
+            //loader.getResourceAsStream("Resources/SomeConfig.xml");
+            ifile = this.getClass().getClassLoader()
+                        .getResourceAsStream("PushNotification.properties");
+            System.out.println("load ... PushNotification.properties");
+
+            //load a properties file
+            prop.load(ifile);
+
+            //TODO define the data with variable
+            //get the property value and print it out
+            notificationMsg = prop.getProperty("notificationtype.1.pushmsg");
+            System.out.println("notificationMsg=" + notificationMsg);
+
+            NotificationsPushTextDataVO notificationsPushTextDataVO = new NotificationsPushTextDataVO("",
+                    "");
+            
+            String replaceString = null;
+
+            if ("1".equals(userNotificationsPushVO.getNotificationType())) {
+                notificationMsg = prop.getProperty("notificationtype.1.pushmsg");
+                notificationsPushTextDataVO = pushDAO.getNotificationsPushTextData(userNotificationsPushVO);
+                replaceString = notificationsPushTextDataVO.getFirstName().trim() +
+                    " " + notificationsPushTextDataVO.getLastName().trim();
+
+                if (replaceString.trim().equals("")) {
+                    replaceString = "Someone";
+                }
+
+                notificationMsg = StringUtils.replace(notificationMsg,
+                        "<firstName> <lastName>", replaceString.trim());
+            } else if ("2".equals(userNotificationsPushVO.getNotificationType())) {
+                notificationMsg = prop.getProperty("notificationtype.2.pushmsg");
+            } else if ("3".equals(userNotificationsPushVO.getNotificationType())) {
+                notificationMsg = prop.getProperty("notificationtype.3.pushmsg");
+                notificationsPushTextDataVO = pushDAO.getNotificationsPushTextData(userNotificationsPushVO);
+                replaceString = notificationsPushTextDataVO.getFirstName().trim() +
+                    " " + notificationsPushTextDataVO.getLastName().trim();
+
+                if (replaceString.trim().equals("")) {
+                    replaceString = "Someone";
+                }
+
+                notificationMsg = StringUtils.replace(notificationMsg,
+                        "<firstName> <lastName>", replaceString.trim());
+            } else if ("4".equals(userNotificationsPushVO.getNotificationType())) {
+                notificationMsg = prop.getProperty("notificationtype.4.pushmsg");
+                notificationsPushTextDataVO = pushDAO.getNotificationsPushTextData(userNotificationsPushVO);
+                replaceString = notificationsPushTextDataVO.getFirstName().trim() +
+                    " " + notificationsPushTextDataVO.getLastName().trim();
+
+                if (replaceString.trim().equals("")) {
+                    replaceString = "Someone";
+                }
+
+                notificationMsg = StringUtils.replace(notificationMsg,
+                        "<firstName> <lastName>", replaceString.trim());
+            } else if ("5".equals(userNotificationsPushVO.getNotificationType())) {
+                notificationMsg = prop.getProperty("notificationtype.5.pushmsg");
+                notificationsPushTextDataVO = pushDAO.getNotificationsPushTextData(userNotificationsPushVO);
+                replaceString = notificationsPushTextDataVO.getFirstName().trim() +
+                    " " + notificationsPushTextDataVO.getLastName().trim();
+
+                if (replaceString.trim().equals("")) {
+                    replaceString = "Someone";
+                }
+
+                notificationMsg = StringUtils.replace(notificationMsg,
+                        "<firstName> <lastName>", replaceString.trim());
+            } else if ("6".equals(userNotificationsPushVO.getNotificationType())) {
+                notificationMsg = prop.getProperty("notificationtype.6.pushmsg");
+            } else {
+                throw new TasteSyncException("Unknown notificationtype=" +
+                    userNotificationsPushVO.getNotificationType());
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new TasteSyncException(ex.getMessage());
+        } finally {
+            if (ifile != null) {
+                try {
+                    ifile.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        System.out.println("notificationMsg=" + notificationMsg);
+
+        return notificationMsg;
+    }
+
     private ApnsService getApnsServiceInstance() {
         InputStream inputStream = this.getClass().getClassLoader()
-                                      .getResourceAsStream("TasteSync.p12");
+                                      .getResourceAsStream("iphone_dev.p12");
         ApnsService service = APNS.newService().withCert(inputStream, "dev123")
                                   .withSandboxDestination().build();
 
@@ -80,7 +185,7 @@ public class PushService {
         //        service = APNS.newService().withCert(inputStream, "dev123")
         //                .withSandboxDestination().build();
         InputStream inputStream = this.getClass().getClassLoader()
-                                      .getResourceAsStream("DG_Certificates.p12");
+                                      .getResourceAsStream("iphone_dev.p12");
         service = APNS.newService().withCert(inputStream, "dev123")
                       .withSandboxDestination().build();
 

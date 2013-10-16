@@ -1,12 +1,14 @@
 package com.tastesync.push.db.dao;
 
+import com.tastesync.common.utils.CommonFunctionsUtil;
+
 import com.tastesync.db.pool.TSDataSource;
 
 import com.tastesync.push.db.dao.PushDAO;
 import com.tastesync.push.db.queries.PushQueries;
 import com.tastesync.push.exception.TasteSyncException;
+import com.tastesync.push.model.vo.NotificationsPushTextDataVO;
 import com.tastesync.push.model.vo.UserNotificationsPushVO;
-import com.tastesync.push.util.CommonFunctionsUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -88,9 +90,15 @@ public class PushDAOImpl implements PushDAO {
 
             resultset = statement.executeQuery();
 
+            String deviceToken = null;
+
             while (resultset.next()) {
-                deviceTokenList.add(CommonFunctionsUtil.getModifiedValueString(
-                        resultset.getString("USER_DEVICE_OAUTH.DEVICE_TOKEN")));
+                deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "USER_DEVICE_OAUTH.DEVICE_TOKEN"));
+
+                if ((deviceToken != null) && !deviceToken.isEmpty()) {
+                    deviceTokenList.add(deviceToken);
+                }
             }
 
             statement.close();
@@ -109,8 +117,8 @@ public class PushDAOImpl implements PushDAO {
 
     @Override
     public void updateNotificationsSentStatus(
-        List<UserNotificationsPushVO> userNotificationsPushVOList, int statusFlag)
-        throws TasteSyncException {
+        List<UserNotificationsPushVO> userNotificationsPushVOList,
+        int statusFlag) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -133,6 +141,65 @@ public class PushDAOImpl implements PushDAO {
             }
 
             statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while updateNotificationsSentStatus= " + e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    @Override
+    public NotificationsPushTextDataVO getNotificationsPushTextData(
+        UserNotificationsPushVO userNotificationsPushVO)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+
+            String sql = null;
+
+            if ("1".equals(userNotificationsPushVO.getNotificationType())) {
+                sql = PushQueries.NOTIFICATIONTYPE1_TEXTDATA_SELECT_SQL;
+            } else if ("3".equals(userNotificationsPushVO.getNotificationType())) {
+                sql = PushQueries.NOTIFICATIONTYPE3_TEXTDATA_SELECT_SQL;
+            } else if ("4".equals(userNotificationsPushVO.getNotificationType())) {
+                sql = PushQueries.NOTIFICATIONTYPE4_TEXTDATA_SELECT_SQL;
+            } else if ("5".equals(userNotificationsPushVO.getNotificationType())) {
+                sql = PushQueries.NOTIFICATIONTYPE5_TEXTDATA_SELECT_SQL;
+            } else {
+                throw new TasteSyncException("Unknown notificationtype=" +
+                    userNotificationsPushVO.getNotificationType());
+            }
+
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, userNotificationsPushVO.getLinkedId());
+
+            resultset = statement.executeQuery();
+
+            String firstName = "";
+            String lastName = "";
+
+            while (resultset.next()) {
+                firstName = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "users.TS_FIRST_NAME"));
+                lastName = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "users.TS_LAST_NAME"));
+            }
+
+            statement.close();
+
+            NotificationsPushTextDataVO notificationsPushTextDataVO = new NotificationsPushTextDataVO(firstName,
+                    lastName);
+
+            return notificationsPushTextDataVO;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
