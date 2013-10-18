@@ -31,5 +31,6 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.23-bin.jar"/>
 	<classpathentry kind="lib" path="lib/p6spy-2.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/tsutils.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
