@@ -8,6 +8,8 @@ import com.tastesync.algo.model.vo.UserRecoSupplyTierVO;
 import com.tastesync.algo.user.reco.pi.PiUserRecoAssigned;
 import com.tastesync.algo.util.TSConstants;
 
+import com.tastesync.common.utils.CommonFunctionsUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -288,7 +290,11 @@ public class UserRecoAssigned {
                                 userRecoDAO.getCountUserOccasionMatch(userRecoSupplyTierVO.getUserId(),
                                     occasionIdList, matchCount);
 
-                            topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
+                            if (numRecorequestParams == 0) {
+                                topicMatchRate = 1;
+                            } else {
+                                topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
+                            }
 
                             userAUserBMatchTier = userRecoDAO.getUserAUserBMatchTier(initiatorUserId,
                                     userRecoSupplyTierVO.getUserId());
@@ -423,6 +429,12 @@ public class UserRecoAssigned {
                     userRecoDAO.submitUserRecoSupplyTier(assigneduserUserId, 0,
                         1);
 
+                    try {
+                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT);
+                    } catch (com.tastesync.common.exception.TasteSyncException e) {
+                        e.printStackTrace();
+                    }
+
                     //sleep for remaining time!!
                     try {
                         System.out.println("SLEEP (in ms) for " +
@@ -465,7 +477,7 @@ public class UserRecoAssigned {
                     }
                 }
 
-                //TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
+                //Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
                     piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,
@@ -639,7 +651,11 @@ public class UserRecoAssigned {
                                 userRecoDAO.getCountUserOccasionMatch(userRecoSupplyTierVO.getUserId(),
                                     occasionIdList, matchCount);
 
-                            topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
+                            if (numRecorequestParams == 0) {
+                                topicMatchRate = 1;
+                            } else {
+                                topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
+                            }
 
                             userAUserBMatchTier = userRecoDAO.getUserAUserBMatchTier(initiatorUserId,
                                     userRecoSupplyTierVO.getUserId());
@@ -687,6 +703,12 @@ public class UserRecoAssigned {
                         assigneduserUserId);
                     userRecoDAO.submitUserRecoSupplyTier(initiatorUserId, 0, 1);
 
+                    try {
+                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT);
+                    } catch (com.tastesync.common.exception.TasteSyncException e) {
+                        e.printStackTrace();
+                    }
+
                     //sleep for remaining time!!
                     try {
                         System.out.println("SLEEP (in ms) for " +
@@ -711,7 +733,7 @@ public class UserRecoAssigned {
                     }
                 }
 
-                //TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
+                //Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
                     piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,

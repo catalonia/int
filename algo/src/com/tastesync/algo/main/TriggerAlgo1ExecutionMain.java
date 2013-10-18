@@ -4,15 +4,12 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.user.reco.UserRecoAssigned;
 
 
-public class UserRestaurantAlgoExecutionMain {
+public class TriggerAlgo1ExecutionMain {
     /**
      * @param args   input arguments - first argument - reco request id
      */
     public static void main(String[] args) {
         UserRecoAssigned userRecoAssigned = new UserRecoAssigned();
-
-        //
-        String recoRequestId = null;
 
         if (args.length == 0) {
             System.out.println("Input parameters - recoRequestId is needed  ");
@@ -20,7 +17,7 @@ public class UserRestaurantAlgoExecutionMain {
             return;
         }
 
-        recoRequestId = args[0];
+        String recoRequestId = args[0];
 
         System.out.println("Input parameters - recoRequestId=" + recoRequestId);
 

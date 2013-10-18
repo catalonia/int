@@ -8,7 +8,7 @@ import com.tastesync.algo.model.vo.RecorequestUserVO;
 import com.tastesync.algo.model.vo.RestaurantNeighbourhoodVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
-import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.common.utils.CommonFunctionsUtil;
 import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;

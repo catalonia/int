@@ -6,7 +6,7 @@ import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.RestaurantsSearchResultsVO;
-import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 

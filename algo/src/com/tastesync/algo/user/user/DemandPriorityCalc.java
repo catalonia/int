@@ -51,7 +51,7 @@ public class DemandPriorityCalc {
             }
         }
 
-        //TODO
+        //
         for (String flaggedUserId : allUserFlaggedUserList) {
             List<String> recoreqslast2daysRecorequestIdList = userUserDAO.getRecoRequestsLastNDays(flaggedUserId,
                     -2);

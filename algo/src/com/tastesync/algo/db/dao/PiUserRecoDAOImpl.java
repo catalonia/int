@@ -3,7 +3,7 @@ package com.tastesync.algo.db.dao;
 import com.tastesync.algo.db.queries.PiUserRecoQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
-import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 

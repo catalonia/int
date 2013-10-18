@@ -75,7 +75,7 @@ public class UserUserCalc {
         userAList = null;
         userBList = null;
         
-        // TODO create A and B pairs
+        //  create A and B pairs
         algoIndicatorIdentifyUseridList = 1;
 
         List<UserFolloweeUserFollowerVO> userFolloweeUserFollowerVOList = userUserDAO.getUserFolloweeUserFollowerFollowData(algoIndicatorIdentifyUseridList);

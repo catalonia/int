@@ -5,7 +5,7 @@ import com.tastesync.algo.db.dao.PiUserRecoDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRecommendationsTopicMatchRateVO;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
-import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +42,7 @@ public class PiUserRecoAssigned {
         //7B
         List<String> piUsersAlreadyAssignedIdList = piUserRecoDAO.getPiUserAlreadyAssignedToUser(initiatorUserId);
 
-        //TODO filter list of temp1users{userId}
+        // filter list of temp1users{userId}
         for (int i = 0; i < temp1PiUsersUserIdList.size(); ++i) {
             temp1PiUsersUserId = temp1PiUsersUserIdList.get(i);
 
@@ -133,7 +133,7 @@ public class PiUserRecoAssigned {
                         piUserRecoDAO.getCountUserThemeMatch(aTemp1PiUsersUserIdList,
                             themeIdList, matchCount);
 
-                    //TODO check mathcocunt not required?
+                    //check matchCount not required?
                     topicMatchCounter = topicMatchCounter +
                         piUserRecoDAO.getCountUserWhoareyouwithMatch(aTemp1PiUsersUserIdList,
                             whoareyouwithIdList, matchCount);
@@ -218,7 +218,7 @@ public class PiUserRecoAssigned {
                     themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
                     occasionIdList);
 
-            // TODO: Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
+            // Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
 
             //  invoke underlying implementation as part of web service
             piUserRecoDAO.submitRecommendationRequestAnswer(recoRequestId,

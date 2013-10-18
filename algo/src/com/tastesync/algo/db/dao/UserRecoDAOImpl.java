@@ -4,7 +4,7 @@ import com.tastesync.algo.db.queries.UserRecoQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.CityNeighbourhoodVO;
 import com.tastesync.algo.model.vo.UserRecoSupplyTierVO;
-import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -584,7 +584,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
         try {
             connection = tsDataSource.getConnection();
 
-            //TODO Check dynamic part
+            // Check dynamic part
             statement = connection.prepareStatement(UserRecoQueries.COUNT_USER_FRIEND_FB_SELECT_SQL);
 
             statement.setString(1, userId);

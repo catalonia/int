@@ -3,7 +3,7 @@ package com.tastesync.algo.db.dao;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.InputRestaurantSearchVO;
 import com.tastesync.algo.model.vo.RestaurantsSearchResultsVO;
-import com.tastesync.algo.util.CommonFunctionsUtil;
+import com.tastesync.common.utils.CommonFunctionsUtil;
 import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;
@@ -373,14 +373,14 @@ public class RestaurantsSearchResultsHelper {
                 inputRestaurantSearchVO.getNeighborhoodId());
         }
 
-        //TODO recheck
+        // recheck
         if (inputRestaurantSearchVO.getSavedFlag() != null) {
             ++bindPosition;
             statement.setString(bindPosition,
                 inputRestaurantSearchVO.getUserId());
         }
 
-        //TODO recheck
+        // recheck
         if (inputRestaurantSearchVO.getFavFlag() != null) {
             ++bindPosition;
             statement.setString(bindPosition,
