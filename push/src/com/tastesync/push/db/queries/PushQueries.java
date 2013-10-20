@@ -28,23 +28,36 @@ public interface PushQueries {
         "WHERE recorequest_user.RECOREQUEST_ID = ? AND " +
         "recorequest_user.INITIATOR_USER_ID = users.USER_ID ";
     public static String NOTIFICATIONTYPE3_TEXTDATA_SELECT_SQL = "" +
-            "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
-            "FROM restaurant_question_user, users " +
-            "WHERE restaurant_question_user.QUESTION_ID = ? AND " +
-            "restaurant_question_user.INITIATOR_USER_ID = users.USER_ID ";
+        "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
+        "FROM restaurant_question_user, users " +
+        "WHERE restaurant_question_user.QUESTION_ID = ? AND " +
+        "restaurant_question_user.INITIATOR_USER_ID = users.USER_ID ";
     public static String NOTIFICATIONTYPE4_TEXTDATA_SELECT_SQL = "" +
-            "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
-            "FROM user_message, users " +
-            "WHERE user_message.MESSAGE_ID = ? AND " +
-            "user_message.SENDER_ID = users.USER_ID ";
+        "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
+        "FROM user_message, users " + "WHERE user_message.MESSAGE_ID = ? AND " +
+        "user_message.SENDER_ID = users.USER_ID ";
     public static String NOTIFICATIONTYPE5_TEXTDATA_SELECT_SQL = "" +
-            "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
-            "FROM reco_like, users " +
-            "WHERE reco_like.ID = ? AND " +
-            "reco_like.LIKE_USER_ID = users.USER_ID ";
-    public static String DEVICE_TOKEN_LOGOUT_DELETE_SQL = ""
-    		+ "DELETE FROM USER_DEVICE_OAUTH "
-    		+ "WHERE  USER_DEVICE_OAUTH.USER_ID = ? "
-    		+ "       AND USER_DEVICE_OAUTH.DEVICE_TOKEN = ?";
-    
+        "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
+        "FROM reco_like, users " + "WHERE reco_like.ID = ? AND " +
+        "reco_like.LIKE_USER_ID = users.USER_ID ";
+    public static String DEVICE_TOKEN_LOGOUT_DELETE_SQL = "" +
+        "DELETE FROM USER_DEVICE_OAUTH " +
+        "WHERE  USER_DEVICE_OAUTH.USER_ID = ? " +
+        "       AND USER_DEVICE_OAUTH.DEVICE_TOKEN = ?";
+    public static String REPLY_VIEWED_INITIATOR_RECOREQUEST_USER_SELECT_SQL = "" +
+        "SELECT DISTINCT RECOREQUEST_USER.RECOREQUEST_ID " +
+        "FROM   RECOREQUEST_USER, " + "       RECOREQUEST_REPLY_USER " +
+        "WHERE  RECOREQUEST_USER.RECOREQUEST_SENT_DATETIME BETWEEN " +
+        "              Sysdate() - INTERVAL ? day AND Sysdate() - INTERVAL ? day " +
+        "       AND RECOREQUEST_USER.RECOREQUEST_ID = " +
+        "           RECOREQUEST_REPLY_USER.RECOREQUEST_ID " +
+        "       AND RECOREQUEST_REPLY_USER.REPLY_VIEWED_INITIATOR = ? ";
+    public static String RECOREPLY_DIDYOULIKE_NOTIF_INSERT_SQL = "" +
+        "INSERT INTO RECOREPLY_DIDYOULIKE_NOTIF " +
+        "            (RECOREPLY_DIDYOULIKE_NOTIF.NOTIF_DATETIME, " +
+        "             RECOREPLY_DIDYOULIKE_NOTIF.NOTIF_VIEWED, " +
+        "             RECOREPLY_DIDYOULIKE_NOTIF.RECOREQUEST_ID) " +
+        "VALUES      ( ?, " + "              ?, " + "              ? )" +
+        "ON DUPLICATE KEY UPDATE " +
+        "recoreply_didyoulike_notif.RECOREQUEST_ID = recoreply_didyoulike_notif.RECOREQUEST_ID ";
 }

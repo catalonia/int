@@ -28,33 +28,46 @@ public class PushService {
 
     public void sendAllPushNotifucations() throws TasteSyncException {
         List<UserNotificationsPushVO> userNotificationsPushVOList = pushDAO.getAllNotifcationsForPush();
-        List<String> deviceTokenList = null;
-
-        ApnsService apnsService = getApnsServiceInstance();
-
-        List<UserNotificationsPushVO> deviceTokenNotFoundUserNotificationsPushVOList =
-            new LinkedList<UserNotificationsPushVO>();
-
-        for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
-            //TODO based on notification type, get template text.
-            String notificationMsg = getNotificationMsg(userNotificationsPushVO);
-
-            String payload = APNS.newPayload().alertBody(notificationMsg).build();
-
-            // based on userId, get all device tokens
-            deviceTokenList = pushDAO.getAllDeviceTokensForSingleUser(userNotificationsPushVO.getUserId());
-
-            if ((deviceTokenList != null) && !deviceTokenList.isEmpty()) {
-                apnsService.push(deviceTokenList, payload);
-            } else {
-                deviceTokenNotFoundUserNotificationsPushVOList.add(userNotificationsPushVO);
-            }
-        }
 
         // update sent status
-        pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList, 1);
-        pushDAO.updateNotificationsSentStatus(deviceTokenNotFoundUserNotificationsPushVOList,
-            2);
+        try {
+        	//error while send push notifications
+            pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList, 2);
+
+            List<String> deviceTokenList = null;
+
+            ApnsService apnsService = getApnsServiceInstance();
+
+            List<UserNotificationsPushVO> deviceTokenNotFoundUserNotificationsPushVOList =
+                new LinkedList<UserNotificationsPushVO>();
+
+            for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
+                // based on notification type, get template text.
+                String notificationMsg = getNotificationMsg(userNotificationsPushVO);
+
+                String payload = APNS.newPayload().alertBody(notificationMsg)
+                                     .build();
+
+                // based on userId, get all device tokens
+                deviceTokenList = pushDAO.getAllDeviceTokensForSingleUser(userNotificationsPushVO.getUserId());
+
+                if ((deviceTokenList != null) && !deviceTokenList.isEmpty()) {
+                    apnsService.push(deviceTokenList, payload);
+                } else {
+                    deviceTokenNotFoundUserNotificationsPushVOList.add(userNotificationsPushVO);
+                }
+            }
+
+            // update sent status
+            pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList, 1);
+            pushDAO.updateNotificationsSentStatus(deviceTokenNotFoundUserNotificationsPushVOList,
+                2);
+        } catch (TasteSyncException e) {
+            e.printStackTrace();
+            pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList, 3);
+            throw new TasteSyncException(
+                "Error while sending push notifcations");
+        }
     }
 
     public String getNotificationMsg(
@@ -69,19 +82,13 @@ public class PushService {
             //loader.getResourceAsStream("Resources/SomeConfig.xml");
             ifile = this.getClass().getClassLoader()
                         .getResourceAsStream("PushNotification.properties");
-            System.out.println("load ... PushNotification.properties");
 
             //load a properties file
             prop.load(ifile);
 
-            //TODO define the data with variable
-            //get the property value and print it out
-            notificationMsg = prop.getProperty("notificationtype.1.pushmsg");
-            System.out.println("notificationMsg=" + notificationMsg);
-
             NotificationsPushTextDataVO notificationsPushTextDataVO = new NotificationsPushTextDataVO("",
                     "");
-            
+
             String replaceString = null;
 
             if ("1".equals(userNotificationsPushVO.getNotificationType())) {
@@ -90,7 +97,8 @@ public class PushService {
                 replaceString = notificationsPushTextDataVO.getFirstName().trim() +
                     " " + notificationsPushTextDataVO.getLastName().trim();
 
-                if (replaceString.trim().equals("")) {
+                //if (replaceString.trim().equals("")) {
+                if (notificationsPushTextDataVO.getFirstName().trim().equals("")) {
                     replaceString = "Someone";
                 }
 
@@ -104,7 +112,8 @@ public class PushService {
                 replaceString = notificationsPushTextDataVO.getFirstName().trim() +
                     " " + notificationsPushTextDataVO.getLastName().trim();
 
-                if (replaceString.trim().equals("")) {
+                //if (replaceString.trim().equals("")) {
+                if (notificationsPushTextDataVO.getFirstName().trim().equals("")) {
                     replaceString = "Someone";
                 }
 
@@ -116,7 +125,8 @@ public class PushService {
                 replaceString = notificationsPushTextDataVO.getFirstName().trim() +
                     " " + notificationsPushTextDataVO.getLastName().trim();
 
-                if (replaceString.trim().equals("")) {
+                //if (replaceString.trim().equals("")) {
+                if (notificationsPushTextDataVO.getFirstName().trim().equals("")) {
                     replaceString = "Someone";
                 }
 
@@ -128,7 +138,8 @@ public class PushService {
                 replaceString = notificationsPushTextDataVO.getFirstName().trim() +
                     " " + notificationsPushTextDataVO.getLastName().trim();
 
-                if (replaceString.trim().equals("")) {
+                //if (replaceString.trim().equals("")) {
+                if (notificationsPushTextDataVO.getFirstName().trim().equals("")) {
                     replaceString = "Someone";
                 }
 
@@ -152,8 +163,6 @@ public class PushService {
                 }
             }
         }
-
-        System.out.println("notificationMsg=" + notificationMsg);
 
         return notificationMsg;
     }
@@ -199,5 +208,13 @@ public class PushService {
         deviceToken = token;
 
         service.push(deviceToken, payload);
+    }
+
+    public void dailyPushServiceNotifications() throws TasteSyncException {
+        // -- TODO: Create script to trigger push notification for Did You Like using recoreply_didyoulike_notif 
+        // -- see below. This script should be executed between 11AM and 5pm EST so that notifications are not sent to Users at night.
+        //Check time
+        pushDAO.updateDidYouLikeFordailyPushServiceNotifications();
+        sendAllPushNotifucations();
     }
 }

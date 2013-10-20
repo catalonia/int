@@ -12,17 +12,18 @@ public class PushServiceMain {
         PushService pushService = new PushService();
 
         try {
-        	pushService.sendAllPushNotifucations();
-//            UserNotificationsPushVO userNotificationsPushVO = new UserNotificationsPushVO("userId",
-//                    "1", "100");
-//            pushService.getNotificationMsg(userNotificationsPushVO);
-//
-//            pushService.testPushMsg(msg, deviceToken);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-        } catch (TasteSyncException e1) {
-            // TODO Auto-generated catch block
+            //pushService.sendAllPushNotifucations();
+            UserNotificationsPushVO userNotificationsPushVO = new UserNotificationsPushVO("userId",
+                    "1", "100");
+            String msg = pushService.getNotificationMsg(userNotificationsPushVO);
+
+            if (1 == 2) {
+                pushService.testPushMsg(msg, "deviceToken");
+            }
+        } catch (IOException e1) {
             e1.printStackTrace();
+        } catch (TasteSyncException e) {
+            e.printStackTrace();
         }
     }
 }

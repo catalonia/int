@@ -15,10 +15,16 @@ public interface PushDAO extends BaseDAO {
     List<String> getAllDeviceTokensForSingleUser(String userId)
         throws TasteSyncException;
 
+    void updateSingleNotificationSentStatus(
+            UserNotificationsPushVO userNotificationsPushVO,
+            int statusFlag) throws TasteSyncException;
+    
     void updateNotificationsSentStatus(
         List<UserNotificationsPushVO> userNotificationsPushVOList,
         int statusFlag) throws TasteSyncException;
 
     NotificationsPushTextDataVO getNotificationsPushTextData(UserNotificationsPushVO userNotificationsPushVO)
         throws TasteSyncException;
+    
+    void updateDidYouLikeFordailyPushServiceNotifications() throws TasteSyncException;
 }
