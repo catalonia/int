@@ -2,9 +2,13 @@ package com.tastesync.common.utils;
 
 import com.tastesync.common.exception.TasteSyncException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.apache.log4j.Logger;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -16,6 +20,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -24,6 +29,8 @@ public class CommonFunctionsUtil {
     public static final String[] EMPTY_STRING_ARRAY = new String[] {  };
     private static final DateTimeFormatter tsDateTimeFormatWithMilliseconds = DateTimeFormat.forPattern(
             "yyyyMMddHHmmssSSS");
+    private static final String GMT_LOCAL_TIME_ZONE = "GMT";
+    private static final String EST_DST_TIME_ZONE = "US/Eastern";
 
     public static String getModifiedValueString(String inputString) {
         return ((inputString == null) ? "" : inputString.trim());
@@ -157,7 +164,10 @@ public class CommonFunctionsUtil {
 
     public static String exec(String inputStrCmd) throws TasteSyncException {
         String scriptRootDir = System.getProperty("SCRIPT_ROOT");
-        System.out.println("scriptRootDir=" + scriptRootDir);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("scriptRootDir=" + scriptRootDir);
+        } // end if
 
         if ((scriptRootDir == null) || scriptRootDir.isEmpty()) {
             throw new TasteSyncException("scriptRootDir=" + scriptRootDir +
@@ -226,6 +236,10 @@ public class CommonFunctionsUtil {
 
             // remove command file
             lProcess.waitFor();
+
+            if (lResult.toString().contains("ERROR:")) {
+                throw new TasteSyncException(lResult.toString());
+            }
         } // end try
         catch (Exception lEx) {
             logger.error("exec(String)", lEx);
@@ -244,14 +258,32 @@ public class CommonFunctionsUtil {
 
     public static void execAsync(String inputStrCmd) throws TasteSyncException {
         String scriptRootDir = System.getProperty("SCRIPT_ROOT");
-        System.out.println("scriptRootDir=" + scriptRootDir);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("scriptRootDir=" + scriptRootDir);
+        } // end if
 
         if ((scriptRootDir == null) || scriptRootDir.isEmpty()) {
             throw new TasteSyncException("scriptRootDir=" + scriptRootDir +
                 " is not properly defined.");
         }
 
-        String strCmd = scriptRootDir + inputStrCmd + " " + scriptRootDir;
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        Date now = new Date();
+        String strNowDate = sdfDate.format(now);
+        String scriptName = StringUtils.substringAfterLast(inputStrCmd, "/");
+        String newinputStrCmd = StringUtils.replace(inputStrCmd,
+                "/" + scriptName, "");
+        String dirNameWithScript = StringUtils.substringAfterLast(newinputStrCmd,
+                "/");
+
+        String outputLogFilePath = " >& " + scriptRootDir + "/" +
+            dirNameWithScript + "/logs/" + strNowDate +
+            String.valueOf((int) (Math.random() * 1000000)) + "_" + scriptName +
+            ".log";
+
+        String strCmd = scriptRootDir + inputStrCmd + " " + scriptRootDir +
+            outputLogFilePath;
 
         if (logger.isDebugEnabled()) {
             logger.debug("exec - start: strCmd=" + strCmd);
@@ -260,6 +292,8 @@ public class CommonFunctionsUtil {
         try {
             // Execute Script
             strCmd = strCmd.replaceAll("\\n", "");
+            logger.info("Within execAsync, finally, call script with strCmd=" +
+                strCmd);
 
             String[] strScript = { "sh", "-c", strCmd };
             Runtime.getRuntime().exec(strScript);
@@ -273,4 +307,38 @@ public class CommonFunctionsUtil {
             logger.debug("execAsync - end strCmd: " + strCmd);
         } // end if
     } // end execAsync()
+
+    public static Date convertJodaTimezone(LocalDateTime date,
+        String localTimeZone, String destTimeZone) {
+        DateTime srcDateTime = date.toDateTime(DateTimeZone.forID(localTimeZone));
+        DateTime dstDateTime = srcDateTime.withZone(DateTimeZone.forID(
+                    destTimeZone));
+
+        return dstDateTime.toLocalDateTime().toDateTime().toDate();
+    }
+
+    public static Date convertJodaTimezone(Date inputDate,
+        String localTimeZone, String destTimeZone) {
+        LocalDateTime date = LocalDateTime.fromDateFields(inputDate);
+        DateTime srcDateTime = date.toDateTime(DateTimeZone.forID(localTimeZone));
+        DateTime dstDateTime = srcDateTime.withZone(DateTimeZone.forID(
+                    destTimeZone));
+
+        return dstDateTime.toLocalDateTime().toDateTime().toDate();
+    }
+
+    public static Date convertJodaTimezoneFromCurrentTimezoneToEST(Date inputDate) {
+        LocalDateTime date = LocalDateTime.fromDateFields(inputDate);
+        //DateTime srcDateTime = date.toDateTime(DateTimeZone.forID(
+          //          GMT_LOCAL_TIME_ZONE));
+        Calendar calendar = Calendar.getInstance();
+        System.out.println(calendar.getTimeZone().getID());
+        DateTime srcDateTime = date.toDateTime(DateTimeZone.forID(
+        		calendar.getTimeZone().getID()));
+        
+        DateTime dstDateTime = srcDateTime.withZone(DateTimeZone.forID(
+                    EST_DST_TIME_ZONE));
+
+        return dstDateTime.toLocalDateTime().toDateTime().toDate();
+    }
 }
