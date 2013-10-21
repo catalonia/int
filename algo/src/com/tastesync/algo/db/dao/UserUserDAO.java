@@ -68,7 +68,7 @@ public interface UserUserDAO extends BaseDAO {
 
     List<String> getRecorequestCuisineTier2(String recorequestId)
         throws TasteSyncException;
-
+    
     List<String> getRecorequestOccasion(String recorequestId)
         throws TasteSyncException;
 
@@ -135,5 +135,7 @@ public interface UserUserDAO extends BaseDAO {
     int getUserPoints(String userId) throws TasteSyncException;
     
     int getNPercentilePoints(double percentileN) throws TasteSyncException;
+
+    int getNumUserFavNvTierNRestaurant(String userId, int tierId) throws TasteSyncException;
 
 }

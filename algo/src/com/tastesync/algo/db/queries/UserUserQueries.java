@@ -246,4 +246,21 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "UPDATE user_follow_data " + "SET    user_follow_data.algo1_ind = ? " +
         "WHERE  user_follow_data.followee_user_id = ? " +
         "       AND user_follow_data.follower_user_id = ? ";
+    
+    
+    public static String COUNT_USER_FAV_NC_TIER_N_REST_SELECT_SQL = ""
+    				+ "SELECT Count(*) "
+    				+ "FROM   (SELECT USER_RESTAURANT_FAV.RESTAURANT_ID "
+    				+ "        FROM   USER_RESTAURANT_FAV, "
+    				+ "               RESTAURANT_EXTENDED_INFO "
+    				+ "        WHERE  USER_RESTAURANT_FAV.USER_ID = ? "
+    				+ "               AND USER_RESTAURANT_FAV.RESTAURANT_ID = "
+    				+ "                   RESTAURANT_EXTENDED_INFO.RESTAURANT_ID "
+    				+ "               AND RESTAURANT_EXTENDED_INFO.CHAIN_ID IS NULL) x, "
+    				+ "       RESTAURANT_INFO_POPULARITY_TIER y "
+    				+ "WHERE  x.RESTAURANT_ID = y.RESTAURANT_ID "
+    				+ "       AND y.TIER_ID = 1 ";
+
+
+    
 }

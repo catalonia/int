@@ -1863,4 +1863,41 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             tsDataSource.closeConnection(null, statement, resultset);
         }
 	}
+
+	@Override
+	public int getNumUserFavNvTierNRestaurant(String userId, int tierId)
+			throws TasteSyncException {
+		TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserUserQueries.COUNT_USER_FAV_NC_TIER_N_REST_SELECT_SQL);
+
+            statement.setString(1, userId);
+            statement.setInt(2, tierId);
+
+            resultset = statement.executeQuery();
+
+            int userXFollowUserY = 0;
+
+            if (resultset.next()) {
+                userXFollowUserY = 1;
+            }
+
+            statement.close();
+
+            return userXFollowUserY;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getNumUserFavNvTierNRestaurant= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+	}
 }

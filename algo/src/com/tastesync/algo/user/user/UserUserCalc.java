@@ -52,29 +52,28 @@ public class UserUserCalc {
             }
         }
 
-        
         // add user A and user B pair to a file
-        List<UserAUserBVO> userAUserBVOList = new ArrayList<UserAUserBVO>(userAList.size()*userBList.size());
+        List<UserAUserBVO> userAUserBVOList = new ArrayList<UserAUserBVO>(userAList.size() * userBList.size());
         UserAUserBVO userAUserBVO = null;
+
         // create userA userB pair
         for (String userA : userAList) {
             for (String userB : userBList) {
-            	
-                userAUserBVO = new UserAUserBVO(userA,
-                		userB);
+                userAUserBVO = new UserAUserBVO(userA, userB);
+
                 if (!userAUserBVOList.contains(userAUserBVO)) {
                     userAUserBVOList.add(userAUserBVO);
-                	
                 } else {
-                	System.out.println("Pair UserA/UserB already found. "+userAUserBVO.toString());
+                    System.out.println("Pair UserA/UserB already found. " +
+                        userAUserBVO.toString());
                 }
-            }        	
+            }
         }
-        	
+
         // reset list to null
         userAList = null;
         userBList = null;
-        
+
         //  create A and B pairs
         algoIndicatorIdentifyUseridList = 1;
 
@@ -83,16 +82,21 @@ public class UserUserCalc {
         for (UserFolloweeUserFollowerVO userFolloweeUserFollowerVOElement : userFolloweeUserFollowerVOList) {
             userAUserBVO = new UserAUserBVO(userFolloweeUserFollowerVOElement.getUserFollowee(),
                     userFolloweeUserFollowerVOElement.getUserFollower());
+
             if (!userAUserBVOList.contains(userAUserBVO)) {
                 userAUserBVOList.add(userAUserBVO);
             } else {
-            	System.out.println("From Follow data. - Pair UserA/UserB already found. "+userAUserBVO.toString());
+                System.out.println(
+                    "From Follow data. - Pair UserA/UserB already found. " +
+                    userAUserBVO.toString());
             }
         }
-        
+
         // reset list to null
-        userFolloweeUserFollowerVOList= null;
-        System.out.println("Number of pairs UserA/UserB found. "+userAUserBVOList.size());
+        userFolloweeUserFollowerVOList = null;
+        System.out.println("Number of pairs UserA/UserB found. " +
+            userAUserBVOList.size());
+
         //pair are available
         for (UserAUserBVO userAUserBVOValue : userAUserBVOList) {
             double userAFollowUserB = userUserDAO.getUserFollowerFirstFollowingUserFolloweeTwo(userAUserBVOValue.getUserB(),
@@ -221,6 +225,9 @@ public class UserUserCalc {
             List<String> userBFavChainRestaurantIdList = userUserDAO.getUserXFavCRest(userAUserBVOValue.getUserB());
             double numUserBFavChainRest = userBFavChainRestaurantIdList.size();
 
+            double numUserAFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserA(), 1);
+            double numUserBFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserB(), 1);
+
             // -- Tier 1 logic
             if ((userAFollowUserB == 1) || (userBFollowUserA == 1) ||
                     ((numCommonNCFavRest / minNumUserABFavNCRest) >= 0.5) ||
@@ -229,31 +236,32 @@ public class UserUserCalc {
                 userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                     userAUserBVOValue.getUserB(), 1);
                 userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
-                        userAUserBVOValue.getUserA(), 1);
+                    userAUserBVOValue.getUserA(), 1);
             } else {
                 // -- Tier 2 logic
                 if ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) >= 0.7) {
                     userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                         userAUserBVOValue.getUserB(), 2);
                     userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
-                            userAUserBVOValue.getUserA(), 2);
+                        userAUserBVOValue.getUserA(), 2);
                 } else {
                     // -- Tier 3 logic TODO
                     if ((numCommonFavNativeCuisines >= 1) ||
                             (((numUserAFavChainRest / (numUserAFavNCRest +
                             numUserAFavChainRest)) >= 0.5) &&
                             ((numUserBFavChainRest / (numUserBFavNCRest +
-                            numUserBFavChainRest)) >= 0.5))) {
+                            numUserBFavChainRest)) >= 0.5)) ||
+                            ((numUserAFavNCPopTier1Rest >= (0.7 * numUserAFavNCRest)) &&
+                            (numUserBFavNCPopTier1Rest >= (0.7 * numUserBFavNCRest)))) {
                         userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                             userAUserBVOValue.getUserB(), 3);
                         userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
-                                userAUserBVOValue.getUserA(), 3);
-                        
+                            userAUserBVOValue.getUserA(), 3);
                     } else {
                         userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                             userAUserBVOValue.getUserB(), 4);
                         userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
-                                userAUserBVOValue.getUserA(), 4);
+                            userAUserBVOValue.getUserA(), 4);
                     }
                 }
             }
@@ -264,7 +272,7 @@ public class UserUserCalc {
                 0);
             userUserDAO.submitUserFollowDataUpdate(userAUserBVOValue.getUserA(),
                 userAUserBVOValue.getUserB(), 0);
-            
+
             //reset list to null!
             userAFavNCRest = null;
             userBFavNCRest = null;
@@ -276,8 +284,8 @@ public class UserUserCalc {
             userBFavNativeCuisIdList = null;
             userAFavChainRestaurantIdList = null;
             userBFavChainRestaurantIdList = null;
-            
         }
+
         //reset to null
         userAUserBVOList = null;
     }
