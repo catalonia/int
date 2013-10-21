@@ -1,11 +1,14 @@
 package com.tastesync.db.pool;
 
-//import com.tastesync.util.TSConstants;
-
 import org.apache.log4j.Logger;
 
 import org.apache.tomcat.dbcp.dbcp.BasicDataSource;
 import org.apache.tomcat.dbcp.dbcp.BasicDataSourceFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -25,11 +28,13 @@ public class TSDataSource {
      */
     private static final Logger logger = Logger.getLogger(TSDataSource.class);
     private static BasicDataSource poolDSInstance; // Database connection pool
+    public static final String TSDB_JNDI = "jdbc/TastesyncDB";
+    private static final String PATH_TO_CONFIG_FILE = "config/TastesyncDB.properties";
     private Connection conn = null;
     private boolean autoCommit = true;
-    public static final String TSDB_JNDI = "jdbc/TastesyncDB";
+
     private TSDataSource() {
-        //TODO Local Testing!
+        //Local init / Testing!
         initialize();
     }
 
@@ -66,6 +71,7 @@ public class TSDataSource {
                 }
 
                 conn = poolDSInstance.getConnection();
+                System.out.println("conn=" + conn);
 
                 if (conn == null) {
                     throw new SQLException("No Database Connection available");
@@ -75,6 +81,7 @@ public class TSDataSource {
                 logger.error("Connection unavailable: " + e);
                 logger.warn("Connection unavailable, close the connection " +
                     "to be able to get another connection ");
+                throw new SQLException("No Database Connection available");
             }
         }
 
@@ -135,32 +142,164 @@ public class TSDataSource {
             // Construct DataSource
             Properties properties = new Properties();
 
-            //properties.setProperty("url",
-            //  "jdbc:mysql://localhost:3306/tastesync");
-            properties.setProperty("url",
-                "jdbc:mysql://localhost:3306/Delta3_3May2013");
-            properties.setProperty("maxActive", "10");
-            properties.setProperty("maxIdle", "8");
-            properties.setProperty("minIdle", "10");
-            properties.setProperty("maxWait", "10");
-            properties.setProperty("testOnBorrow", "true");
-            //properties.setProperty("username", "username");
-            //properties.setProperty("password", "password");
-            properties.setProperty("username", "root");
-            properties.setProperty("password", "");
+            //read from the property file.
+            Properties dbProperties = new Properties();
 
-            properties.setProperty("validationQuery", "SELECT 1");
-            properties.setProperty("removeAbandoned", "true");
-            properties.setProperty("removeAbandonedTimeout", "1");
-            properties.setProperty("logAbandoned", "true");
+            // Prepend a Root n case the environment variable is defined
+            String configRoot = System.getProperty("CONFIG_ROOT");
+
+            if (configRoot == null) {
+                configRoot = "";
+            } // end if
+            else {
+                if (!configRoot.endsWith(File.separator)) {
+                    configRoot = configRoot + File.separator;
+                } // end if
+            } // end else
+
+            String filepath = configRoot + PATH_TO_CONFIG_FILE;
+            FileInputStream fis = null;
 
             try {
+                fis = new FileInputStream(filepath);
+                dbProperties.load(fis);
+
+                System.out.println("dbProperties=" + dbProperties);
+
+                String url = dbProperties.getProperty("url");
+
+                if ((url != null) && !url.isEmpty()) {
+                    properties.setProperty("url", url);
+                } else {
+                    //properties.setProperty("url",
+                    //  "jdbc:mysql://localhost:3306/tastesyncdb");
+                    properties.setProperty("url",
+                        "jdbc:mysql://localhost:3306/Delta3_3May2013");
+                }
+
+                String maxActive = dbProperties.getProperty("maxActive");
+
+                if ((maxActive != null) && !maxActive.isEmpty()) {
+                    properties.setProperty("maxActive", maxActive);
+                } else {
+                    properties.setProperty("maxActive", "10");
+                }
+
+                String maxIdle = dbProperties.getProperty("maxIdle");
+
+                if ((maxIdle != null) && !maxIdle.isEmpty()) {
+                    properties.setProperty("maxIdle", maxIdle);
+                } else {
+                    properties.setProperty("maxIdle", "8");
+                }
+
+                String minIdle = dbProperties.getProperty("minIdle");
+
+                if ((minIdle != null) && !minIdle.isEmpty()) {
+                    properties.setProperty("minIdle", minIdle);
+                } else {
+                    properties.setProperty("minIdle", "10");
+                }
+
+                String maxWait = dbProperties.getProperty("maxWait");
+
+                if ((maxWait != null) && !maxWait.isEmpty()) {
+                    properties.setProperty("maxWait", maxWait);
+                } else {
+                    properties.setProperty("maxWait", "10");
+                }
+
+                String testOnBorrow = dbProperties.getProperty("testOnBorrow");
+
+                if ((testOnBorrow != null) && !testOnBorrow.isEmpty()) {
+                    properties.setProperty("testOnBorrow", testOnBorrow);
+                } else {
+                    properties.setProperty("testOnBorrow", "true");
+                }
+
+                String username = dbProperties.getProperty("username");
+
+                if ((username != null) && !username.isEmpty()) {
+                    properties.setProperty("username", username);
+                } else {
+                    properties.setProperty("username", "root");
+                }
+
+                String password = dbProperties.getProperty("password");
+
+                if ((password != null) && !password.isEmpty()) {
+                    properties.setProperty("password", password);
+                } else {
+                    properties.setProperty("password", "");
+                }
+
+                String validationQuery = dbProperties.getProperty(
+                        "validationQuery");
+
+                if ((validationQuery != null) && !validationQuery.isEmpty()) {
+                    properties.setProperty("validationQuery", validationQuery);
+                } else {
+                    properties.setProperty("validationQuery", "SELECT 1");
+                }
+
+                String removeAbandoned = dbProperties.getProperty(
+                        "removeAbandoned");
+
+                if ((removeAbandoned != null) && !removeAbandoned.isEmpty()) {
+                    properties.setProperty("removeAbandoned", removeAbandoned);
+                } else {
+                    properties.setProperty("removeAbandoned", "true");
+                }
+
+                String removeAbandonedTimeout = dbProperties.getProperty(
+                        "removeAbandonedTimeout");
+
+                if ((removeAbandonedTimeout != null) &&
+                        !removeAbandonedTimeout.isEmpty()) {
+                    properties.setProperty("removeAbandonedTimeout",
+                        removeAbandonedTimeout);
+                } else {
+                    properties.setProperty("removeAbandonedTimeout", "1");
+                }
+
+                String logAbandoned = dbProperties.getProperty("logAbandoned");
+
+                if ((logAbandoned != null) && !logAbandoned.isEmpty()) {
+                    properties.setProperty("logAbandoned", logAbandoned);
+                } else {
+                    properties.setProperty("logAbandoned", "true");
+                }
+
                 poolDSInstance = (BasicDataSource) BasicDataSourceFactory.createDataSource(properties);
-                System.out.println("poolDSInstance=" + poolDSInstance + " " +
-                    poolDSInstance.getMaxIdle());
-            } catch (Exception e) {
+            } // end try
+            catch (FileNotFoundException e) {
+                logger.error("File can not be read : " + filepath);
+                logger.error("init():FileNotFoundException=", e);
+            } // end catch
+            catch (IOException e) {
+                logger.error("No file to read at path " + filepath);
+
+                logger.error("init():IOException=", e);
+            } // end catch
+            catch (Exception e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
-            }
+
+                if (poolDSInstance != null) {
+                    System.out.println("poolDSInstance=" + poolDSInstance +
+                        " " + poolDSInstance.getMaxIdle());
+                }
+            } finally {
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } // end try
+                    catch (IOException e) {
+                        logger.error("Error while closing the file: IOException=",
+                            e);
+                    } // end catch
+                } // end if
+            } // end finally
 
             if (poolDSInstance == null) {
                 throw new IllegalArgumentException(
