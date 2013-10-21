@@ -140,6 +140,17 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "FROM   recorequest_reply_user " +
         "WHERE  recorequest_reply_user.reply_user_id = ? " +
         "       AND recorequest_reply_user.reply_send_datetime >=? ";
+    public static String N_PERCENTILE_USER_POINTS_SELECT_SQL = "" +
+        "SELECT t1.USER_POINTS " +
+        "FROM   (SELECT @ROWNUM := @ROWNUM + 1 AS row_number, " +
+        "               USERS.USER_ID, " + "               USERS.USER_POINTS " +
+        "        FROM   USERS, " + "               (SELECT @ROWNUM := 0) r " +
+        "        ORDER  BY USERS.USER_POINTS) t1, " +
+        "       (SELECT Count(*) AS total_rows " + "        FROM   USERS) t2 " +
+        "WHERE  t1.ROW_NUMBER = Round(t2.TOTAL_ROWS * 0.8) ";
+    public static String USER_POINTS_SELECT_SQL = "" +
+        "SELECT USERS.USER_POINTS " + "FROM   USERS " +
+        "WHERE  USERS.USER_ID = ? ";
     public static String USER_RECO_DEMAND_INSERT_SQL = "" +
         "INSERT INTO user_reco_demand_tier_precalc " +
         "            (user_reco_demand_tier_precalc.calc_flag, " +

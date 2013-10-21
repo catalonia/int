@@ -128,5 +128,12 @@ public interface UserUserDAO extends BaseDAO {
 
     void sumbitAssignedUserUserMatchTier(String userIdA, String userIdB,
         int matchTier) throws TasteSyncException;
-    void submitUserFollowDataUpdate(String userIdA, String userIdB, int algoInd) throws TasteSyncException;
+
+    void submitUserFollowDataUpdate(String userIdA, String userIdB, int algoInd)
+        throws TasteSyncException;
+
+    int getUserPoints(String userId) throws TasteSyncException;
+    
+    int getNPercentilePoints(double percentileN) throws TasteSyncException;
+
 }

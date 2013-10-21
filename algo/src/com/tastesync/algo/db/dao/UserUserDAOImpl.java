@@ -8,8 +8,9 @@ import com.tastesync.algo.model.vo.RecorequestUserVO;
 import com.tastesync.algo.model.vo.RestaurantNeighbourhoodVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
-import com.tastesync.common.utils.CommonFunctionsUtil;
 import com.tastesync.algo.util.TSConstants;
+
+import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -1750,16 +1751,17 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             }
 
             throw new TasteSyncException(
-                "Error while sumbitAssignedUserUserMatchTier = " + e.getMessage());
+                "Error while sumbitAssignedUserUserMatchTier = " +
+                e.getMessage());
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);
         }
     }
 
-	@Override
-	public void submitUserFollowDataUpdate(String userIdA, String userIdB, int algoInd)
-			throws TasteSyncException {
-		TSDataSource tsDataSource = TSDataSource.getInstance();
+    @Override
+    public void submitUserFollowDataUpdate(String userIdA, String userIdB,
+        int algoInd) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1791,8 +1793,74 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);
         }
-        
+    }
+
+    @Override
+    public int getUserPoints(String userId) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserUserQueries.USER_POINTS_SELECT_SQL);
+
+            statement.setString(1, userId);
+
+            resultset = statement.executeQuery();
+
+            int userPoints = 0;
+
+            if (resultset.next()) {
+                userPoints = resultset.getInt("USERS.USER_POINTS");
+            }
+
+            statement.close();
+
+            return userPoints;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("Error while getUserPoints= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+    }
+
+	@Override
+	public int getNPercentilePoints(double percentileN)
+			throws TasteSyncException {
+		TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserUserQueries.N_PERCENTILE_USER_POINTS_SELECT_SQL);
+
+            statement.setDouble(1, percentileN);
+
+            resultset = statement.executeQuery();
+
+            int percentileNUserPoints = 0;
+
+            if (resultset.next()) {
+            	percentileNUserPoints = resultset.getInt("USER_POINTS");
+            }
+
+            statement.close();
+
+            return percentileNUserPoints;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("Error while getNPercentilePoints= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
 	}
-
-
 }

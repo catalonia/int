@@ -51,6 +51,10 @@ public class DemandPriorityCalc {
             }
         }
 
+        //eightyPercentilePoints TODO
+        double eightyPercentile = 0.80;
+        int eightyPercentilePoints = userUserDAO.getNPercentilePoints(eightyPercentile);
+
         //
         for (String flaggedUserId : allUserFlaggedUserList) {
             List<String> recoreqslast2daysRecorequestIdList = userUserDAO.getRecoRequestsLastNDays(flaggedUserId,
@@ -102,6 +106,9 @@ public class DemandPriorityCalc {
                     -2);
             int numRecoreqsUserAnsLast2Days = recorequestReplyUserAnsweredRecorequestId2DaysList.size();
 
+            // user points
+            int userPoints = userUserDAO.getUserPoints(flaggedUserId);
+
             //-- Tier 3 logic
             if ((numRecoreqsAnsToday >= 2) || (numRecoreqsAnsLast2Days >= 3)) {
                 userUserDAO.submitUserRecoDemandTierPrecalc(flaggedUserId, 3);
@@ -109,7 +116,9 @@ public class DemandPriorityCalc {
                 //-- Tier 1 logic
                 //-- TODO: User has 50+ points AND is in the top 20th percentile of users based on points
                 if ((numRecoreqsUserAnsLast2Days >= 3) ||
-                        (numRecoreqsUserAnsToday >= 2)) {
+                        (numRecoreqsUserAnsToday >= 2) ||
+                        ((userPoints >= 50) &&
+                        (userPoints >= eightyPercentilePoints))) {
                     userUserDAO.submitUserRecoDemandTierPrecalc(flaggedUserId, 1);
                 } else {
                     userUserDAO.submitUserRecoDemandTierPrecalc(flaggedUserId, 2);
