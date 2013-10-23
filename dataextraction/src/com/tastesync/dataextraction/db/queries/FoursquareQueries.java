@@ -47,9 +47,9 @@ public interface FoursquareQueries {
     public static String MATCH_FOURSQUARE_STATUS_UPDATE_SQL = "" +
         "UPDATE 4SQ_FACTUAL_EXTRACT " +
         "SET    4SQ_FACTUAL_EXTRACT.4SQ_PULL_ELIG_IND = ? " +
-        "                                                             AND " +
+        "                                                             , " +
         "              4SQ_FACTUAL_EXTRACT.LAST_MATCH_IND = ? " +
-        "                                                             AND " +
+        "                                                             , " +
         "              4SQ_FACTUAL_EXTRACT.LAST_UPDATED = ? " +
         "WHERE  4SQ_FACTUAL_EXTRACT.RESTAURANT_ID = ?";
 }
