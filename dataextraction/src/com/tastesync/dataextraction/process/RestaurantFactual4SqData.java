@@ -87,6 +87,22 @@ public class RestaurantFactual4SqData {
 
                 factualData.setFactualId(readLineFactualDataArray[0]);
                 factualData.setRestuarantName(readLineFactualDataArray[1]);
+
+                if ("null".equals(readLineFactualDataArray[2]) ||
+                        "null".equals(readLineFactualDataArray[3])) {
+                    int pullEligInd = 0;
+                    int lastMatchInd = 0;
+                    String restaurantId = readLineFactualDataArray[0];
+
+                    pullEligInd = 0;
+                    lastMatchInd = 0;
+
+                    FoursquareDAO foursquareDAO = new FoursquareDAOImpl();
+                    foursquareDAO.matchFoursquareStatusUpdate(pullEligInd,
+                        lastMatchInd, restaurantId);
+                    continue;
+                }
+
                 factualData.setLatitude(new BigDecimal(
                         readLineFactualDataArray[2]));
                 factualData.setLongtitude(new BigDecimal(
