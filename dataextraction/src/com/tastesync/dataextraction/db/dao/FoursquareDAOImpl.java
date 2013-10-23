@@ -309,7 +309,7 @@ public class FoursquareDAOImpl implements FoursquareDAO {
         try {
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
-            statement = connection.prepareStatement(FoursquareQueries.USER_ACCESS_NDAYS_STATUS_ATTEMPT_BEFORE_NDAYS_FOURSQ_FACTUAL_EXTRACT_UPDATE_SQL);
+            statement = connection.prepareStatement(FoursquareQueries.MATCH_FOURSQUARE_STATUS_UPDATE_SQL);
 
             statement.setInt(1, pullEligInd);
             statement.setInt(2, lastMatchInd);
