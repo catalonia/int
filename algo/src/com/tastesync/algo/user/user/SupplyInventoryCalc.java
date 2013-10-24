@@ -146,7 +146,9 @@ public class SupplyInventoryCalc {
                 userUserDAO.submitUserRecoSupplyTier(flagUserId, 4);
             } else {
                 //-- TODO: Tier 1 IF User if online right now 
-                if (1 == 2) {
+                boolean isUserOnline = userUserDAO.isUserOnlin(flagUserId);
+
+                if (isUserOnline) {
                     userUserDAO.submitUserRecoSupplyTier(flagUserId, 1);
                 } else {
                     if (((numRecorequestsInitiatedTotal >= TSConstants.MAX_RECOREQUEST_CONSIDERED) &&

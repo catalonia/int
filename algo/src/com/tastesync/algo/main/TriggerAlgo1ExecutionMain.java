@@ -2,6 +2,7 @@ package com.tastesync.algo.main;
 
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.user.reco.UserRecoAssigned;
+import com.tastesync.db.pool.TSDataSource;
 
 
 public class TriggerAlgo1ExecutionMain {
@@ -22,8 +23,10 @@ public class TriggerAlgo1ExecutionMain {
         System.out.println("Input parameters - recoRequestId=" + recoRequestId);
 
         int recorequestIteration = 1;
-
         try {
+        	
+        	TSDataSource tsDataSource = TSDataSource.getInstance();
+        	
             userRecoAssigned.processAssignRecorequestToUsers(recoRequestId,
                 recorequestIteration);
         } catch (TasteSyncException e) {

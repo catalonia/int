@@ -61,19 +61,19 @@ public class DemandPriorityCalc {
                     -2);
 
             for (String recoreqslast2daysRecorequestId : recoreqslast2daysRecorequestIdList) {
-                List<String> cuisTier1IdList = userUserDAO.getRecorequestCuisineTier1(recoreqslast2daysRecorequestId);
-
-                List<String> cuisTier2IdList = userUserDAO.getRecorequestCuisineTier2(recoreqslast2daysRecorequestId);
-
-                List<String> occasionIdList = userUserDAO.getRecorequestOccasion(recoreqslast2daysRecorequestId);
-
-                List<String> priceIdList = userUserDAO.getRecorequestPrice(recoreqslast2daysRecorequestId);
-
-                List<String> themeIdList = userUserDAO.getRecorequestTheme(recoreqslast2daysRecorequestId);
-
-                List<String> typeofrestIdList = userUserDAO.getRecorequestTypeofRest(recoreqslast2daysRecorequestId);
-
-                List<String> whoareyouwithIdList = userUserDAO.getRecorequestWhoarewithyou(recoreqslast2daysRecorequestId);
+//                List<String> cuisTier1IdList = userUserDAO.getRecorequestCuisineTier1(recoreqslast2daysRecorequestId);
+//
+//                List<String> cuisTier2IdList = userUserDAO.getRecorequestCuisineTier2(recoreqslast2daysRecorequestId);
+//
+//                List<String> occasionIdList = userUserDAO.getRecorequestOccasion(recoreqslast2daysRecorequestId);
+//
+//                List<String> priceIdList = userUserDAO.getRecorequestPrice(recoreqslast2daysRecorequestId);
+//
+//                List<String> themeIdList = userUserDAO.getRecorequestTheme(recoreqslast2daysRecorequestId);
+//
+//                List<String> typeofrestIdList = userUserDAO.getRecorequestTypeofRest(recoreqslast2daysRecorequestId);
+//
+//                List<String> whoareyouwithIdList = userUserDAO.getRecorequestWhoarewithyou(recoreqslast2daysRecorequestId);
                 List<String> recorequestCityIdNeighbourIdList = userUserDAO.getRecorequestLocation(recoreqslast2daysRecorequestId);
 
                 List<String> recorequestCityIdList = new ArrayList<String>();

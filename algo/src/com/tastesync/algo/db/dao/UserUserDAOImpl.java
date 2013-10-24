@@ -1829,10 +1829,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         }
     }
 
-	@Override
-	public int getNPercentilePoints(double percentileN)
-			throws TasteSyncException {
-		TSDataSource tsDataSource = TSDataSource.getInstance();
+    @Override
+    public int getNPercentilePoints(double percentileN)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1849,7 +1849,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             int percentileNUserPoints = 0;
 
             if (resultset.next()) {
-            	percentileNUserPoints = resultset.getInt("USER_POINTS");
+                percentileNUserPoints = resultset.getInt("USER_POINTS");
             }
 
             statement.close();
@@ -1862,12 +1862,12 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);
         }
-	}
+    }
 
-	@Override
-	public int getNumUserFavNvTierNRestaurant(String userId, int tierId)
-			throws TasteSyncException {
-		TSDataSource tsDataSource = TSDataSource.getInstance();
+    @Override
+    public int getNumUserFavNvTierNRestaurant(String userId, int tierId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -1899,5 +1899,45 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);
         }
-	}
+    }
+
+    @Override
+    public boolean isUserOnlin(String userId) throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserUserQueries.USER_ONLINE_SELECT_SQL);
+
+            statement.setString(1, userId);
+
+            resultset = statement.executeQuery();
+
+            String userOnline = null;
+
+            while (resultset.next()) {
+                userOnline = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "USERS.IS_ONLINE"));
+            }
+
+            statement.close();
+
+            if ("y".equalsIgnoreCase(userOnline)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getNumUserFavNvTierNRestaurant= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(null, statement, resultset);
+        }
+    }
 }

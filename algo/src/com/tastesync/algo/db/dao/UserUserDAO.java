@@ -137,5 +137,6 @@ public interface UserUserDAO extends BaseDAO {
     int getNPercentilePoints(double percentileN) throws TasteSyncException;
 
     int getNumUserFavNvTierNRestaurant(String userId, int tierId) throws TasteSyncException;
-
+  
+    boolean isUserOnlin(String userId) throws TasteSyncException;
 }

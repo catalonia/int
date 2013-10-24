@@ -1,6 +1,5 @@
 package com.tastesync.algo.user.restaurant;
 
-import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 
 import java.util.ArrayList;
@@ -75,8 +74,8 @@ public class RankRestaurantsSingleUserCalcHelper {
         restaurantPopularityTierVOList = null;
 
         //rank them
-        int lowerRankNumber = 0;
-        int upperRankNumber = numTier1Match0.size();
+        //int lowerRankNumber = 0;
+        //int upperRankNumber = numTier1Match0.size();
         int currentRankNumber = 0;
 
         int restaurantsRankMatch0ListExpectedSize = numTier1Match0.size() +
