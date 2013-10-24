@@ -229,6 +229,7 @@ public class RestaurantFactual4SqData {
             String venueNameFromResult = null;
             String phoneNumberFromResult = null;
             boolean matchFound = false;
+            
             CompactVenue matchedCompactVenue = null;
             //TODO if foursquare id is availbale in restaurant_factual_4sq, then skip the below call!!
             //STEP 1
@@ -344,15 +345,11 @@ public class RestaurantFactual4SqData {
                     int pullEligInd = 0;
                     int lastMatchInd = 0;
                     String restaurantId = factualId;
-
-                    if (matchFound) {
-                        pullEligInd = 0;
+                    pullEligInd = 0;
+                    lastMatchInd = 0;
+                    if (venuesLength == 1) {
                         lastMatchInd = 1;
-                    } else {
-                        pullEligInd = 0;
-                        lastMatchInd = 0;
                     }
-
                     FoursquareDAO foursquareDAO = new FoursquareDAOImpl();
                     foursquareDAO.matchFoursquareStatusUpdate(pullEligInd,
                         lastMatchInd, restaurantId);
