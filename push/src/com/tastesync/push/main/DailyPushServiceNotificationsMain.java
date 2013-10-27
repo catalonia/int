@@ -25,7 +25,6 @@ public class DailyPushServiceNotificationsMain {
                 calendar.setTime(currentDate);
                 sleepNeeded(startHour, endHour, calendar);
 
-                //System.out.println("Executing PUSH notifications "+calendar);
                 // between 8 (AM) and 23 (11 PM)
                 if ((calendar.get(Calendar.HOUR_OF_DAY) >= startHour) &&
                         (calendar.get(Calendar.HOUR_OF_DAY) <= endHour)) {
