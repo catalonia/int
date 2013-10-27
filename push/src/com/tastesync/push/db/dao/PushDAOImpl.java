@@ -93,8 +93,10 @@ public class PushDAOImpl implements PushDAO {
             String deviceToken = null;
 
             while (resultset.next()) {
+                //deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                  //          "USER_DEVICE_OAUTH.DEVICE_TOKEN"));
                 deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                            "USER_DEVICE_OAUTH.DEVICE_TOKEN"));
+                        "DEVICE_TOKEN"));
 
                 if ((deviceToken != null) && !deviceToken.isEmpty()) {
                     deviceTokenList.add(deviceToken);

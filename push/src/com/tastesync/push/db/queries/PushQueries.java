@@ -12,10 +12,12 @@ public interface PushQueries {
         "       NOTIFICATIONS_ALL.NOTIFICATION_TYPE, " +
         "       NOTIFICATIONS_ALL.LINKED_ID " + "FROM   NOTIFICATIONS_ALL " +
         "WHERE  PUSH_NOTIFICATION_SENT <> 1 " +
-        "AND push_notification_sent <> 2";
+        "AND PUSH_NOTIFICATION_SENT <> 2";
     public static String DEVICE_TOKEN_SELECT_SQL = "" +
-        "SELECT DISTINCT USER_DEVICE_OAUTH.DEVICE_TOKEN " +
-        "FROM   USER_DEVICE_OAUTH " + "WHERE  USER_ID = ?";
+        //"SELECT DISTINCT USER_DEVICE_OAUTH.DEVICE_TOKEN " +
+        //"FROM   USER_DEVICE_OAUTH " + "WHERE  USER_ID = ?";
+        "SELECT DISTINCT DEVICE_TOKEN FROM USER_DEVICE WHERE  USER_ID = ?";
+    
     public static String PUSH_NOTIFICATIONS_ALL_UPDATE_SQL = "" +
         "UPDATE NOTIFICATIONS_ALL " +
         "SET    NOTIFICATIONS_ALL.PUSH_NOTIFICATION_SENT = ? " +
@@ -40,10 +42,6 @@ public interface PushQueries {
         "SELECT users.TS_FIRST_NAME, " + "users.TS_LAST_NAME " +
         "FROM reco_like, users " + "WHERE reco_like.ID = ? AND " +
         "reco_like.LIKE_USER_ID = users.USER_ID ";
-    public static String DEVICE_TOKEN_LOGOUT_DELETE_SQL = "" +
-        "DELETE FROM USER_DEVICE_OAUTH " +
-        "WHERE  USER_DEVICE_OAUTH.USER_ID = ? " +
-        "       AND USER_DEVICE_OAUTH.DEVICE_TOKEN = ?";
     public static String REPLY_VIEWED_INITIATOR_RECOREQUEST_USER_SELECT_SQL = "" +
         "SELECT DISTINCT RECOREQUEST_USER.RECOREQUEST_ID " +
         "FROM   RECOREQUEST_USER, " + "       RECOREQUEST_REPLY_USER " +

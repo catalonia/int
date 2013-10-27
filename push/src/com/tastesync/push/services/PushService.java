@@ -78,7 +78,7 @@ public class PushService {
         Properties prop = new Properties();
 
         try {
-            ClassLoader loader = this.getClass().getClassLoader();
+            //ClassLoader loader = this.getClass().getClassLoader();
             //loader.getResourceAsStream("Resources/SomeConfig.xml");
             ifile = this.getClass().getClassLoader()
                         .getResourceAsStream("PushNotification.properties");
