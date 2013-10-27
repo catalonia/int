@@ -150,7 +150,7 @@ public class RestaurantFactual4SqData {
                 //TODO to be removed lator
                 ++i;
 
-                if (i == -1) {
+                if (i == 2) {
                     return;
                 }
             } // end while
@@ -450,9 +450,13 @@ public class RestaurantFactual4SqData {
                                               .append(completeVenue.getStats()
                                                                    .getCheckinsCount())
                                               .append("\",");
-                            outputStringBuffer.append("\"")
-                                              .append((completeVenue.getRating() != null)
-                                ? completeVenue.getRating() : "").append("\"");
+                            if (completeVenue.getRating() != null) {
+                                outputStringBuffer.append("\"")
+                                .append(completeVenue.getRating()).append("\"");
+                            } else {
+                                outputStringBuffer.append(completeVenue.getRating());
+                            }
+                            
                             outputStringBuffer.append(" );");
                             outputSqlFileWriter.write(outputStringBuffer.toString());
                             outputSqlFileWriter.newLine();
