@@ -29,7 +29,7 @@ public class DBConnection {
      * @return connection
      */
     public Connection openDBConnection() {
-        System.out.println("Open DB connection");
+//        System.out.println("Open DB connection");
 
         Connection connection = null;
 
@@ -37,20 +37,16 @@ public class DBConnection {
             Class.forName(DB_DRIVER);
         } // end try
         catch (ClassNotFoundException e) {
-            System.out.println("Where is your MYSQL JDBC Driver?");
             e.printStackTrace();
 
             System.exit(0);
         } // end catch
-
-        System.out.println("MYSQL Driver Registered!");
 
         try {
             connection = DriverManager.getConnection(DB_CONNECTION, DB_USER,
                     DB_PASSWORD);
         } // end try
         catch (SQLException e) {
-            System.out.println("Connection Failed! Check output console");
             e.printStackTrace();
 
             System.exit(0);
@@ -100,8 +96,6 @@ public class DBConnection {
 
             return;
         } // end catch
-
-        System.out.println("MYSQL JDBC Driver Registered!");
 
         Connection connection = null;
 
