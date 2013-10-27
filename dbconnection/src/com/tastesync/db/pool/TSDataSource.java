@@ -29,7 +29,22 @@ public class TSDataSource {
     private static final Logger logger = Logger.getLogger(TSDataSource.class);
     private static BasicDataSource poolDSInstance; // Database connection pool
     public static final String TSDB_JNDI = "jdbc/TastesyncDB";
-    private static final String PATH_TO_CONFIG_FILE = "config/TastesyncDB.properties";
+    private static final String PATH_TO_CONFIG_FILE = "./config/TastesyncDB.properties";
+
+    //  "jdbc:mysql://localhost:3306/tastesyncdb");
+    private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/Delta3_3May2013?generateSimpleParameterMetadata=true";
+    private static final String DEFAULT_MAX_ACTIVE = "10";
+    private static final String DEFAULT_MAX_IDLE = "8";
+    private static final String DEFAULT_MIN_IDLE = "10";
+    private static final String DEFAULT_MAX_WAIT = "10";
+    private static final String DEFAULT_TEST_ON_BORROW = "true";
+    private static final String DEFAULT_USERNAME = "root";
+    private static final String DEFAULT_PASSWORD = "";
+    private static final String DEFAULT_VALIDATION_QUERY = "SELECT 1";
+    private static final String DEFAULT_REMOVED_ABANDONED = "true";
+    private static final String DEFAULT_REMOVED_ABANDONED_TIMEOUT = "1";
+    private static final String DEFAULT_LOG_ABANDONED = "true";
+    private static final String DEFAULT_DRIVERNAME = "com.mysql.jdbc.Driver";
     private Connection conn = null;
     private boolean autoCommit = true;
 
@@ -71,7 +86,6 @@ public class TSDataSource {
                 }
 
                 conn = poolDSInstance.getConnection();
-                System.out.println("conn=" + conn);
 
                 if (conn == null) {
                     throw new SQLException("No Database Connection available");
@@ -125,6 +139,26 @@ public class TSDataSource {
         return conn;
     }
 
+    private static void setDefaultProperties(Properties properties) {
+        //properties.setProperty("url",
+        properties.setProperty("url", DEFAULT_URL);
+        properties.setProperty("maxActive", DEFAULT_MAX_ACTIVE);
+        properties.setProperty("maxIdle", DEFAULT_MAX_IDLE);
+        properties.setProperty("minIdle", DEFAULT_MIN_IDLE);
+        properties.setProperty("maxWait", DEFAULT_MAX_WAIT);
+        properties.setProperty("testOnBorrow", DEFAULT_TEST_ON_BORROW);
+        properties.setProperty("username", DEFAULT_USERNAME);
+        properties.setProperty("password", DEFAULT_PASSWORD);
+        properties.setProperty("validationQuery", DEFAULT_VALIDATION_QUERY);
+        properties.setProperty("removeAbandoned", DEFAULT_REMOVED_ABANDONED);
+        properties.setProperty("removeAbandonedTimeout",
+            DEFAULT_REMOVED_ABANDONED_TIMEOUT);
+        properties.setProperty("logAbandoned", DEFAULT_LOG_ABANDONED);
+        properties.setProperty("driverClassName", DEFAULT_DRIVERNAME);
+        properties.setProperty("driverClassName",
+            "com.p6spy.engine.spy.P6SpyDriver");
+    }
+
     private static void initialize() {
         try {
             // Create initial context
@@ -158,23 +192,19 @@ public class TSDataSource {
             } // end else
 
             String filepath = configRoot + PATH_TO_CONFIG_FILE;
+
             FileInputStream fis = null;
 
             try {
                 fis = new FileInputStream(filepath);
                 dbProperties.load(fis);
 
-                System.out.println("dbProperties=" + dbProperties);
-
                 String url = dbProperties.getProperty("url");
 
                 if ((url != null) && !url.isEmpty()) {
                     properties.setProperty("url", url);
                 } else {
-                    //properties.setProperty("url",
-                    //  "jdbc:mysql://localhost:3306/tastesyncdb");
-                    properties.setProperty("url",
-                        "jdbc:mysql://localhost:3306/Delta3_3May2013");
+                    properties.setProperty("url", DEFAULT_URL);
                 }
 
                 String maxActive = dbProperties.getProperty("maxActive");
@@ -182,7 +212,7 @@ public class TSDataSource {
                 if ((maxActive != null) && !maxActive.isEmpty()) {
                     properties.setProperty("maxActive", maxActive);
                 } else {
-                    properties.setProperty("maxActive", "10");
+                    properties.setProperty("maxActive", DEFAULT_MAX_ACTIVE);
                 }
 
                 String maxIdle = dbProperties.getProperty("maxIdle");
@@ -190,7 +220,7 @@ public class TSDataSource {
                 if ((maxIdle != null) && !maxIdle.isEmpty()) {
                     properties.setProperty("maxIdle", maxIdle);
                 } else {
-                    properties.setProperty("maxIdle", "8");
+                    properties.setProperty("maxIdle", DEFAULT_MAX_IDLE);
                 }
 
                 String minIdle = dbProperties.getProperty("minIdle");
@@ -198,7 +228,7 @@ public class TSDataSource {
                 if ((minIdle != null) && !minIdle.isEmpty()) {
                     properties.setProperty("minIdle", minIdle);
                 } else {
-                    properties.setProperty("minIdle", "10");
+                    properties.setProperty("minIdle", DEFAULT_MIN_IDLE);
                 }
 
                 String maxWait = dbProperties.getProperty("maxWait");
@@ -206,7 +236,7 @@ public class TSDataSource {
                 if ((maxWait != null) && !maxWait.isEmpty()) {
                     properties.setProperty("maxWait", maxWait);
                 } else {
-                    properties.setProperty("maxWait", "10");
+                    properties.setProperty("maxWait", DEFAULT_MAX_WAIT);
                 }
 
                 String testOnBorrow = dbProperties.getProperty("testOnBorrow");
@@ -214,7 +244,8 @@ public class TSDataSource {
                 if ((testOnBorrow != null) && !testOnBorrow.isEmpty()) {
                     properties.setProperty("testOnBorrow", testOnBorrow);
                 } else {
-                    properties.setProperty("testOnBorrow", "true");
+                    properties.setProperty("testOnBorrow",
+                        DEFAULT_TEST_ON_BORROW);
                 }
 
                 String username = dbProperties.getProperty("username");
@@ -222,7 +253,7 @@ public class TSDataSource {
                 if ((username != null) && !username.isEmpty()) {
                     properties.setProperty("username", username);
                 } else {
-                    properties.setProperty("username", "root");
+                    properties.setProperty("username", DEFAULT_USERNAME);
                 }
 
                 String password = dbProperties.getProperty("password");
@@ -230,7 +261,7 @@ public class TSDataSource {
                 if ((password != null) && !password.isEmpty()) {
                     properties.setProperty("password", password);
                 } else {
-                    properties.setProperty("password", "");
+                    properties.setProperty("password", DEFAULT_PASSWORD);
                 }
 
                 String validationQuery = dbProperties.getProperty(
@@ -239,7 +270,8 @@ public class TSDataSource {
                 if ((validationQuery != null) && !validationQuery.isEmpty()) {
                     properties.setProperty("validationQuery", validationQuery);
                 } else {
-                    properties.setProperty("validationQuery", "SELECT 1");
+                    properties.setProperty("validationQuery",
+                        DEFAULT_VALIDATION_QUERY);
                 }
 
                 String removeAbandoned = dbProperties.getProperty(
@@ -248,7 +280,8 @@ public class TSDataSource {
                 if ((removeAbandoned != null) && !removeAbandoned.isEmpty()) {
                     properties.setProperty("removeAbandoned", removeAbandoned);
                 } else {
-                    properties.setProperty("removeAbandoned", "true");
+                    properties.setProperty("removeAbandoned",
+                        DEFAULT_REMOVED_ABANDONED);
                 }
 
                 String removeAbandonedTimeout = dbProperties.getProperty(
@@ -259,7 +292,8 @@ public class TSDataSource {
                     properties.setProperty("removeAbandonedTimeout",
                         removeAbandonedTimeout);
                 } else {
-                    properties.setProperty("removeAbandonedTimeout", "1");
+                    properties.setProperty("removeAbandonedTimeout",
+                        DEFAULT_REMOVED_ABANDONED_TIMEOUT);
                 }
 
                 String logAbandoned = dbProperties.getProperty("logAbandoned");
@@ -267,29 +301,30 @@ public class TSDataSource {
                 if ((logAbandoned != null) && !logAbandoned.isEmpty()) {
                     properties.setProperty("logAbandoned", logAbandoned);
                 } else {
-                    properties.setProperty("logAbandoned", "true");
+                    properties.setProperty("logAbandoned", DEFAULT_LOG_ABANDONED);
                 }
 
-                poolDSInstance = (BasicDataSource) BasicDataSourceFactory.createDataSource(properties);
+                String driverClassName = dbProperties.getProperty(
+                        "driverClassName");
+
+                if ((driverClassName != null) && !driverClassName.isEmpty()) {
+                    properties.setProperty("driverClassName", driverClassName);
+                } else {
+                    properties.setProperty("driverClassName", DEFAULT_DRIVERNAME);
+                }
             } // end try
             catch (FileNotFoundException e) {
                 logger.error("File can not be read : " + filepath);
                 logger.error("init():FileNotFoundException=", e);
+                // ry to add add default values
+                setDefaultProperties(properties);
             } // end catch
             catch (IOException e) {
                 logger.error("No file to read at path " + filepath);
 
                 logger.error("init():IOException=", e);
             } // end catch
-            catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-
-                if (poolDSInstance != null) {
-                    System.out.println("poolDSInstance=" + poolDSInstance +
-                        " " + poolDSInstance.getMaxIdle());
-                }
-            } finally {
+            finally {
                 if (fis != null) {
                     try {
                         fis.close();
@@ -300,6 +335,19 @@ public class TSDataSource {
                     } // end catch
                 } // end if
             } // end finally
+
+            try {
+                System.out.println("Final database properties=" + properties);
+                poolDSInstance = (BasicDataSource) BasicDataSourceFactory.createDataSource(properties);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+
+                if (poolDSInstance != null) {
+                    System.out.println("poolDSInstance=" + poolDSInstance +
+                        " " + poolDSInstance.getMaxIdle());
+                }
+            }
 
             if (poolDSInstance == null) {
                 throw new IllegalArgumentException(
