@@ -82,9 +82,6 @@ public class RestaurantsSearchResultsHelper {
                 logger.debug("inputRestaurantSearchVO=" +
                     inputRestaurantSearchVO);
             }
-
-            System.out.println("inputRestaurantSearchVO=" +
-                inputRestaurantSearchVO);
         }
 
         //once do count(*), second time do select using limit derived from paginationId
@@ -346,8 +343,8 @@ public class RestaurantsSearchResultsHelper {
                     consolidatedSearchQuery.toString());
             }
 
-            System.out.println("consolidatedSearchQuery=" +
-                consolidatedSearchQuery.toString());
+//            System.out.println("consolidatedSearchQuery=" +
+//                consolidatedSearchQuery.toString());
         }
 
         return consolidatedSearchQuery;

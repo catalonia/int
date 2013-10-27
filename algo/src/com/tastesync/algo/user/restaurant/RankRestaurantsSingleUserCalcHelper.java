@@ -9,7 +9,7 @@ import java.util.List;
 
 
 public class RankRestaurantsSingleUserCalcHelper {
-    private static boolean printDebugExtra = true;
+    private static boolean printDebugExtra = false;
 
     public RankRestaurantsSingleUserCalcHelper() {
         super();

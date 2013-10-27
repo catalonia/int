@@ -20,7 +20,7 @@ import java.util.Random;
 public class UserRecoAssigned {
     private static final String NOT_USER_TOPIC_MATCH_4 = "not_user_topic_match_4";
     private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
-    private boolean printDebugExtra = true;
+    private boolean printDebugExtra = false;
 
     public UserRecoAssigned() {
         super();
