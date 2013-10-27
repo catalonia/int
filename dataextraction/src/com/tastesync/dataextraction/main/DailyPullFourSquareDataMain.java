@@ -13,8 +13,10 @@ import com.tastesync.dataextraction.util.TSConstants;
 
 import java.text.SimpleDateFormat;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 
 public class DailyPullFourSquareDataMain {
@@ -22,6 +24,72 @@ public class DailyPullFourSquareDataMain {
      * @param args
      */
     public static void main(String[] args) {
+        Date currentDate = new Date();
+
+        //check day 
+        boolean runProcessToday = isProcessToBeRunToday(currentDate);
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(
+                    "US/Eastern"));
+        calendar.setTime(currentDate);
+
+        if (!runProcessToday) {
+            // further logics to wait
+            System.out.println("hours=" +
+                (24 - calendar.get(Calendar.HOUR_OF_DAY)) + "SLEEP for " +
+                (3600000 * (24 - calendar.get(Calendar.HOUR_OF_DAY))));
+            Thread.currentThread();
+
+            try {
+                Thread.sleep(3600000 * (24 -
+                    calendar.get(Calendar.HOUR_OF_DAY)));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        boolean runProcessNow = false;
+
+        if (runProcessToday) {
+            //run between 1 and 8 in the night!
+            if ((calendar.get(Calendar.HOUR_OF_DAY) >= 1) &&
+                    (calendar.get(Calendar.HOUR_OF_DAY) <= 8)) {
+                runProcessNow = true;
+            }
+
+            if (!runProcessNow) {
+                if (calendar.get(Calendar.HOUR_OF_DAY) > 8) {
+                    // further logics to wait
+                    System.out.println("hours=" +
+                        (24 - calendar.get(Calendar.HOUR_OF_DAY)) +
+                        "SLEEP for " +
+                        (3600000 * (24 - calendar.get(Calendar.HOUR_OF_DAY))));
+                    Thread.currentThread();
+
+                    try {
+                        Thread.sleep(3600000 * (24 -
+                            calendar.get(Calendar.HOUR_OF_DAY)));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            if (calendar.get(Calendar.HOUR_OF_DAY) < 1) {
+                // further logics to wait
+                System.out.println("hours=" +
+                    (1 - calendar.get(Calendar.HOUR_OF_DAY)) + "SLEEP for " +
+                    (3600000 * (1 - calendar.get(Calendar.HOUR_OF_DAY))));
+                Thread.currentThread();
+
+                try {
+                    Thread.sleep(3600000 * (1 -
+                        calendar.get(Calendar.HOUR_OF_DAY)));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         DefaultIOHandler defaultIOHandler = new DefaultIOHandler();
         FoursquareApi foursquareApi = new FoursquareApi(TSConstants.CLIENT_ID,
                 TSConstants.CLIENT_SECRET, TSConstants.REDIRECURI,
@@ -59,7 +127,7 @@ public class DailyPullFourSquareDataMain {
                 lastUpdatedNDays, lastMatchInd, accessNDays);
 
             pullEligInd = 1;
-            beforeNDays = 45;
+            beforeNDays = 42;
             lastMatchInd = 0;
 
             dailyRestaurantFactual4SqData.identifyRestaurantsFourSqExtractUsingUpdate(pullEligInd,
@@ -99,19 +167,54 @@ public class DailyPullFourSquareDataMain {
             String oExecResult = null;
 
             try {
-                oExecResult = CommonFunctionsUtil.exec(TSConstants.DAILY_PULL_4SQ_SCRIPT + " " +
-                        outputSqlFilePath);
+                oExecResult = CommonFunctionsUtil.exec(TSConstants.DAILY_PULL_4SQ_SCRIPT +
+                        " " + outputSqlFilePath);
             } catch (com.tastesync.common.exception.TasteSyncException e) {
                 e.printStackTrace();
             }
+
             if (oExecResult.contains("ERROR:")) {
-            	//TODO rename the output sql file
-            	
+                //TODO rename the output sql file
             }
         } catch (TasteSyncException e) {
             e.printStackTrace();
         }
 
         System.out.println("************ End ************");
+    }
+
+    private static boolean isProcessToBeRunToday(Date currentDate) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(
+                    "US/Eastern"));
+        calendar.setTime(currentDate);
+
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+        // "Sunday"
+        case 1:
+
+        // "Thursday"
+        case 5:
+
+        // "Friday"
+        case 6:
+
+        // "Saturday"
+        case 7:
+            return false;
+
+        // "Monday"
+        case 2:
+
+        // "Tuesday"
+        case 3:
+
+        // "Wednesday"
+        case 4:
+            return true;
+        }
+
+        return false;
     }
 }
