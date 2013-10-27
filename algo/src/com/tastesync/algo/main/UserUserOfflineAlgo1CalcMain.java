@@ -18,31 +18,33 @@ public class UserUserOfflineAlgo1CalcMain {
         Connection connection = null;
 
         try {
-            //Get DB connection object
-            tsDataSource = TSDataSource.getInstance();
+            while (true) {
+                //Get DB connection object
+                tsDataSource = TSDataSource.getInstance();
 
-            connection = tsDataSource.getConnection();
+                connection = tsDataSource.getConnection();
 
-            tsDataSource.begin();
+                tsDataSource.begin();
 
-            SupplyInventoryCalc supplyInventoryCalc = new SupplyInventoryCalc();
-            supplyInventoryCalc.processAllUserFlaggedUserListSupplyInventory();
-            tsDataSource.commit();
-            tsDataSource.begin();
+                SupplyInventoryCalc supplyInventoryCalc = new SupplyInventoryCalc();
+                supplyInventoryCalc.processAllUserFlaggedUserListSupplyInventory();
+                tsDataSource.commit();
+                tsDataSource.begin();
 
-            DemandPriorityCalc demandPriorityCalc = new DemandPriorityCalc();
-            demandPriorityCalc.processAllUserFlaggedUserListDemandPriority();
-            tsDataSource.commit();
-            tsDataSource.begin();
+                DemandPriorityCalc demandPriorityCalc = new DemandPriorityCalc();
+                demandPriorityCalc.processAllUserFlaggedUserListDemandPriority();
+                tsDataSource.commit();
+                tsDataSource.begin();
 
-            UserTopicCalc userTopicCalc = new UserTopicCalc();
-            userTopicCalc.processAllUserFlaggedUserListUserTopic();
-            tsDataSource.commit();
-            tsDataSource.begin();
+                UserTopicCalc userTopicCalc = new UserTopicCalc();
+                userTopicCalc.processAllUserFlaggedUserListUserTopic();
+                tsDataSource.commit();
+                tsDataSource.begin();
 
-            UserUserCalc userUserCalc = new UserUserCalc();
-            userUserCalc.processAllUserFlaggedUserListUserUser();
-            tsDataSource.commit();
+                UserUserCalc userUserCalc = new UserUserCalc();
+                userUserCalc.processAllUserFlaggedUserListUserUser();
+                tsDataSource.commit();
+            }
         } catch (TasteSyncException e) {
             e.printStackTrace();
         } catch (SQLException e) {

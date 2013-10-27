@@ -17,27 +17,29 @@ public class UserRestaurantOfflineAlgo2CalcMain {
         Connection connection = null;
 
         try {
-            //Get DB connection object
-            tsDataSource = TSDataSource.getInstance();
+            while (true) {
+                //Get DB connection object
+                tsDataSource = TSDataSource.getInstance();
 
-            connection = tsDataSource.getConnection();
+                connection = tsDataSource.getConnection();
 
-            tsDataSource.begin();
+                tsDataSource.begin();
 
-            //Run algo calc
-            RestInfoPopularityTierCalc restInfoPopularityTierCalc = new RestInfoPopularityTierCalc();
-            restInfoPopularityTierCalc.processAllFlaggedRestaurantListRestInfoPopularityTier();
-            tsDataSource.commit();
-            tsDataSource.begin();
+                //Run algo calc
+                RestInfoPopularityTierCalc restInfoPopularityTierCalc = new RestInfoPopularityTierCalc();
+                restInfoPopularityTierCalc.processAllFlaggedRestaurantListRestInfoPopularityTier();
+                tsDataSource.commit();
+                tsDataSource.begin();
 
-            RestUserMatchCounterCalc restUserMatchCounterCalc = new RestUserMatchCounterCalc();
-            restUserMatchCounterCalc.processAllFlaggedRestaurantListRestUserMatchCounter();
-            tsDataSource.commit();
-            tsDataSource.begin();
+                RestUserMatchCounterCalc restUserMatchCounterCalc = new RestUserMatchCounterCalc();
+                restUserMatchCounterCalc.processAllFlaggedRestaurantListRestUserMatchCounter();
+                tsDataSource.commit();
+                tsDataSource.begin();
 
-            UserRestRankOrderCalc userRestRankOrderCalc = new UserRestRankOrderCalc();
-            userRestRankOrderCalc.updateUserRestRankOrderCalc();
-            tsDataSource.commit();
+                UserRestRankOrderCalc userRestRankOrderCalc = new UserRestRankOrderCalc();
+                userRestRankOrderCalc.updateUserRestRankOrderCalc();
+                tsDataSource.commit();
+            }
         } catch (TasteSyncException e) {
             e.printStackTrace();
         } catch (SQLException e) {

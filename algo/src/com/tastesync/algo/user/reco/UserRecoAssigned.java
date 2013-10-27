@@ -430,7 +430,7 @@ public class UserRecoAssigned {
                         1);
 
                     try {
-                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT);
+                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT, TSConstants.BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT);
                     } catch (com.tastesync.common.exception.TasteSyncException e) {
                         e.printStackTrace();
                     }
@@ -704,7 +704,7 @@ public class UserRecoAssigned {
                     userRecoDAO.submitUserRecoSupplyTier(initiatorUserId, 0, 1);
 
                     try {
-                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT);
+                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT, TSConstants.BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT);
                     } catch (com.tastesync.common.exception.TasteSyncException e) {
                         e.printStackTrace();
                     }
