@@ -353,7 +353,7 @@ public class CommonFunctionsUtil {
         //DateTime srcDateTime = date.toDateTime(DateTimeZone.forID(
           //          GMT_LOCAL_TIME_ZONE));
         Calendar calendar = Calendar.getInstance();
-        System.out.println(calendar.getTimeZone().getID());
+        //System.out.println(calendar.getTimeZone().getID());
         DateTime srcDateTime = date.toDateTime(DateTimeZone.forID(
         		calendar.getTimeZone().getID()));
         
