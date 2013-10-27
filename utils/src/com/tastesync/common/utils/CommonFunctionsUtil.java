@@ -29,7 +29,6 @@ public class CommonFunctionsUtil {
     public static final String[] EMPTY_STRING_ARRAY = new String[] {  };
     private static final DateTimeFormatter tsDateTimeFormatWithMilliseconds = DateTimeFormat.forPattern(
             "yyyyMMddHHmmssSSS");
-    private static final String GMT_LOCAL_TIME_ZONE = "GMT";
     private static final String EST_DST_TIME_ZONE = "US/Eastern";
 
     public static String getModifiedValueString(String inputString) {
@@ -164,9 +163,11 @@ public class CommonFunctionsUtil {
 
     public static String exec(String inputStrCmd) throws TasteSyncException {
         String scriptRootDir = System.getProperty("SCRIPT_ROOT");
+        String envType = System.getProperty("ENV_TYPE");
 
         if (logger.isDebugEnabled()) {
             logger.debug("scriptRootDir=" + scriptRootDir);
+            logger.debug("envType=" + envType);
         } // end if
 
         if ((scriptRootDir == null) || scriptRootDir.isEmpty()) {
@@ -174,7 +175,13 @@ public class CommonFunctionsUtil {
                 " is not properly defined.");
         }
 
-        String strCmd = scriptRootDir + inputStrCmd + " " + scriptRootDir;
+        if ((envType == null) || envType.isEmpty()) {
+            throw new TasteSyncException("envType=" + scriptRootDir +
+                " is not properly defined.");
+        }
+        scriptRootDir = scriptRootDir +"/"+envType+ "/";
+        
+        String strCmd = scriptRootDir +inputStrCmd + " " + scriptRootDir;
 
         if (logger.isDebugEnabled()) {
             logger.debug("exec - start: strCmd=" + strCmd);
@@ -236,9 +243,15 @@ public class CommonFunctionsUtil {
 
             // remove command file
             lProcess.waitFor();
+            
+            
 
             if (lResult.toString().contains("ERROR:")) {
-                throw new TasteSyncException(lResult.toString());
+            	if (!lResult.toString().contains("ERROR:Warning:")) {
+                    throw new TasteSyncException(lResult.toString());
+            	} else {
+            		System.out.println("Warning message: "+lResult.toString());
+            	}
             }
         } // end try
         catch (Exception lEx) {
@@ -256,11 +269,13 @@ public class CommonFunctionsUtil {
         return returnString;
     } // end exec()
 
-    public static void execAsync(String inputStrCmd) throws TasteSyncException {
+    public static void execAsync(String inputStrCmd, String baseScriptName) throws TasteSyncException {
         String scriptRootDir = System.getProperty("SCRIPT_ROOT");
-
+        String envType = System.getProperty("ENV_TYPE");
+        
         if (logger.isDebugEnabled()) {
             logger.debug("scriptRootDir=" + scriptRootDir);
+            logger.debug("envType=" + envType);
         } // end if
 
         if ((scriptRootDir == null) || scriptRootDir.isEmpty()) {
@@ -268,21 +283,27 @@ public class CommonFunctionsUtil {
                 " is not properly defined.");
         }
 
+        if ((envType == null) || envType.isEmpty()) {
+            throw new TasteSyncException("envType=" + scriptRootDir +
+                " is not properly defined.");
+        }
+        
+        scriptRootDir = scriptRootDir +"/"+envType;
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         Date now = new Date();
         String strNowDate = sdfDate.format(now);
-        String scriptName = StringUtils.substringAfterLast(inputStrCmd, "/");
-        String newinputStrCmd = StringUtils.replace(inputStrCmd,
-                "/" + scriptName, "");
-        String dirNameWithScript = StringUtils.substringAfterLast(newinputStrCmd,
-                "/");
+//        String scriptName = StringUtils.substringAfterLast(inputStrCmd, "/");
+//        String newinputStrCmd = StringUtils.replace(inputStrCmd,
+//                "/" + scriptName, "");
+//        String dirNameWithScript = StringUtils.substringAfterLast(newinputStrCmd,
+//                "/");
 
         String outputLogFilePath = " >& " + scriptRootDir + "/" +
-            dirNameWithScript + "/logs/" + strNowDate +
-            String.valueOf((int) (Math.random() * 1000000)) + "_" + scriptName +
+            "/logs/" + strNowDate +"_"+System.nanoTime()+"_"+
+            String.valueOf((int) (Math.random() * 100000)) + "_" + baseScriptName +
             ".log";
 
-        String strCmd = scriptRootDir + inputStrCmd + " " + scriptRootDir +
+        String strCmd = scriptRootDir + "/"+inputStrCmd + " " + scriptRootDir +
             outputLogFilePath;
 
         if (logger.isDebugEnabled()) {
