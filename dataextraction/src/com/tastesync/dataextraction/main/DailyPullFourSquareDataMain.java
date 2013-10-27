@@ -31,7 +31,7 @@ public class DailyPullFourSquareDataMain {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(
                     "US/Eastern"));
         calendar.setTime(currentDate);
-
+        System.out.println("Before Executing Daily Pull FourSquare Data "+calendar);
         if (!runProcessToday) {
             // further logics to wait
             System.out.println("hours=" +
@@ -89,7 +89,8 @@ public class DailyPullFourSquareDataMain {
                 }
             }
         }
-
+        System.out.println("Executing Daily Pull FourSquare Data "+calendar);
+        
         DefaultIOHandler defaultIOHandler = new DefaultIOHandler();
         FoursquareApi foursquareApi = new FoursquareApi(TSConstants.CLIENT_ID,
                 TSConstants.CLIENT_SECRET, TSConstants.REDIRECURI,
