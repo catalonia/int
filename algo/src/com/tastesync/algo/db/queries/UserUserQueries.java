@@ -147,7 +147,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "        FROM   USERS, " + "               (SELECT @ROWNUM := 0) r " +
         "        ORDER  BY USERS.USER_POINTS) t1, " +
         "       (SELECT Count(*) AS total_rows " + "        FROM   USERS) t2 " +
-        "WHERE  t1.ROW_NUMBER = Round(t2.TOTAL_ROWS * 0.8) ";
+        "WHERE  t1.ROW_NUMBER = Round(t2.TOTAL_ROWS * ?) ";
     public static String USER_POINTS_SELECT_SQL = "" +
         "SELECT USERS.USER_POINTS " + "FROM   USERS " +
         "WHERE  USERS.USER_ID = ? ";
