@@ -13,7 +13,7 @@ public class FactualDataVO implements Serializable {
     private String restuarantName;
     private BigDecimal latitude;
     private BigDecimal longtitude;
-    boolean latLonAvailable = false;
+    private boolean latLonAvailable = false;
     private String phoneNumber;
 
     public FactualDataVO() {
@@ -28,9 +28,9 @@ public class FactualDataVO implements Serializable {
         this.latitude = latitude;
         this.longtitude = longtitude;
         this.latLonAvailable = (((latitude != null) &&
-            (latitude.compareTo(new BigDecimal(0)) == 0)) &&
-            ((longtitude != null) &&
-            (longtitude.compareTo(new BigDecimal(0)) == 0))) ? true : false;
+                (latitude.compareTo(new BigDecimal(0)) == 0)) &&
+                ((longtitude != null) &&
+                        (longtitude.compareTo(new BigDecimal(0)) == 0)));
         this.phoneNumber = phoneNumber;
     }
 

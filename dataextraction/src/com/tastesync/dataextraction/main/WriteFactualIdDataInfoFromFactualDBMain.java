@@ -34,8 +34,8 @@ public class WriteFactualIdDataInfoFromFactualDBMain {
                 factualIdList);
 
             Date stopTime = new Date();
-            long timeTakenInMilliSeconds = new Long(stopTime.getTime() -
-                    startTime.getTime());
+            long timeTakenInMilliSeconds = stopTime.getTime() -
+                    startTime.getTime();
             String timeTakenInSeconds = (timeTakenInMilliSeconds / 1000) + "." +
                 (timeTakenInMilliSeconds % 1000);
             System.out.println("Time taken=" + timeTakenInMilliSeconds +

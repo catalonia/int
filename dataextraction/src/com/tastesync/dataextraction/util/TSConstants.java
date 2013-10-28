@@ -21,6 +21,6 @@ public interface TSConstants {
     public static final String[] EMPTY_STRING_ARRAY = new String[] {  };
     public static final String DAILY_PULL_4SQ_SCRIPT = "./dataextraction/DailyPullFourSquareExecSQL.sh";
     public enum DATAEXTRACTION_SOURCETYPE {FACTUAL,
-        FOURSQUARE;
+        FOURSQUARE
     }
 }

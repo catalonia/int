@@ -187,6 +187,15 @@ public class DailyPullFourSquareDataMain {
                 }
             } catch (TasteSyncException e) {
                 e.printStackTrace();
+                // further logics to wait
+                System.out.println("SLEEP for " + (60000 * 2));
+                Thread.currentThread();
+
+                try {
+                    Thread.sleep((60000 * 2));
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             }
 
             System.out.println("************ End ************");

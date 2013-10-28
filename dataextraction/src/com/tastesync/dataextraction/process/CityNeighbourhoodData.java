@@ -55,16 +55,15 @@ public class CityNeighbourhoodData {
             for (int i = 0; i < cityLatLonDataList.size(); ++i) {
                 inputCityLatLonData = cityLatLonDataList.get(i);
 
-                for (int j = 0; j < cityLatLonDataList.size(); ++j) {
-                    if (inputCityLatLonData.getIdentifierID() != (cityLatLonDataList.get(
-                                j).getIdentifierID())) {
+                for (CityLatLonDataVO cityLatLonDataListElement : cityLatLonDataList) {
+                    if (inputCityLatLonData.getIdentifierID() != (cityLatLonDataListElement.getIdentifierID())) {
                         distanceCalculatedFromInputCity = distFromUsingHaversineDistance(inputCityLatLonData.getiNTPTLAT()
-                                                                                                            .doubleValue(),
+                                .doubleValue(),
                                 inputCityLatLonData.getiNTPTLNG().doubleValue(),
-                                cityLatLonDataList.get(j).getiNTPTLAT()
-                                                  .doubleValue(),
-                                cityLatLonDataList.get(j).getiNTPTLNG()
-                                                  .doubleValue());
+                                cityLatLonDataListElement.getiNTPTLAT()
+                                        .doubleValue(),
+                                        cityLatLonDataListElement.getiNTPTLNG()
+                                        .doubleValue());
 
                         //TODO
                         //insert into closest_cities (source_city_id, source_city, destination_city_id, destination_city, distance)
@@ -76,35 +75,34 @@ public class CityNeighbourhoodData {
                             outputStringBuffer = new StringBuffer();
 
                             outputStringBuffer.append(
-                                "INSERT INTO CLOSEST_CITIES (SOURCE_CITY_ID, SOURCE_CITY, SOURCE_STATE, DESTINATION_CITY_ID, DESTINATION_CITY, DESTINATION_STATE, DISTANCE) VALUES (");
+                                    "INSERT INTO CLOSEST_CITIES (SOURCE_CITY_ID, SOURCE_CITY, SOURCE_STATE, DESTINATION_CITY_ID, DESTINATION_CITY, DESTINATION_STATE, DISTANCE) VALUES (");
                             outputStringBuffer.append("\"")
-                                              .append(inputCityLatLonData.getIdentifierID())
-                                              .append("\",");
+                                    .append(inputCityLatLonData.getIdentifierID())
+                                    .append("\",");
                             outputStringBuffer.append("\"")
-                                              .append(inputCityLatLonData.getPlace())
-                                              .append("\",");
+                                    .append(inputCityLatLonData.getPlace())
+                                    .append("\",");
                             outputStringBuffer.append("\"")
-                                              .append(inputCityLatLonData.getState())
-                                              .append("\",");
+                                    .append(inputCityLatLonData.getState())
+                                    .append("\",");
 
                             outputStringBuffer.append("\"")
-                                              .append(cityLatLonDataList.get(j)
-                                                                        .getIdentifierID())
-                                              .append("\",");
+                                    .append(cityLatLonDataListElement
+                                            .getIdentifierID())
+                                    .append("\",");
                             outputStringBuffer.append("\"")
-                                              .append(cityLatLonDataList.get(j)
-                                                                        .getPlace())
-                                              .append("\",");
+                                    .append(cityLatLonDataListElement
+                                            .getPlace())
+                                    .append("\",");
                             outputStringBuffer.append("\"")
-                                              .append(cityLatLonDataList.get(j)
-                                                                        .getState())
-                                              .append("\",");
+                                    .append(cityLatLonDataListElement
+                                            .getState())
+                                    .append("\",");
 
                             outputStringBuffer.append("\"")
-                                              .append(df.format(
-                                    distanceCalculatedFromInputCity))
-                                              .append("\"");
-                            ;
+                                    .append(df.format(
+                                            distanceCalculatedFromInputCity))
+                                    .append("\"");
                             outputStringBuffer.append(" );");
 
                             outputFileWriter.write(outputStringBuffer.toString());
@@ -121,8 +119,8 @@ public class CityNeighbourhoodData {
                         } else {
                             if (printDebugExtra) {
                                 System.out.println(
-                                    "Nothing is to be written!! distanceCalculatedFromInputCity=" +
-                                    distanceCalculatedFromInputCity);
+                                        "Nothing is to be written!! distanceCalculatedFromInputCity=" +
+                                                distanceCalculatedFromInputCity);
                             }
                         }
                     }
@@ -254,7 +252,7 @@ public class CityNeighbourhoodData {
      *d = R.c
      *
      */
-    public double distFromUsingHaversineDistance(double lat1, double lng1,
+    private double distFromUsingHaversineDistance(double lat1, double lng1,
         double lat2, double lng2) {
         double earthRadius = 6371; // Radious of the earth
         double dLat = Math.toRadians(lat2 - lat1);

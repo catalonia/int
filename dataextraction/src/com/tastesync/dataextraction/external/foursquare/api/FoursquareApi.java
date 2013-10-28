@@ -1880,7 +1880,7 @@ public class FoursquareApi {
         }
 
         if (urlBuilder.indexOf("&v=") == -1) {
-            urlBuilder.append("&v=" + version);
+            urlBuilder.append("&v=").append(version);
         }
 
         if (useCallback) {
@@ -1970,7 +1970,7 @@ public class FoursquareApi {
          * @throws JSONException when JSON parsing error occurs
          */
         public ApiRequestResponse(ResultMeta meta, JSONObject response,
-            JSONArray notifications) throws JSONException {
+            JSONArray notifications) {
             this.meta = meta;
             this.response = response;
             this.notifications = notifications;
