@@ -872,7 +872,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                             "user_restaurant_match_counter.match_counter"));
             }
 
-            if (strUserMatchCounter != null) {
+            if (strUserMatchCounter != null && !strUserMatchCounter.isEmpty()) {
                 userMatchCounter = Integer.valueOf(strUserMatchCounter);
             } else {
                 userMatchCounter = 0;
