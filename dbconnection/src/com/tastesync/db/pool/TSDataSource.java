@@ -28,7 +28,7 @@ public class TSDataSource {
      */
     private static final Logger logger = Logger.getLogger(TSDataSource.class);
     private static BasicDataSource poolDSInstance; // Database connection pool
-    public static final String TSDB_JNDI = "jdbc/TastesyncDB";
+    private static final String TSDB_JNDI = "jdbc/TastesyncDB";
     private static final String PATH_TO_CONFIG_FILE = "./config/TastesyncDB.properties";
 
     //  "jdbc:mysql://localhost:3306/tastesyncdb");
@@ -102,8 +102,7 @@ public class TSDataSource {
         return conn;
     }
 
-    public Connection getConnection(String username, String password)
-        throws SQLException {
+    public Connection getConnection(String username, String password) {
         if (conn == null) {
             try {
                 //Double check
@@ -422,11 +421,10 @@ public class TSDataSource {
     }
 
     public synchronized boolean testConnection() {
-        Connection connection = null;
         boolean isConnected = false;
 
         try {
-            connection = getConnection();
+            Connection connection = getConnection();
 
             if (connection != null) {
                 isConnected = true;
