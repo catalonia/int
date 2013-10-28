@@ -1926,11 +1926,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement.close();
 
-            if ("y".equalsIgnoreCase(userOnline)) {
-                return true;
-            } else {
-                return false;
-            }
+            return "y".equalsIgnoreCase(userOnline);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
