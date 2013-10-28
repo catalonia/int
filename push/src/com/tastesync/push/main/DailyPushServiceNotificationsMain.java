@@ -10,13 +10,13 @@ import java.util.TimeZone;
 
 public class DailyPushServiceNotificationsMain {
     /**
-     * @param args
+     * @param args input args
      */
     public static void main(String[] args) {
         PushService pushService = new PushService();
 
-        while (true) {
-            try {
+        try {
+            while (true) {
                 int startHour = 8;
                 int endHour = 23;
                 Date currentDate = new Date();
@@ -45,9 +45,9 @@ public class DailyPushServiceNotificationsMain {
                         e.printStackTrace();
                     }
                 }
-            } catch (TasteSyncException e) {
-                e.printStackTrace();
             }
+        } catch (TasteSyncException e) {
+            e.printStackTrace();
         }
     }
 

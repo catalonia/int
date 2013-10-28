@@ -34,7 +34,7 @@ public class PushService {
         	//error while send push notifications
             pushDAO.updateNotificationsSentStatus(userNotificationsPushVOList, 2);
 
-            List<String> deviceTokenList = null;
+            List<String> deviceTokenList;
 
             ApnsService apnsService = getApnsServiceInstance();
 
@@ -70,7 +70,7 @@ public class PushService {
         }
     }
 
-    public String getNotificationMsg(
+    private String getNotificationMsg(
         UserNotificationsPushVO userNotificationsPushVO)
         throws TasteSyncException {
         String notificationMsg = null;
@@ -176,8 +176,7 @@ public class PushService {
         return service;
     }
 
-    public void testPushMsg(String msg, String deviceToken)
-        throws IOException {
+    public void testPushMsg(String msg) {
         System.out.println("Notification is to be sent.");
 
         ApnsService service;
@@ -205,7 +204,7 @@ public class PushService {
         token = "94e2a80d 12ad0bc1 7d6ac413 ac4a27ea 9d701f68 c1668bed 22549c7c 226acc89";
         token = "94e2a80d12ad0bc17d6ac413ac4a27ea9d701f68c1668bed22549c7c226acc89";
 
-        deviceToken = token;
+        String deviceToken = token;
 
         service.push(deviceToken, payload);
     }

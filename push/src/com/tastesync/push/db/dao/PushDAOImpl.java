@@ -41,7 +41,7 @@ public class PushDAOImpl implements PushDAO {
             String userId;
             String notificationType;
             String linkedId;
-            UserNotificationsPushVO userNotificationsPushVO = null;
+            UserNotificationsPushVO userNotificationsPushVO;
 
             while (resultset.next()) {
                 userId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -90,7 +90,7 @@ public class PushDAOImpl implements PushDAO {
 
             resultset = statement.executeQuery();
 
-            String deviceToken = null;
+            String deviceToken;
 
             while (resultset.next()) {
                 //deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
@@ -166,7 +166,7 @@ public class PushDAOImpl implements PushDAO {
         try {
             connection = tsDataSource.getConnection();
 
-            String sql = null;
+            String sql;
 
             if ("1".equals(userNotificationsPushVO.getNotificationType())) {
                 sql = PushQueries.NOTIFICATIONTYPE1_TEXTDATA_SELECT_SQL;
@@ -198,10 +198,8 @@ public class PushDAOImpl implements PushDAO {
 
             statement.close();
 
-            NotificationsPushTextDataVO notificationsPushTextDataVO = new NotificationsPushTextDataVO(firstName,
+            return new NotificationsPushTextDataVO(firstName,
                     lastName);
-
-            return notificationsPushTextDataVO;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -231,7 +229,7 @@ public class PushDAOImpl implements PushDAO {
 
             resultset = statement.executeQuery();
 
-            String recoRequestId = null;
+            String recoRequestId;
             statementInner = connection.prepareStatement(PushQueries.RECOREPLY_DIDYOULIKE_NOTIF_INSERT_SQL);
 
             while (resultset.next()) {
