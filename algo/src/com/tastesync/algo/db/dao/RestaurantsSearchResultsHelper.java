@@ -26,11 +26,13 @@ public class RestaurantsSearchResultsHelper {
     private static final String SEARCH_QUERY_PART1_SQL = "" +
         " SELECT x.RESTAURANT_ID," + " y.user_restaurant_rank " + " FROM ( ";
     private static final String SEARCH_QUERY_PART2_1_SQL = "" +
-        " restaurant x ";
+        " SELECT distinct restaurant.RESTAURANT_ID" + " FROM restaurant ";
     private static final String SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL = "" +
-        " LEFT OUTER JOIN user_restaurant_match_counter y ON " +
-        "x.RESTAURANT_CITY_ID=? "+
-        "y.user_id=? "+
+        " ) x LEFT OUTER JOIN (" +
+        "SELECT user_restaurant_match_counter.restaurant_id, " +
+        "       user_restaurant_match_counter.user_restaurant_rank " +
+        "FROM   user_restaurant_match_counter " +
+        "WHERE  user_restaurant_match_counter.user_id = ? " + ") y " + "ON " +
         " x.RESTAURANT_ID = y.RESTAURANT_ID" + " ORDER BY " +
         " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank, x.restaurant_id ASC ";
     private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
