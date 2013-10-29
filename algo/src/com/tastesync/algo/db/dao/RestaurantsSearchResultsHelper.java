@@ -1,10 +1,12 @@
 package com.tastesync.algo.db.dao;
 
+import com.tastesync.algo.db.queries.UserRestaurantQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.InputRestaurantSearchVO;
 import com.tastesync.algo.model.vo.RestaurantsSearchResultsVO;
-import com.tastesync.common.utils.CommonFunctionsUtil;
 import com.tastesync.algo.util.TSConstants;
+
+import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -24,16 +26,13 @@ public class RestaurantsSearchResultsHelper {
     private static final String COUNT_SEARCH_QUERY_PART1_SQL = "" +
         " SELECT Count(*) FROM ( ";
     private static final String SEARCH_QUERY_PART1_SQL = "" +
-        " SELECT x.RESTAURANT_ID," + " y.user_restaurant_rank " + " FROM ( ";
+        " SELECT x.RESTAURANT_ID, y.user_restaurant_rank FROM ( ";
     private static final String SEARCH_QUERY_PART2_1_SQL = "" +
-        " SELECT distinct restaurant.RESTAURANT_ID" + " FROM restaurant ";
+        " SELECT distinct restaurant.RESTAURANT_ID FROM restaurant ";
     private static final String SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL = "" +
-        " ) x LEFT OUTER JOIN (" +
-        "SELECT user_restaurant_match_counter.restaurant_id, " +
-        "       user_restaurant_match_counter.user_restaurant_rank " +
-        "FROM   user_restaurant_match_counter " +
-        "WHERE  user_restaurant_match_counter.user_id = ? " + ") y " + "ON " +
-        " x.RESTAURANT_ID = y.RESTAURANT_ID" + " ORDER BY " +
+        " ) x LEFT OUTER JOIN user_restaurant_match_counter y ON " +
+        " y.user_id = ? " + " AND x.RESTAURANT_ID = y.RESTAURANT_ID" +
+        " ORDER BY " +
         " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank, x.restaurant_id ASC ";
     private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
@@ -52,19 +51,6 @@ public class RestaurantsSearchResultsHelper {
         String[] cuisineTier2IdArray, String[] themeIdArray,
         String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
         String[] occasionIdArray) throws TasteSyncException {
-        neighborhoodId = CommonFunctionsUtil.converStringAsNullIfNeeded(neighborhoodId);
-        userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
-        restaurantId = CommonFunctionsUtil.converStringAsNullIfNeeded(restaurantId);
-        neighborhoodId = CommonFunctionsUtil.converStringAsNullIfNeeded(neighborhoodId);
-        cityId = CommonFunctionsUtil.converStringAsNullIfNeeded(cityId);
-        stateName = CommonFunctionsUtil.converStringAsNullIfNeeded(stateName);
-        rating = CommonFunctionsUtil.converStringAsNullIfNeeded(rating);
-        savedFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(savedFlag);
-        favFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(favFlag);
-        dealFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(dealFlag);
-        chainFlag = CommonFunctionsUtil.converStringAsNullIfNeeded(chainFlag);
-        paginationId = CommonFunctionsUtil.converStringAsNullIfNeeded(paginationId);
-
         InputRestaurantSearchVO inputRestaurantSearchVO = new InputRestaurantSearchVO(userId,
                 restaurantId, neighborhoodId, cityId, stateName,
                 cuisineTier1IdArray, priceIdList, rating, savedFlag, favFlag,
@@ -96,8 +82,7 @@ public class RestaurantsSearchResultsHelper {
             statement = connection.prepareStatement(consolidatedSearchQuery.toString());
 
             resultset = bindParametersForConsolidatedQuery(executingCount,
-                    userId, rating, inputRestaurantSearchVO, statement,
-                    consolidatedSearchQuery);
+                    inputRestaurantSearchVO, statement);
 
             int rowCount = 0;
 
@@ -119,8 +104,85 @@ public class RestaurantsSearchResultsHelper {
             statement = connection.prepareStatement(consolidatedSearchQuery.toString());
 
             resultset = bindParametersForConsolidatedQuery(executingCount,
-                    userId, rating, inputRestaurantSearchVO, statement,
-                    consolidatedSearchQuery);
+                    inputRestaurantSearchVO, statement);
+
+            List<String> restaurantIdList = new ArrayList<String>(TSConstants.PAGINATION_GAP);
+            String restaurantIdValue = null;
+
+            while (resultset.next()) {
+                restaurantIdValue = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "restaurant_id"));
+
+                if (restaurantIdValue != null) {
+                    restaurantIdList.add(restaurantIdValue);
+                }
+            }
+
+            statement.close();
+
+            return new RestaurantsSearchResultsVO(String.valueOf(
+                    maxPaginationId), restaurantIdList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while showListOfRestaurantsSearchResults= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.close();
+            tsDataSource.closeConnection(connection, statement, resultset);
+        }
+    }
+
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(
+        String userId, String cityId, String paginationId)
+        throws TasteSyncException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        //once do count(*), second time do select using limit derived from paginationId
+        try {
+            connection = tsDataSource.getConnection();
+            statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL);
+
+            statement.setString(1, cityId);
+            statement.setString(2, userId);
+
+            resultset = statement.executeQuery();
+
+            int rowCount = 0;
+
+            if (resultset.next()) {
+                rowCount = resultset.getInt(1);
+            }
+
+            statement.close();
+
+            //reassigned
+            int maxPaginationId = (rowCount / TSConstants.PAGINATION_GAP) + 1;
+
+            // query is built. now bind the parameters!
+            statement = connection.prepareStatement(UserRestaurantQueries.USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL);
+
+            statement.setString(1, cityId);
+            statement.setString(2, userId);
+
+            int pagintionIndex = 0;
+
+            if (paginationId != null) {
+                pagintionIndex = (Integer.valueOf(paginationId) - 1) * TSConstants.PAGINATION_GAP;
+            }
+
+            if (pagintionIndex < 0) {
+                pagintionIndex = 0;
+            }
+
+            statement.setInt(3, pagintionIndex);
+            statement.setInt(4, TSConstants.PAGINATION_GAP);
+
+            resultset = statement.executeQuery();
 
             List<String> restaurantIdList = new ArrayList<String>(TSConstants.PAGINATION_GAP);
             String restaurantIdValue = null;
@@ -343,18 +405,17 @@ public class RestaurantsSearchResultsHelper {
                     consolidatedSearchQuery.toString());
             }
 
-//            System.out.println("consolidatedSearchQuery=" +
-//                consolidatedSearchQuery.toString());
+            //            System.out.println("consolidatedSearchQuery=" +
+            //                consolidatedSearchQuery.toString());
         }
 
         return consolidatedSearchQuery;
     }
 
     private ResultSet bindParametersForConsolidatedQuery(
-        boolean executingCount, String userId, String rating,
+        boolean executingCount,
         InputRestaurantSearchVO inputRestaurantSearchVO,
-        PreparedStatement statement, StringBuffer consolidatedSearchQuery)
-        throws SQLException {
+        PreparedStatement statement) throws SQLException {
         ResultSet resultset;
         int bindPosition = 0;
 
@@ -421,7 +482,8 @@ public class RestaurantsSearchResultsHelper {
         //-- IF restaurantSearchParameters{rating} is not null 
         if ((inputRestaurantSearchVO.getRating() != null)) {
             ++bindPosition;
-            statement.setDouble(bindPosition, new Double(rating));
+            statement.setDouble(bindPosition,
+                new Double(inputRestaurantSearchVO.getRating()));
         }
 
         // -- IF restaurantSearchParameters{chainFlag} = 0 (0 means "Hide" Chain Restaurants)
@@ -430,13 +492,8 @@ public class RestaurantsSearchResultsHelper {
         //            ++bindPosition;
         //            statement.setDouble(bindPosition, new Double(rating));
         //        }
-
-        //Fixed part
-        // Left outer join
-        consolidatedSearchQuery.append(SEARCH_QUERY_PART3_LEFT_OUTER_JOIN_SQL);
-
         ++bindPosition;
-        statement.setString(bindPosition, userId);
+        statement.setString(bindPosition, inputRestaurantSearchVO.getUserId());
 
         if (!executingCount) {
             ++bindPosition;

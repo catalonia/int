@@ -6,6 +6,7 @@ import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.RestaurantsSearchResultsVO;
+
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
@@ -763,9 +764,9 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
             statement.close();
 
-            return (numNbrhoodMatch + numCuis2Match +
-                    numPriceMatch + numFavFollowMatch + numRecoFollowMatch +
-                    numFavTrustedMatch + numRecoTrustedMatch);
+            return (numNbrhoodMatch + numCuis2Match + numPriceMatch +
+            numFavFollowMatch + numRecoFollowMatch + numFavTrustedMatch +
+            numRecoTrustedMatch);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -776,14 +777,14 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     }
 
     @Override
-    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(String userId,
-        String restaurantId, String neighborhoodId, String cityId,
-        String stateName, String[] cuisineTier1IdArray, String[] priceIdList,
-        String rating, String savedFlag, String favFlag, String dealFlag,
-        String chainFlag, String paginationId, String[] cuisineTier2IdArray,
-        String[] themeIdArray, String[] whoareyouwithIdArray,
-        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
-        throws TasteSyncException {
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
+        String userId, String restaurantId, String neighborhoodId,
+        String cityId, String stateName, String[] cuisineTier1IdArray,
+        String[] priceIdList, String rating, String savedFlag, String favFlag,
+        String dealFlag, String chainFlag, String paginationId,
+        String[] cuisineTier2IdArray, String[] themeIdArray,
+        String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
+        String[] occasionIdArray) throws TasteSyncException {
         RestaurantsSearchResultsHelper restaurantsSearchResultsHelper = new RestaurantsSearchResultsHelper();
 
         return restaurantsSearchResultsHelper.showListOfRestaurantsSearchResults(userId,
@@ -845,8 +846,6 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         }
     }
 
-    
-
     @Override
     public int getUserMatchCounter(String userId, String restaurantId)
         throws TasteSyncException {
@@ -872,7 +871,8 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                             "user_restaurant_match_counter.match_counter"));
             }
 
-            if (strUserMatchCounter != null && !strUserMatchCounter.isEmpty()) {
+            if ((strUserMatchCounter != null) &&
+                    !strUserMatchCounter.isEmpty()) {
                 userMatchCounter = Integer.valueOf(strUserMatchCounter);
             } else {
                 userMatchCounter = 0;
@@ -975,5 +975,14 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         } finally {
             tsDataSource.closeConnection(null, statement, resultset);
         }
+    }
+
+    @Override
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(
+        String userId, String cityId, String paginationId) throws TasteSyncException {
+        RestaurantsSearchResultsHelper restaurantsSearchResultsHelper = new RestaurantsSearchResultsHelper();
+
+        return restaurantsSearchResultsHelper.showListOfRestaurantsSearchResultsBasedOnUserCity(userId,
+            cityId, paginationId);
     }
 }

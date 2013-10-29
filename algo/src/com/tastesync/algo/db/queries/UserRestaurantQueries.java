@@ -254,4 +254,22 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "VALUES      ( ?, " + "              ?, " + "              ? ) " +
         " ON DUPLICATE KEY UPDATE " +
         " user_restaurant_match_counter.user_restaurant_rank = ?";
+    public static String COUNT_USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL = "" +
+        "SELECT x.RESTAURANT_ID, " + "       y.USER_RESTAURANT_RANK " +
+        "FROM   RESTAURANT x " +
+        "       LEFT OUTER JOIN USER_RESTAURANT_MATCH_COUNTER y " +
+        "                    ON x.RESTAURANT_CITY_ID = ? " +
+        "                       AND x.RESTAURANT_ID = y.RESTAURANT_ID " +
+        "                       AND y.USER_ID = ? " +
+        "ORDER  BY Isnull(y.USER_RESTAURANT_RANK), " +
+        "          y.USER_RESTAURANT_RANK ASC ";
+    public static String USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL = "" +
+        "SELECT x.RESTAURANT_ID, " + "       y.USER_RESTAURANT_RANK " +
+        "FROM   RESTAURANT x " +
+        "       LEFT OUTER JOIN USER_RESTAURANT_MATCH_COUNTER y " +
+        "                    ON x.RESTAURANT_CITY_ID = ? " +
+        "                       AND x.RESTAURANT_ID = y.RESTAURANT_ID " +
+        "                       AND y.USER_ID = ? " +
+        "ORDER  BY Isnull(y.USER_RESTAURANT_RANK), " +
+        "          y.USER_RESTAURANT_RANK ASC " + "LIMIT ?, ? ";
 }

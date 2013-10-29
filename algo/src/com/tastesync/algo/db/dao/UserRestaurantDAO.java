@@ -45,25 +45,29 @@ public interface UserRestaurantDAO extends BaseDAO {
         RestaurantPopularityTierVO flaggedRestaurantPopularityTierVO)
         throws TasteSyncException;
 
-    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(String userId,
-        String restaurantId, String neighborhoodId, String cityId,
-        String stateName, String[] cuisineTier1IdArray, String[] priceIdList,
-        String rating, String savedFlag, String favFlag, String dealFlag,
-        String chainFlag, String paginationId, String[] cuisineTier2IdArray,
-        String[] themeIdArray, String[] whoareyouwithIdArray,
-        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
+    RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
+        String userId, String restaurantId, String neighborhoodId,
+        String cityId, String stateName, String[] cuisineTier1IdArray,
+        String[] priceIdList, String rating, String savedFlag, String favFlag,
+        String dealFlag, String chainFlag, String paginationId,
+        String[] cuisineTier2IdArray, String[] themeIdArray,
+        String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
+        String[] occasionIdArray) throws TasteSyncException;
+
+    RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(
+        String userId, String cityId, String paginationId) throws TasteSyncException;
+
+    void submitAssignedRankUserRestaurantForWhole(
+        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
         throws TasteSyncException;
 
-    public void submitAssignedRankUserRestaurantForWhole(
-    		List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+    int getUserMatchCounter(String userId, String restaurantId)
         throws TasteSyncException;
 
-    public int getUserMatchCounter(String userId, String restaurantId) throws TasteSyncException;
+    int getRestaurantInfoTierId(String userId, String restaurantId)
+        throws TasteSyncException;
 
-    public int getRestaurantInfoTierId(String userId, String restaurantId) throws TasteSyncException;
-
-    public void submitAssignedRankUserRestaurant(
-    		List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
-            throws TasteSyncException;
-    
+    void submitAssignedRankUserRestaurant(
+        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+        throws TasteSyncException;
 }
