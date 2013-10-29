@@ -241,13 +241,13 @@ public class RankRestaurantsSingleUserCalcHelper {
 
         while ((upper0Endindex <= restaurantsRankMatch0ListSize) ||
                 (upper1Endindex <= restaurantsRankMatch1ListSize)) {
-            if (printDebugExtra) {
+            //if (printDebugExtra) {
                 System.out.println("upper0Endindex=" + upper0Endindex +
                     " restaurantsRankMatch0ListSize=" +
                     restaurantsRankMatch0ListSize + " upper1Endindex=" +
                     upper1Endindex + " restaurantsRankMatch1ListSize=" +
                     restaurantsRankMatch1ListSize);
-            }
+            //}
 
             if (upper0Endindex <= restaurantsRankMatch0ListSize) {
                 for (int currentRestaurantsRankMatch0Index = lower0StartIndex;
