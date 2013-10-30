@@ -11,6 +11,8 @@ import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 
+import org.apache.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,6 +25,11 @@ import java.util.List;
 
 public class UserRestaurantDAOImpl extends BaseDaoImpl
     implements UserRestaurantDAO {
+    /**
+     * Logger for this class
+     */
+    private static final Logger logger = Logger.getLogger(UserRestaurantDAOImpl.class);
+
     @Override
     public List<RestaurantCityVO> getFlaggedRestaurantList(
         int algoIndicatorIdentifyRestaurantIdList) throws TasteSyncException {
@@ -876,7 +883,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 userMatchCounter = Integer.valueOf(strUserMatchCounter);
             } else {
                 userMatchCounter = 0;
-                System.out.println("userMatchCounter is NULL. set to 0");
+
+                if (logger.isInfoEnabled()) {
+                    logger.info("userMatchCounter is NULL. set to 0");
+                }
             }
 
             statement.close();
@@ -919,7 +929,10 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 pupularityTierId = Integer.valueOf(strPupularityTierId);
             } else {
                 pupularityTierId = 0;
-                System.out.println("pupularityTierId is NULL. set to 0");
+
+                if (logger.isInfoEnabled()) {
+                    logger.info("pupularityTierId is NULL. set to 0");
+                }
             }
 
             statement.close();
@@ -979,7 +992,8 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
 
     @Override
     public RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(
-        String userId, String cityId, String paginationId) throws TasteSyncException {
+        String userId, String cityId, String paginationId)
+        throws TasteSyncException {
         RestaurantsSearchResultsHelper restaurantsSearchResultsHelper = new RestaurantsSearchResultsHelper();
 
         return restaurantsSearchResultsHelper.showListOfRestaurantsSearchResultsBasedOnUserCity(userId,

@@ -158,7 +158,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "             user_reco_demand_tier_precalc.user_id) " +
         "VALUES      ( ?, " + "              ?, " + "              ? ) " +
         " ON DUPLICATE KEY UPDATE " +
-        " user_reco_demand_tier_precalc.calc_flag = ? " +
+        " user_reco_demand_tier_precalc.calc_flag = ?, " +
         " user_reco_demand_tier_precalc.demand_tier_precalc = ? ";
     public static String RECOREQUEST_REPLY_USER_RESTAURANT_REPLY_SELECT_SQL = "" +
         "SELECT recorequest_reply_user.reply_user_id, " +
@@ -240,7 +240,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "             user_user_match_tier.user_a_id, " +
         "             user_user_match_tier.user_b_id) " + "VALUES      ( ?, " +
         "              ?, " + "              ?, " + "              ? ) " +
-        " ON DUPLICATE KEY UPDATE" + " user_user_match_tier.calc_flag = ?" +
+        " ON DUPLICATE KEY UPDATE" + " user_user_match_tier.calc_flag = ?, " +
         " user_user_match_tier.match_tier = ?";
     public static String USER_FOLLOW_DATA_UPDATE_SQL = "" +
         "UPDATE user_follow_data " + "SET    user_follow_data.algo1_ind = ? " +
@@ -257,7 +257,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "               AND RESTAURANT_EXTENDED_INFO.CHAIN_ID IS NULL) x, " +
         "       RESTAURANT_INFO_POPULARITY_TIER y " +
         "WHERE  x.RESTAURANT_ID = y.RESTAURANT_ID " +
-        "       AND y.TIER_ID = 1 ";
+        "       AND y.TIER_ID = ? ";
     
     public static String USER_ONLINE_SELECT_SQL = ""
     		+ "SELECT USERS.IS_ONLINE "

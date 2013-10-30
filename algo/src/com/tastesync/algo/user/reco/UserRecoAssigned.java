@@ -10,6 +10,8 @@ import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +20,10 @@ import java.util.Random;
 
 
 public class UserRecoAssigned {
+    /**
+     * Logger for this class
+     */
+    private static final Logger logger = Logger.getLogger(UserRecoAssigned.class);
     private static final String NOT_USER_TOPIC_MATCH_4 = "not_user_topic_match_4";
     private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
     private boolean printDebugExtra = false;
@@ -188,16 +194,21 @@ public class UserRecoAssigned {
                     String[] temp1usersTemp1FieldResult = new String[temp1usersTemp1Field.size()];
                     temp1usersTemp1FieldResult = temp1usersTemp1Field.toArray(temp1usersTemp1FieldResult);
 
-                    System.out.println("temp1usersTemp1FieldResult=" +
-                        Arrays.toString(temp1usersTemp1FieldResult));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("temp1usersTemp1FieldResult=" +
+                            Arrays.toString(temp1usersTemp1FieldResult));
+                    }
 
                     Integer[] indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult =
                         new Integer[indexElementToBeRemovedFrmUserRecoSupplyTierVOList.size()];
                     indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult = indexElementToBeRemovedFrmUserRecoSupplyTierVOList.toArray(indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult);
-                    System.out.println(
-                        "indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult=" +
-                        Arrays.toString(
-                            indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult));
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(
+                            "indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult=" +
+                            Arrays.toString(
+                                indexElementToBeRemovedFrmUserRecoSupplyTierVOListResult));
+                    }
                 }
 
                 // check parameters are same as part of sanity check
@@ -343,38 +354,62 @@ public class UserRecoAssigned {
                     if (printDebugExtra) {
                         String[] tranche1usersUserIdResult = new String[tranche1usersUserId.size()];
                         tranche1usersUserIdResult = tranche1usersUserId.toArray(tranche1usersUserIdResult);
-                        System.out.println("tranche1usersUserIdResult=" +
-                            Arrays.toString(tranche1usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info("tranche1usersUserIdResult=" +
+                                Arrays.toString(tranche1usersUserIdResult));
+                        }
 
                         String[] tranche2usersUserIdResult = new String[tranche2usersUserId.size()];
                         tranche2usersUserIdResult = tranche2usersUserId.toArray(tranche2usersUserIdResult);
-                        System.out.println("tranche2usersUserIdResult=" +
-                            Arrays.toString(tranche2usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info("tranche2usersUserIdResult=" +
+                                Arrays.toString(tranche2usersUserIdResult));
+                        }
 
                         String[] tranche3usersUserIdResult = new String[tranche3usersUserId.size()];
                         tranche3usersUserIdResult = tranche3usersUserId.toArray(tranche3usersUserIdResult);
-                        System.out.println("tranche3usersUserIdResult=" +
-                            Arrays.toString(tranche3usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info(" tranche3usersUserIdResult=" +
+                                Arrays.toString(tranche3usersUserIdResult));
+                        }
 
                         String[] tranche4usersUserIdResult = new String[tranche4usersUserId.size()];
                         tranche4usersUserIdResult = tranche4usersUserId.toArray(tranche4usersUserIdResult);
-                        System.out.println("tranche4usersUserIdResult=" +
-                            Arrays.toString(tranche4usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info("tranche4usersUserIdResult=" +
+                                Arrays.toString(tranche4usersUserIdResult));
+                        }
 
                         String[] tranche5usersUserIdResult = new String[tranche5usersUserId.size()];
                         tranche5usersUserIdResult = tranche5usersUserId.toArray(tranche5usersUserIdResult);
-                        System.out.println("tranche5usersUserIdResult=" +
-                            Arrays.toString(tranche5usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info(
+                                "processAssignRecorequestToUsers(String, int) - tranche5usersUserIdResult=" +
+                                Arrays.toString(tranche5usersUserIdResult));
+                        }
 
                         String[] tranche6usersUserIdResult = new String[tranche6usersUserId.size()];
                         tranche6usersUserIdResult = tranche6usersUserId.toArray(tranche6usersUserIdResult);
-                        System.out.println("tranche6usersUserIdResult=" +
-                            Arrays.toString(tranche6usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info(
+                                "processAssignRecorequestToUsers(String, int) - tranche6usersUserIdResult=" +
+                                Arrays.toString(tranche6usersUserIdResult));
+                        }
 
                         String[] tranche7usersUserIdResult = new String[tranche7usersUserId.size()];
                         tranche7usersUserIdResult = tranche7usersUserId.toArray(tranche7usersUserIdResult);
-                        System.out.println("tranche7usersUserIdResult=" +
-                            Arrays.toString(tranche7usersUserIdResult));
+
+                        if (logger.isInfoEnabled()) {
+                            logger.info(
+                                "processAssignRecorequestToUsers(String, int) - tranche7usersUserIdResult=" +
+                                Arrays.toString(tranche7usersUserIdResult));
+                        }
 
                         tranche1usersUserIdResult = null;
                         tranche2usersUserIdResult = null;
@@ -421,7 +456,9 @@ public class UserRecoAssigned {
                     tranche7usersUserId = null;
                 }
 
-                System.out.println("assigneduserUserId=" + assigneduserUserId);
+                if (logger.isInfoEnabled()) {
+                    logger.info("assigneduserUserId=" + assigneduserUserId);
+                }
 
                 if (assigneduserUserId != null) {
                     userRecoDAO.submitRecorequestTsAssigned(recoRequestId,
@@ -430,15 +467,20 @@ public class UserRecoAssigned {
                         1);
 
                     try {
-                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT, TSConstants.BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT);
+                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
+                            TSConstants.BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT);
                     } catch (com.tastesync.common.exception.TasteSyncException e) {
                         e.printStackTrace();
                     }
 
                     //sleep for remaining time!!
                     try {
-                        System.out.println("SLEEP (in ms) for " +
-                            TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(
+                                "processAssignRecorequestToUsers(String, int) - SLEEP (in ms) for " +
+                                TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                        }
+
                         Thread.currentThread();
                         Thread.sleep(TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
                     } catch (InterruptedException e) {
@@ -489,8 +531,11 @@ public class UserRecoAssigned {
             } else {
                 //sleep for remaining time!!
                 try {
-                    System.out.println("SLEEP (in ms) for " +
-                        TSConstants.DEMAND_TIER3_START_SLEEP_TIME);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(" SLEEP (in ms) for " +
+                            TSConstants.DEMAND_TIER3_START_SLEEP_TIME);
+                    }
+
                     Thread.currentThread();
                     Thread.sleep(TSConstants.DEMAND_TIER3_START_SLEEP_TIME);
                 } catch (InterruptedException e) {
@@ -704,15 +749,20 @@ public class UserRecoAssigned {
                     userRecoDAO.submitUserRecoSupplyTier(initiatorUserId, 0, 1);
 
                     try {
-                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT, TSConstants.BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT);
+                        CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
+                            TSConstants.BASENAME_SEND_PUSH_NOTIFICATIONS_SCRIPT);
                     } catch (com.tastesync.common.exception.TasteSyncException e) {
-                        e.printStackTrace();
+                        logger.error("processAssignRecorequestToUsers(String, int)",
+                            e);
                     }
 
                     //sleep for remaining time!!
                     try {
-                        System.out.println("SLEEP (in ms) for " +
-                            TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("SLEEP (in ms) for " +
+                                TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
+                        }
+
                         Thread.currentThread();
                         Thread.sleep(TSConstants.SLEEP_TIME_BETWEEN_TWO_REQUEST_ITERATION_IN_MILLISECONDS);
                     } catch (InterruptedException e) {

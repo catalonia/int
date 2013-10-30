@@ -2,6 +2,8 @@ package com.tastesync.algo.user.restaurant;
 
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -9,7 +11,10 @@ import java.util.List;
 
 
 public class RankRestaurantsSingleUserCalcHelper {
-    private static boolean printDebugExtra = false;
+    /**
+     * Logger for this class
+     */
+    private static final Logger logger = Logger.getLogger(RankRestaurantsSingleUserCalcHelper.class);
 
     public RankRestaurantsSingleUserCalcHelper() {
         super();
@@ -37,9 +42,9 @@ public class RankRestaurantsSingleUserCalcHelper {
                 ? Integer.valueOf(restaurantPopularityTierVO.getNumUserRestaurantMatchCount())
                 : (Integer.MIN_VALUE);
 
-            if (printDebugExtra) {
-                System.out.println("restaurantTierId=" + restaurantTierId +
-                    " userMatchCounter=" + userMatchCounter + "\n\t" +
+            if (logger.isInfoEnabled()) {
+                logger.info("restaurantTierId=" + restaurantTierId +
+                    " userMatchCounter=" + userMatchCounter + "\nt" +
                     restaurantPopularityTierVO);
             }
 
@@ -64,9 +69,12 @@ public class RankRestaurantsSingleUserCalcHelper {
             } else if ((restaurantTierId == 5) && (userMatchCounter > 0)) {
                 numTier5Match1.add(restaurantPopularityTierVO);
             } else {
-                System.out.println(
-                    "Not a valid group. Unknown combination for restaurantTierId=" +
-                    restaurantTierId + " userMatchCounter=" + userMatchCounter);
+                if (logger.isInfoEnabled()) {
+                    logger.info(
+                        "personalisedRestaurantsResultsForSingleUser(LinkedList<RestaurantPopularityTierVO>) - Not a valid group. Unknown combination for restaurantTierId=" +
+                        restaurantTierId + " userMatchCounter=" +
+                        userMatchCounter);
+                }
             }
         }
 
@@ -241,13 +249,13 @@ public class RankRestaurantsSingleUserCalcHelper {
 
         while ((upper0Endindex <= restaurantsRankMatch0ListSize) ||
                 (upper1Endindex <= restaurantsRankMatch1ListSize)) {
-            //if (printDebugExtra) {
-                System.out.println("upper0Endindex=" + upper0Endindex +
+            if (logger.isDebugEnabled()) {
+                logger.debug("upper0Endindex=" + upper0Endindex +
                     " restaurantsRankMatch0ListSize=" +
                     restaurantsRankMatch0ListSize + " upper1Endindex=" +
                     upper1Endindex + " restaurantsRankMatch1ListSize=" +
                     restaurantsRankMatch1ListSize);
-            //}
+            }
 
             if (upper0Endindex <= restaurantsRankMatch0ListSize) {
                 for (int currentRestaurantsRankMatch0Index = lower0StartIndex;

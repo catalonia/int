@@ -36,7 +36,6 @@ public class RestaurantsSearchResultsHelper {
         " ISNULL(y.user_restaurant_rank), y.user_restaurant_rank, x.restaurant_id ASC ";
     private static final String SEARCH_QUERY_PART4_SQL = "LIMIT ?, ?";
     private static final String HIDE_CHAINED_RESTAURANT = "0";
-    private static final boolean printDebugExtra = false;
 
     public RestaurantsSearchResultsHelper() {
         super();
@@ -63,11 +62,8 @@ public class RestaurantsSearchResultsHelper {
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
-        if (printDebugExtra) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("inputRestaurantSearchVO=" +
-                    inputRestaurantSearchVO);
-            }
+        if (logger.isDebugEnabled()) {
+            logger.debug("inputRestaurantSearchVO=" + inputRestaurantSearchVO);
         }
 
         //once do count(*), second time do select using limit derived from paginationId
@@ -399,14 +395,9 @@ public class RestaurantsSearchResultsHelper {
             consolidatedSearchQuery.append(SEARCH_QUERY_PART4_SQL);
         }
 
-        if (printDebugExtra) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("consolidatedSearchQuery=" +
-                    consolidatedSearchQuery.toString());
-            }
-
-            //            System.out.println("consolidatedSearchQuery=" +
-            //                consolidatedSearchQuery.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("consolidatedSearchQuery=" +
+                consolidatedSearchQuery.toString());
         }
 
         return consolidatedSearchQuery;

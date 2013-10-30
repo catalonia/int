@@ -1736,7 +1736,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement.setInt(5, 0);
 
-            statement.setInt(2, matchTier);
+            statement.setInt(6, matchTier);
 
             statement.executeUpdate();
 

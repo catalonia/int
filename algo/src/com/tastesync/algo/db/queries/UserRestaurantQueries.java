@@ -255,7 +255,7 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         " ON DUPLICATE KEY UPDATE " +
         " user_restaurant_match_counter.user_restaurant_rank = ?";
     public static String COUNT_USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL = "" +
-        "SELECT x.RESTAURANT_ID, " + "       y.USER_RESTAURANT_RANK " +
+        "SELECT COUNT(*) " +
         "FROM   RESTAURANT x " +
         "       LEFT OUTER JOIN USER_RESTAURANT_MATCH_COUNTER y " +
         "                    ON x.RESTAURANT_CITY_ID = ? " +

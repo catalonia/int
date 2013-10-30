@@ -8,11 +8,17 @@ import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.UserAUserBVO;
 import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class UserUserCalc {
+    /**
+     * Logger for this class
+     */
+    private static final Logger logger = Logger.getLogger(UserUserCalc.class);
     private UserUserDAO userUserDAO = new UserUserDAOImpl();
 
     public UserUserCalc() {
@@ -64,8 +70,10 @@ public class UserUserCalc {
                 if (!userAUserBVOList.contains(userAUserBVO)) {
                     userAUserBVOList.add(userAUserBVO);
                 } else {
-                    System.out.println("Pair UserA/UserB already found. " +
-                        userAUserBVO.toString());
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Pair UserA/UserB already found. " +
+                            userAUserBVO.toString());
+                    }
                 }
             }
         }
@@ -86,16 +94,21 @@ public class UserUserCalc {
             if (!userAUserBVOList.contains(userAUserBVO)) {
                 userAUserBVOList.add(userAUserBVO);
             } else {
-                System.out.println(
-                    "From Follow data. - Pair UserA/UserB already found. " +
-                    userAUserBVO.toString());
+                if (logger.isDebugEnabled()) {
+                    logger.info(
+                        "From Follow data. - Pair UserA/UserB already found. " +
+                        userAUserBVO.toString());
+                }
             }
         }
 
         // reset list to null
         userFolloweeUserFollowerVOList = null;
-        System.out.println("Number of pairs UserA/UserB found. " +
-            userAUserBVOList.size());
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Number of pairs UserA/UserB found. " +
+                userAUserBVOList.size());
+        }
 
         //pair are available
         for (UserAUserBVO userAUserBVOValue : userAUserBVOList) {
@@ -225,8 +238,10 @@ public class UserUserCalc {
             List<String> userBFavChainRestaurantIdList = userUserDAO.getUserXFavCRest(userAUserBVOValue.getUserB());
             double numUserBFavChainRest = userBFavChainRestaurantIdList.size();
 
-            double numUserAFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserA(), 1);
-            double numUserBFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserB(), 1);
+            double numUserAFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserA(),
+                    1);
+            double numUserBFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserB(),
+                    1);
 
             // -- Tier 1 logic
             if ((userAFollowUserB == 1) || (userBFollowUserA == 1) ||
