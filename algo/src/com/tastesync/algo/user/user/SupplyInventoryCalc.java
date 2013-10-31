@@ -8,6 +8,10 @@ import com.tastesync.algo.model.vo.RecorequestTsAssignedVO;
 import com.tastesync.algo.model.vo.RecorequestUserVO;
 import com.tastesync.algo.util.TSConstants;
 
+import com.tastesync.db.pool.TSDataSource;
+
+import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +29,8 @@ public class SupplyInventoryCalc {
 
     //-- Identify flagged users
     public void processAllUserFlaggedUserListSupplyInventory()
-        throws TasteSyncException {
+        throws TasteSyncException, SQLException {
+    	TSDataSource tsDataSource = TSDataSource.getInstance();
         int algoIndicatorIdentifyUseridList = 2;
         List<String> recorequestUserFlaggedUserList = userUserDAO.getRecorequestUserFlaggedUserList(algoIndicatorIdentifyUseridList);
         algoIndicatorIdentifyUseridList = 1;
@@ -78,6 +83,7 @@ public class SupplyInventoryCalc {
 
         double numRecorequestsAssignedTotal = 0;
         double numUserRecorequestsAssignedRepliedWithin10Mins = 0;
+        
 
         for (String flagUserId : allUserFlaggedUserList) {
             numRecorequestsAssignedToday = userUserDAO.getNumRecorequestsAssignedToday(flagUserId);
@@ -138,6 +144,8 @@ public class SupplyInventoryCalc {
                 }
             }
 
+            tsDataSource.begin();
+
             if ((numRecorequestsAssignedToday >= 3) ||
                     ((numRecorequestsAssignedToday -
                     numRecorequestsAssignedTodayReplied) >= 2) ||
@@ -162,18 +170,30 @@ public class SupplyInventoryCalc {
                     }
                 }
             }
+
+            tsDataSource.commit();
         }
+
+        tsDataSource.begin();
 
         for (String flaggedUserId : recorequestUserFlaggedUserList) {
             userUserDAO.submitRecorrequestUser(flaggedUserId, 1);
         }
 
+        tsDataSource.commit();
+        tsDataSource.begin();
+
         for (String flaggedUserId : recorequestTsAssignedFlaggedUserList) {
             userUserDAO.submitRecorrequestAssigned(flaggedUserId, 0);
         }
 
+        tsDataSource.commit();
+        tsDataSource.begin();
+
         for (String flaggedUserId : recorequestReplyUserFlaggedUserList) {
             userUserDAO.submitRecorrequestReplyUserAlgo1(flaggedUserId, 3);
         }
+
+        tsDataSource.commit();
     }
 }

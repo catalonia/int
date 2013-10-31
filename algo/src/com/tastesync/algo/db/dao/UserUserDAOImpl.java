@@ -1714,7 +1714,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
     }
 
     @Override
-    public void sumbitAssignedUserUserMatchTier(String userIdA, String userIdB,
+    public void submitAssignedUserUserMatchTier(String userIdA, String userIdB,
         int matchTier) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
@@ -1780,12 +1780,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
 
-            if (tsDataSource != null) {
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
             }
 
             throw new TasteSyncException(

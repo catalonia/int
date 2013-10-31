@@ -26,7 +26,7 @@ public class UserRecoAssigned {
     private static final Logger logger = Logger.getLogger(UserRecoAssigned.class);
     private static final String NOT_USER_TOPIC_MATCH_4 = "not_user_topic_match_4";
     private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
-    private boolean printDebugExtra = false;
+    private static final boolean printDebugExtra = false;
 
     public UserRecoAssigned() {
         super();

@@ -6,7 +6,9 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
+import com.tastesync.db.pool.TSDataSource;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +17,8 @@ import java.util.List;
 public class UserRestRankOrderCalc {
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
-    public void updateUserRestRankOrderCalc() throws TasteSyncException {
+    public void updateUserRestRankOrderCalc() throws TasteSyncException, SQLException {
+    	TSDataSource tsDataSource = TSDataSource.getInstance();
         int algoIndicatorIdentifyRestaurantIdList = 0;
         List<RestaurantCityVO> flaggedRestaurantList = userRestaurantDAO.getFlaggedRestaurantList(algoIndicatorIdentifyRestaurantIdList);
         List<String> usersIdList = userRestaurantDAO.getAllUsers();
@@ -58,11 +61,13 @@ public class UserRestRankOrderCalc {
                 // check numUserRestaurantMatchCount
                 List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
 
+                tsDataSource.begin();
                 // final insert
                 userRestaurantDAO.submitAssignedRankUserRestaurant(list1ofrestaurants);
 
                 userRestaurantDAO.submitFlaggedRestaurant(flaggedRestaurantUserVO.getRestaurantId(),
                     -1);
+                tsDataSource.commit();
             }
         }
     }

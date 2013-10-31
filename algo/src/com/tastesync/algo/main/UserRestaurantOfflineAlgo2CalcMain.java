@@ -44,7 +44,6 @@ public class UserRestaurantOfflineAlgo2CalcMain {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
-
             try {
                 tsDataSource.rollback();
             } catch (SQLException e1) {

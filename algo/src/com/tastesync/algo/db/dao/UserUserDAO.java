@@ -126,7 +126,7 @@ public interface UserUserDAO extends BaseDAO {
 
     List<String> getUserXFavCRest(String userIdX) throws TasteSyncException;
 
-    void sumbitAssignedUserUserMatchTier(String userIdA, String userIdB,
+    void submitAssignedUserUserMatchTier(String userIdA, String userIdB,
         int matchTier) throws TasteSyncException;
 
     void submitUserFollowDataUpdate(String userIdA, String userIdB, int algoInd)

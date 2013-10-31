@@ -4,7 +4,9 @@ import com.tastesync.algo.db.dao.UserRestaurantDAO;
 import com.tastesync.algo.db.dao.UserRestaurantDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
+import com.tastesync.db.pool.TSDataSource;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,7 +21,8 @@ public class RestInfoPopularityTierCalc {
 	// get restaurant if based on alog_ind
     //TODO need to be updated/reset whenever data from factual is updated
     public void processAllFlaggedRestaurantListRestInfoPopularityTier()
-        throws TasteSyncException {
+        throws TasteSyncException, SQLException {
+    	TSDataSource tsDataSource = TSDataSource.getInstance();
         int algoIndicatorIdentifyRestaurantIdList = 1;
         List<RestaurantCityVO> recorequestUserFlaggedUserList = userRestaurantDAO.getFlaggedRestaurantList(algoIndicatorIdentifyRestaurantIdList);
         List<String> cityIdList = userRestaurantDAO.getFlaggedCityIdList(algoIndicatorIdentifyRestaurantIdList);
@@ -51,12 +54,14 @@ public class RestInfoPopularityTierCalc {
             }
 
             medianUsersNumberForCity = cityMedianHashMap.get(restaurantCityVO.getCityId());
-
+            tsDataSource.begin();
             userRestaurantDAO.processSingleRestaurantIdCalc(restaurantCityVO.getRestaurantId(),
                 medianUsersNumberForCity);
-
+            tsDataSource.commit();
+            tsDataSource.begin();
             userRestaurantDAO.submitFlaggedRestaurant(restaurantCityVO.getRestaurantId(),
                 algoIndicatorDone);
+            tsDataSource.commit();
         }
     }
 }

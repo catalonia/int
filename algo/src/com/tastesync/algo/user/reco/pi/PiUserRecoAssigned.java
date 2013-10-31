@@ -25,7 +25,7 @@ public class PiUserRecoAssigned {
      */
     private static final Logger logger = Logger.getLogger(PiUserRecoAssigned.class);
     private PiUserRecoDAO piUserRecoDAO = new PiUserRecoDAOImpl();
-    private boolean printDebugExtra = false;
+    private static final boolean printDebugExtra = false;
 
     public PiUserRecoAssigned() {
         super();

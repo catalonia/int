@@ -3,7 +3,9 @@ package com.tastesync.algo.user.user;
 import com.tastesync.algo.db.dao.UserUserDAO;
 import com.tastesync.algo.db.dao.UserUserDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
+import com.tastesync.db.pool.TSDataSource;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,8 @@ public class DemandPriorityCalc {
     }
 
     public void processAllUserFlaggedUserListDemandPriority()
-        throws TasteSyncException {
+        throws TasteSyncException, SQLException {
+    	TSDataSource tsDataSource = TSDataSource.getInstance();
         int algoIndicatorIdentifyUseridList = 1;
         List<String> recorequestUserFlaggedUserList = userUserDAO.getRecorequestUserFlaggedUserList(algoIndicatorIdentifyUseridList);
         algoIndicatorIdentifyUseridList = 3;
@@ -108,7 +111,7 @@ public class DemandPriorityCalc {
 
             // user points
             int userPoints = userUserDAO.getUserPoints(flaggedUserId);
-
+            tsDataSource.begin();
             //-- Tier 3 logic
             if ((numRecoreqsAnsToday >= 2) || (numRecoreqsAnsLast2Days >= 3)) {
                 userUserDAO.submitUserRecoDemandTierPrecalc(flaggedUserId, 3);
@@ -124,14 +127,17 @@ public class DemandPriorityCalc {
                     userUserDAO.submitUserRecoDemandTierPrecalc(flaggedUserId, 2);
                 }
             }
+            tsDataSource.commit();
         }
-
+        tsDataSource.begin();
         for (String flaggedUserId : recorequestUserFlaggedUserList) {
             userUserDAO.submitRecorrequestUser(flaggedUserId, 0);
         }
-
+        tsDataSource.commit();
+        tsDataSource.begin();
         for (String flaggedUserId : recorequestReplyUserFlaggedUserList) {
             userUserDAO.submitRecorrequestUser(flaggedUserId, 2);
         }
+        tsDataSource.commit();
     }
 }

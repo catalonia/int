@@ -5,6 +5,10 @@ import com.tastesync.algo.db.dao.UserUserDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 
+import com.tastesync.db.pool.TSDataSource;
+
+import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +21,8 @@ public class UserTopicCalc {
     }
 
     public void processAllUserFlaggedUserListUserTopic()
-        throws TasteSyncException {
+        throws TasteSyncException, SQLException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
         int algoIndicatorIdentifyUseridList = 2;
         List<RestaurantUserVO> recorequestReplyUserRestaurantUsersList = userUserDAO.getRecorequestReplyUserRestaurant(algoIndicatorIdentifyUseridList);
         algoIndicatorIdentifyUseridList = 2;
@@ -43,6 +48,8 @@ public class UserTopicCalc {
             restaurantUsersList.add(restaurantUserVO);
         }
 
+        tsDataSource.begin();
+
         for (RestaurantUserVO flaggedRestaurantUserVO : restaurantUsersList) {
             String chainFlag = userUserDAO.getRestaurantInfoChained(flaggedRestaurantUserVO.getRestaurantId());
 
@@ -50,6 +57,9 @@ public class UserTopicCalc {
                 userUserDAO.submitUserCityNbrHoodAndCusineTier2Match(flaggedRestaurantUserVO);
             }
         }
+
+        tsDataSource.commit();
+        tsDataSource.begin();
 
         for (RestaurantUserVO restaurantUserVO : recorequestReplyUserRestaurantUsersList) {
             ArrayList<String> userIdListDone = new ArrayList<String>();
@@ -61,14 +71,23 @@ public class UserTopicCalc {
             }
         }
 
+        tsDataSource.commit();
+        tsDataSource.begin();
+
         for (RestaurantUserVO restaurantUserVO : restaurantTipsTastesyncUsersList) {
             userUserDAO.submitRestaurantTipsTastesyncAlgo1(restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 1);
         }
 
+        tsDataSource.commit();
+        tsDataSource.begin();
+
         for (RestaurantUserVO restaurantUserVO : restaurantFavUsersList) {
             userUserDAO.submitRestaurantFav(restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 2);
         }
+
+        tsDataSource.commit();
+        tsDataSource.begin();
     }
 }

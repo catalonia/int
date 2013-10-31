@@ -8,7 +8,11 @@ import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.UserAUserBVO;
 import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
 
+import com.tastesync.db.pool.TSDataSource;
+
 import org.apache.log4j.Logger;
+
+import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +30,9 @@ public class UserUserCalc {
     }
 
     public void processAllUserFlaggedUserListUserUser()
-        throws TasteSyncException {
+        throws TasteSyncException, SQLException {
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+
         // get pair of userA and userB
         // remove duplicates
         // remove where userA /UserB is same as UserB/userA
@@ -181,7 +187,7 @@ public class UserUserCalc {
                 }
             }
 
-            List<String> userAfavNonChainRestClusterId = null;
+            List<String> userAfavNonChainRestClusterId = new ArrayList<String>();
 
             double numUserAFavNCRestClusters = 0;
 
@@ -191,7 +197,7 @@ public class UserUserCalc {
                     userAfavNonChainRestClusterId.size();
             }
 
-            List<String> userBfavNonChainRestClusterId = null;
+            List<String> userBfavNonChainRestClusterId = new ArrayList<String>();
             double numUserBFavNCRestClusters = 0;
 
             for (String userBFavNCRestElement : userBFavNCRest) {
@@ -211,7 +217,8 @@ public class UserUserCalc {
             double numCommonNCFavRestClusters = 0;
 
             for (String userAfavNonChainRestClusterIdElement : userAfavNonChainRestClusterId) {
-                if (userBfavNonChainRestClusterId.contains(
+                if ((userBfavNonChainRestClusterId != null) &&
+                        userBfavNonChainRestClusterId.contains(
                             userAfavNonChainRestClusterIdElement)) {
                     ++numCommonNCFavRestClusters;
                 }
@@ -242,22 +249,23 @@ public class UserUserCalc {
                     1);
             double numUserBFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(userAUserBVOValue.getUserB(),
                     1);
+            tsDataSource.begin();
 
             // -- Tier 1 logic
             if ((userAFollowUserB == 1) || (userBFollowUserA == 1) ||
                     ((numCommonNCFavRest / minNumUserABFavNCRest) >= 0.5) ||
                     ((numCommonNbrhoodNCFavRest / minNumUserABFavNCRest) >= 0.7) ||
                     ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) == 1.0)) {
-                userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
+                userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                     userAUserBVOValue.getUserB(), 1);
-                userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
                     userAUserBVOValue.getUserA(), 1);
             } else {
                 // -- Tier 2 logic
                 if ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) >= 0.7) {
-                    userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
+                    userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                         userAUserBVOValue.getUserB(), 2);
-                    userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                    userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
                         userAUserBVOValue.getUserA(), 2);
                 } else {
                     // -- Tier 3 logic TODO
@@ -268,26 +276,28 @@ public class UserUserCalc {
                             numUserBFavChainRest)) >= 0.5)) ||
                             ((numUserAFavNCPopTier1Rest >= (0.7 * numUserAFavNCRest)) &&
                             (numUserBFavNCPopTier1Rest >= (0.7 * numUserBFavNCRest)))) {
-                        userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
+                        userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                             userAUserBVOValue.getUserB(), 3);
-                        userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                        userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
                             userAUserBVOValue.getUserA(), 3);
                     } else {
-                        userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
+                        userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserA(),
                             userAUserBVOValue.getUserB(), 4);
-                        userUserDAO.sumbitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
+                        userUserDAO.submitAssignedUserUserMatchTier(userAUserBVOValue.getUserB(),
                             userAUserBVOValue.getUserA(), 4);
                     }
                 }
             }
 
+            tsDataSource.commit();
+            tsDataSource.begin();
             //TODO
             //USER_RESTAURANT_FAV_UPDATE_SQL shud have a different algo_indicator? 
             userUserDAO.submitRestaurantFav(userAUserBVOValue.getUserA(), null,
                 0);
             userUserDAO.submitUserFollowDataUpdate(userAUserBVOValue.getUserA(),
                 userAUserBVOValue.getUserB(), 0);
-
+            tsDataSource.commit();
             //reset list to null!
             userAFavNCRest = null;
             userBFavNCRest = null;
