@@ -47,15 +47,16 @@ public interface UserRestaurantDAO extends BaseDAO {
 
     RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         String userId, String restaurantId, String neighborhoodId,
-        String cityId, String stateName, String[] cuisineTier1IdArray,
-        String[] priceIdList, String rating, String savedFlag, String favFlag,
-        String dealFlag, String chainFlag, String paginationId,
-        String[] cuisineTier2IdArray, String[] themeIdArray,
-        String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
-        String[] occasionIdArray) throws TasteSyncException;
+        String cityId, String stateName, String[] priceIdList, String rating,
+        String savedFlag, String favFlag, String dealFlag, String chainFlag,
+        String paginationId, String[] cuisineTier2IdArray,
+        String[] themeIdArray, String[] whoareyouwithIdArray,
+        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
+        throws TasteSyncException;
 
     RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(
-        String userId, String cityId, String paginationId) throws TasteSyncException;
+        String userId, String cityId, String paginationId)
+        throws TasteSyncException;
 
     void submitAssignedRankUserRestaurantForWhole(
         List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)

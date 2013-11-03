@@ -667,6 +667,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
 
         try {
             connection = tsDataSource.getConnection();
+            tsDataSource.begin();
             statement = connection.prepareStatement(PiUserRecoQueries.PI_RECO_LOG_INSERT_SQL);
 
             //generate Pi_Reco_Log_Id

@@ -19,7 +19,7 @@ public class RestaurantsSearchResultsOnlineCalc {
     // return list of restaurantIds based on different parameters
     public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         String userId, String restaurantId, String neighborhoodId,
-        String cityId, String stateName, String[] cuisineTier1IdArray,
+        String cityId, String stateName,
         String[] priceIdList, String rating, String savedFlag, String favFlag,
         String dealFlag, String chainFlag, String paginationId,
         String[] cuisineTier2IdArray, String[] themeIdArray,
@@ -42,7 +42,7 @@ public class RestaurantsSearchResultsOnlineCalc {
         //TODO different cases identifications.
         if ((userId != null) && (restaurantId == null) &&
                 (neighborhoodId == null) && (cityId != null) &&
-                (cuisineTier1IdArray == null) && (priceIdList == null) &&
+                (priceIdList == null) &&
                 (rating == null) && (savedFlag == null) && (favFlag == null) &&
                 (dealFlag == null) && (chainFlag == null) &&
                 (cuisineTier2IdArray == null) && (themeIdArray == null) &&
@@ -63,7 +63,7 @@ public class RestaurantsSearchResultsOnlineCalc {
         case TSConstants.DEFAULT_SEARCH_TYPE:
             restaurantsSearchResultsVO = userRestaurantDAO.showListOfRestaurantsSearchResults(userId,
                     restaurantId, neighborhoodId, cityId, stateName,
-                    cuisineTier1IdArray, priceIdList, rating, savedFlag,
+                    priceIdList, rating, savedFlag,
                     favFlag, dealFlag, chainFlag, paginationId,
                     cuisineTier2IdArray, themeIdArray, whoareyouwithIdArray,
                     typeOfRestaurantIdArray, occasionIdArray);
@@ -73,7 +73,7 @@ public class RestaurantsSearchResultsOnlineCalc {
         default:
             restaurantsSearchResultsVO = userRestaurantDAO.showListOfRestaurantsSearchResults(userId,
                     restaurantId, neighborhoodId, cityId, stateName,
-                    cuisineTier1IdArray, priceIdList, rating, savedFlag,
+                    priceIdList, rating, savedFlag,
                     favFlag, dealFlag, chainFlag, paginationId,
                     cuisineTier2IdArray, themeIdArray, whoareyouwithIdArray,
                     typeOfRestaurantIdArray, occasionIdArray);

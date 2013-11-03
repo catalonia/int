@@ -14,7 +14,7 @@ public interface TSDBCommonQueries {
         " AND restaurant_neighbourhood.restaurant_id =?  " +
         " AND restaurant.restaurant_id = restaurant_neighbourhood.restaurant_id";
     public static String RESTAURANT_PRICERANGE_SELECT_SQL = "" +
-        "SELECT restaurant.price_range " + "FROM   restaurant, " +
+        "SELECT DISTINCT restaurant.price_range " + "FROM   restaurant, " +
         "       restaurant_neighbourhood " +
         "WHERE  restaurant.restaurant_id = ? " +
         " AND   restaurant_neighbourhood.restaurant_id = ? " +

@@ -5,6 +5,7 @@ import com.tastesync.algo.db.dao.PiUserRecoDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRecommendationsTopicMatchRateVO;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
+import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -24,8 +26,8 @@ public class PiUserRecoAssigned {
      * Logger for this class
      */
     private static final Logger logger = Logger.getLogger(PiUserRecoAssigned.class);
-    private PiUserRecoDAO piUserRecoDAO = new PiUserRecoDAOImpl();
     private static final boolean printDebugExtra = false;
+    private PiUserRecoDAO piUserRecoDAO = new PiUserRecoDAOImpl();
 
     public PiUserRecoAssigned() {
         super();
@@ -63,7 +65,8 @@ public class PiUserRecoAssigned {
                 }
             }
 
-            if (!piUsersAlreadyAssignedIdList.contains(temp1PiUsersUserId)) {
+            if ((piUsersAlreadyAssignedIdList.size() != 0) &&
+                    piUsersAlreadyAssignedIdList.contains(temp1PiUsersUserId)) {
                 if (!indexElementToBeRemovedFrmUserRecoSupplyTierVOList.contains(
                             i)) {
                     indexElementToBeRemovedFrmUserRecoSupplyTierVOList.add(i);
@@ -105,10 +108,11 @@ public class PiUserRecoAssigned {
         // no users
         if ((temp1PiUsersUserIdList == null) ||
                 (temp1PiUsersUserIdList.size() == 0)) {
-        	if (logger.isInfoEnabled()) {
-            logger.info("No Pi Users list found. temp1PiUsersUserIdList=" +
-                temp1PiUsersUserIdList);
-        	}
+            if (logger.isInfoEnabled()) {
+                logger.info("No Pi Users list found. temp1PiUsersUserIdList=" +
+                    temp1PiUsersUserIdList);
+            }
+
             return;
         } else {
             if (temp1PiUsersUserIdList.size() == 1) {
@@ -186,22 +190,28 @@ public class PiUserRecoAssigned {
                 if (printDebugExtra) {
                     String[] tranche1PiUsersUserIdResult = new String[tranche1PiUsersUserId.size()];
                     tranche1PiUsersUserIdResult = tranche1PiUsersUserId.toArray(tranche1PiUsersUserIdResult);
+
                     if (logger.isInfoEnabled()) {
-                    logger.info("tranche1PiUsersUserIdResult=" +
-                        Arrays.toString(tranche1PiUsersUserIdResult));
+                        logger.info("tranche1PiUsersUserIdResult=" +
+                            Arrays.toString(tranche1PiUsersUserIdResult));
                     }
+
                     String[] tranche2PiUsersUserIdResult = new String[tranche2PiUsersUserId.size()];
                     tranche2PiUsersUserIdResult = tranche2PiUsersUserId.toArray(tranche2PiUsersUserIdResult);
+
                     if (logger.isInfoEnabled()) {
-                    logger.info("tranche2PiUsersUserIdResult=" +
-                        Arrays.toString(tranche2PiUsersUserIdResult));
+                        logger.info("tranche2PiUsersUserIdResult=" +
+                            Arrays.toString(tranche2PiUsersUserIdResult));
                     }
+
                     String[] tranche3PiUsersUserIdResult = new String[tranche3PiUsersUserId.size()];
                     tranche3PiUsersUserIdResult = tranche3PiUsersUserId.toArray(tranche3PiUsersUserIdResult);
+
                     if (logger.isInfoEnabled()) {
-                    logger.info("tranche3PiUsersUserIdResult=" +
-                        Arrays.toString(tranche3PiUsersUserIdResult));
+                        logger.info("tranche3PiUsersUserIdResult=" +
+                            Arrays.toString(tranche3PiUsersUserIdResult));
                     }
+
                     tranche1PiUsersUserIdResult = null;
                     tranche2PiUsersUserIdResult = null;
                     tranche3PiUsersUserIdResult = null;
@@ -231,6 +241,24 @@ public class PiUserRecoAssigned {
             piUserRecoDAO.submitPiRecorequestTsAssigned(recoRequestId,
                 assigneduserUserId);
 
+            //sleep for remaining time!!
+            try {
+                long sleepTime = (long) (TSConstants.PI_ASSIGNED_START_SLEEP_TIME * ((Math.random() * 6) +
+                    2));
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" SLEEP (in ms) for " + sleepTime);
+                }
+
+                //TODO removed
+                if (1 != 1) {
+                    Thread.currentThread();
+                    Thread.sleep(sleepTime);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             PiRestaurantRecommendationVO piRestaurantRecommendationVO = getPiRestaurantRecommendation(initiatorUserId,
                     cuisineTier2IdList, cuisineTier1IdList, priceIdList,
                     themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
@@ -249,9 +277,9 @@ public class PiUserRecoAssigned {
             piUserRecoDAO.submitPiRecoLog(initiatorUserId, assigneduserUserId,
                 piRestaurantRecommendationVO);
         } else {
-        	if (logger.isInfoEnabled()) {
-            logger.info("No user is assigned!!!");
-        	}
+            if (logger.isInfoEnabled()) {
+                logger.info("No user is assigned!!!");
+            }
         }
     }
 
@@ -320,10 +348,14 @@ public class PiUserRecoAssigned {
 
         List<String> excludedRecommendationIdsList = piUserRecoDAO.getExcludedRecommendationIdList(initiatorUserId);
 
-        for (PiRecommendationsTopicMatchRateVO piRecommendationsTopicMatchRateVOElement : piRecommendationsTopicMatchRateVOList) {
+        for (Iterator<PiRecommendationsTopicMatchRateVO> it = piRecommendationsTopicMatchRateVOList.iterator();
+                it.hasNext();) {
+            PiRecommendationsTopicMatchRateVO piRecommendationsTopicMatchRateVOElement =
+                it.next();
+
             if (excludedRecommendationIdsList.contains(
                         piRecommendationsTopicMatchRateVOElement.getRecommendationId())) {
-                piRecommendationsTopicMatchRateVOList.remove(piRecommendationsTopicMatchRateVOElement);
+                it.remove();
             }
         }
 
@@ -331,16 +363,17 @@ public class PiUserRecoAssigned {
 
         //from the remaining list. pick the first one.
         if (piRecommendationsTopicMatchRateVOList.size() > 0) {
-        	if (logger.isInfoEnabled()) {
-            logger.info("piRestaurantRecommendationVO Found " +
-                piRecommendationsTopicMatchRateVOList.get(0));
-        	}
+            if (logger.isInfoEnabled()) {
+                logger.info("piRestaurantRecommendationVO Found " +
+                    piRecommendationsTopicMatchRateVOList.get(0));
+            }
+
             piRestaurantRecommendationVO = piUserRecoDAO.getPiRecommendationIdText(piRecommendationsTopicMatchRateVOList.get(
                         0).getRecommendationId());
         } else {
-        	if (logger.isInfoEnabled()) {
-            logger.info("piRestaurantRecommendationVO Not Found");
-        	}
+            if (logger.isInfoEnabled()) {
+                logger.info("piRestaurantRecommendationVO Not Found");
+            }
         }
 
         return piRestaurantRecommendationVO;

@@ -12,7 +12,6 @@ public class InputRestaurantSearchVO implements Serializable {
     private String neighborhoodId;
     private String cityId;
     private String stateName;
-    private String[] cuisineTier1IdArray;
     private String[] priceIdList;
     private String rating;
     private String savedFlag;
@@ -28,7 +27,7 @@ public class InputRestaurantSearchVO implements Serializable {
 
     public InputRestaurantSearchVO(String userId, String restaurantId,
         String neighborhoodId, String cityId, String stateName,
-        String[] cuisineTier1IdArray, String[] priceIdList, String rating,
+        String[] priceIdList, String rating,
         String savedFlag, String favFlag, String dealFlag, String chainFlag,
         String paginationId, String[] cuisineTier2IdArray,
         String[] themeIdArray, String[] whoareyouwithIdArray,
@@ -39,7 +38,6 @@ public class InputRestaurantSearchVO implements Serializable {
         this.neighborhoodId = neighborhoodId;
         this.cityId = cityId;
         this.stateName = stateName;
-        this.cuisineTier1IdArray = cuisineTier1IdArray;
         this.priceIdList = priceIdList;
         this.rating = rating;
         this.savedFlag = savedFlag;
@@ -72,10 +70,6 @@ public class InputRestaurantSearchVO implements Serializable {
 
     public String getStateName() {
         return stateName;
-    }
-
-    public String[] getCuisineTier1IdArray() {
-        return cuisineTier1IdArray;
     }
 
     public String[] getPriceIdList() {
@@ -134,8 +128,7 @@ public class InputRestaurantSearchVO implements Serializable {
     public String toString() {
         return "InputRestaurantSearchVO [userId=" + userId + ", restaurantId=" +
         restaurantId + ", neighborhoodId=" + neighborhoodId + ", cityId=" +
-        cityId + ", stateName=" + stateName + ", cuisineTier1IdArray=" +
-        Arrays.toString(cuisineTier1IdArray) + ", priceIdList=" +
+        cityId + ", stateName=" + stateName + ", priceIdList=" +
         Arrays.toString(priceIdList) + ", rating=" + rating + ", savedFlag=" +
         savedFlag + ", favFlag=" + favFlag + ", dealFlag=" + dealFlag +
         ", chainFlag=" + chainFlag + ", paginationId=" + paginationId +

@@ -2,6 +2,7 @@ package com.tastesync.algo.db.dao;
 
 import com.tastesync.algo.db.queries.TSDBCommonQueries;
 import com.tastesync.algo.exception.TasteSyncException;
+import com.tastesync.algo.util.TSConstants;
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
@@ -42,7 +43,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
                 String chainId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "restaurant_extended_info.chain_id"));
 
-                if (chainId != null) {
+                if (chainId != null && !chainId .isEmpty()) {
                     chainFlag = "1";
                 }
             }
@@ -199,7 +200,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
     
     @Override
     public void submitRestaurantFav(String flaggedUserId, String restaurantId,
-        int algoInd) throws TasteSyncException {
+        int algoInd, TSConstants.ALGO_TYPE algoType) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection;
@@ -210,16 +211,17 @@ public abstract class BaseDaoImpl implements BaseDAO {
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
 
-            if ((restaurantId != null) && !restaurantId.isEmpty()) {
-                statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_USER_RESTAURANT_FAV_RESTAURANT_UPDATE_SQL);
+            if (algoType.equals(TSConstants.ALGO_TYPE.ALGO1)) {
+            	statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_USER_RESTAURANT_FAV_UPDATE_SQL);
+            } else if (algoType.equals(TSConstants.ALGO_TYPE.ALGO2)) {
+            	statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_USER_RESTAURANT_FAV_RESTAURANT_UPDATE_SQL);
             } else {
-                statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_USER_RESTAURANT_FAV_UPDATE_SQL);
+            	throw new IllegalArgumentException("Unknown ALGO_TYPE");
             }
-
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
 
-            if ((restaurantId != null) && !restaurantId.isEmpty()) {
+            if (algoType.equals(TSConstants.ALGO_TYPE.ALGO2)) {
                 statement.setString(3, restaurantId);
             }
 

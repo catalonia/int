@@ -7,6 +7,7 @@ import com.tastesync.algo.model.vo.RecorequestUserVO;
 import com.tastesync.algo.model.vo.RestaurantNeighbourhoodVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
+import com.tastesync.algo.util.TSConstants;
 
 import java.util.List;
 
@@ -103,7 +104,7 @@ public interface UserUserDAO extends BaseDAO {
         int algoIndicatorIdentifyUseridListFour) throws TasteSyncException;
 
     List<RestaurantUserVO> getUserRestaurantFav(
-        int algoIndicatorIdentifyUseridList) throws TasteSyncException;
+        int algoIndicatorIdentifyUseridList, boolean restaurantNeeded) throws TasteSyncException;
 
     void submitUserCityNbrHoodAndCusineTier2Match(
         RestaurantUserVO flaggedRestaurantUserVO) throws TasteSyncException;

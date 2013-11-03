@@ -786,20 +786,19 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         String userId, String restaurantId, String neighborhoodId,
-        String cityId, String stateName, String[] cuisineTier1IdArray,
-        String[] priceIdList, String rating, String savedFlag, String favFlag,
-        String dealFlag, String chainFlag, String paginationId,
-        String[] cuisineTier2IdArray, String[] themeIdArray,
-        String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
-        String[] occasionIdArray) throws TasteSyncException {
+        String cityId, String stateName, String[] priceIdList, String rating,
+        String savedFlag, String favFlag, String dealFlag, String chainFlag,
+        String paginationId, String[] cuisineTier2IdArray,
+        String[] themeIdArray, String[] whoareyouwithIdArray,
+        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
+        throws TasteSyncException {
         RestaurantsSearchResultsHelper restaurantsSearchResultsHelper = new RestaurantsSearchResultsHelper();
 
         return restaurantsSearchResultsHelper.showListOfRestaurantsSearchResults(userId,
-            restaurantId, neighborhoodId, cityId, stateName,
-            cuisineTier1IdArray, priceIdList, rating, savedFlag, favFlag,
-            dealFlag, chainFlag, paginationId, cuisineTier2IdArray,
-            themeIdArray, whoareyouwithIdArray, typeOfRestaurantIdArray,
-            occasionIdArray);
+            restaurantId, neighborhoodId, cityId, stateName, priceIdList,
+            rating, savedFlag, favFlag, dealFlag, chainFlag, paginationId,
+            cuisineTier2IdArray, themeIdArray, whoareyouwithIdArray,
+            typeOfRestaurantIdArray, occasionIdArray);
     }
 
     @Override

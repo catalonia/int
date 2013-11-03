@@ -45,18 +45,21 @@ public class RestaurantsSearchResultsHelper {
     // return list of restaurantIds based on different parameters
     public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         String userId, String restaurantId, String neighborhoodId,
-        String cityId, String stateName, String[] cuisineTier1IdArray,
-        String[] priceIdList, String rating, String savedFlag, String favFlag,
-        String dealFlag, String chainFlag, String paginationId,
-        String[] cuisineTier2IdArray, String[] themeIdArray,
-        String[] whoareyouwithIdArray, String[] typeOfRestaurantIdArray,
-        String[] occasionIdArray) throws TasteSyncException {
+        String cityId, String stateName, String[] priceIdList, String rating,
+        String savedFlag, String favFlag, String dealFlag, String chainFlag,
+        String paginationId, String[] cuisineTier2IdArray,
+        String[] themeIdArray, String[] whoareyouwithIdArray,
+        String[] typeOfRestaurantIdArray, String[] occasionIdArray)
+        throws TasteSyncException {
+        if (chainFlag == null) {
+            chainFlag = HIDE_CHAINED_RESTAURANT;
+        }
+
         InputRestaurantSearchVO inputRestaurantSearchVO = new InputRestaurantSearchVO(userId,
-                restaurantId, neighborhoodId, cityId, stateName,
-                cuisineTier1IdArray, priceIdList, rating, savedFlag, favFlag,
-                dealFlag, chainFlag, paginationId, cuisineTier2IdArray,
-                themeIdArray, whoareyouwithIdArray, typeOfRestaurantIdArray,
-                occasionIdArray);
+                restaurantId, neighborhoodId, cityId, stateName, priceIdList,
+                rating, savedFlag, favFlag, dealFlag, chainFlag, paginationId,
+                cuisineTier2IdArray, themeIdArray, whoareyouwithIdArray,
+                typeOfRestaurantIdArray, occasionIdArray);
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -247,18 +250,9 @@ public class RestaurantsSearchResultsHelper {
 
         //-- IF recoRequestParameters{listOfCuisTier2{cuisineTier2Id}} OR restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} 
         //OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
-        if (((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
-                (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) ||
-                ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
-                (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0))) {
+        if ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
+                (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0)) {
             consolidatedSearchQuery.append(", ").append("restaurant_cuisine ");
-        }
-
-        //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} 
-        //OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
-        if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
-                (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
-            consolidatedSearchQuery.append(", ").append("cuisine_tier_mapper ");
         }
 
         // -- IF restaurantSearchParameters{chainFlag} = 0 (0 means "Hide" Chain Restaurants)
@@ -328,32 +322,7 @@ public class RestaurantsSearchResultsHelper {
             consolidatedSearchQuery.append(" ) ");
         }
 
-        //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
-        if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
-                (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
-            consolidatedSearchQuery.append(
-                "AND cuisine_tier_mapper.tier1_cuisine_id IN ( ");
-
-            for (int i = 0;
-                    i < inputRestaurantSearchVO.getCuisineTier1IdArray().length;
-                    ++i) {
-                if (i != (inputRestaurantSearchVO.getCuisineTier1IdArray().length -
-                        1)) {
-                    consolidatedSearchQuery.append("?,");
-                } else {
-                    consolidatedSearchQuery.append("?");
-                }
-            }
-
-            consolidatedSearchQuery.append(" ) ");
-
-            consolidatedSearchQuery.append(
-                "AND restaurant_cuisine.tier2_cuisine_id = cuisine_tier_mapper.tier2_cuisine_id ");
-        }
-
-        if (((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
-                (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) ||
-                ((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
+        if (((inputRestaurantSearchVO.getCuisineTier2IdArray() != null) &&
                 (inputRestaurantSearchVO.getCuisineTier2IdArray().length != 0))) {
             consolidatedSearchQuery.append(
                 "AND restaurant.restaurant_id = restaurant_cuisine.restaurant_id ");
@@ -450,18 +419,6 @@ public class RestaurantsSearchResultsHelper {
                 ++bindPosition;
                 statement.setString(bindPosition,
                     inputRestaurantSearchVO.getCuisineTier2IdArray()[i]);
-            }
-        }
-
-        //-- IF restaurantSearchParameters{listOfCuisinesTier1{cuisineTier1Id}} OR recoRequestParameters{listOfCuisTier1{cuisineTier1Id}} is not null 
-        if ((inputRestaurantSearchVO.getCuisineTier1IdArray() != null) &&
-                (inputRestaurantSearchVO.getCuisineTier1IdArray().length != 0)) {
-            for (int i = 0;
-                    i < inputRestaurantSearchVO.getCuisineTier1IdArray().length;
-                    ++i) {
-                ++bindPosition;
-                statement.setString(bindPosition,
-                    inputRestaurantSearchVO.getCuisineTier1IdArray()[i]);
             }
         }
 

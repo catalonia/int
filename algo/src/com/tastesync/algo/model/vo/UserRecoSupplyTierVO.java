@@ -21,4 +21,11 @@ public class UserRecoSupplyTierVO implements Serializable {
     public int getUserSupplyInvTier() {
         return userSupplyInvTier;
     }
+
+	@Override
+	public String toString() {
+		return "UserRecoSupplyTierVO [userId=" + userId
+				+ ", userSupplyInvTier=" + userSupplyInvTier + "]";
+	}
+    
 }

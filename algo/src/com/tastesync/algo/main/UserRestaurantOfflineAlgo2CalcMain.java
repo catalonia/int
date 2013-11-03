@@ -23,27 +23,21 @@ public class UserRestaurantOfflineAlgo2CalcMain {
 
                 connection = tsDataSource.getConnection();
 
-                tsDataSource.begin();
-
                 //Run algo calc
                 RestInfoPopularityTierCalc restInfoPopularityTierCalc = new RestInfoPopularityTierCalc();
                 restInfoPopularityTierCalc.processAllFlaggedRestaurantListRestInfoPopularityTier();
-                tsDataSource.commit();
-                tsDataSource.begin();
 
                 RestUserMatchCounterCalc restUserMatchCounterCalc = new RestUserMatchCounterCalc();
                 restUserMatchCounterCalc.processAllFlaggedRestaurantListRestUserMatchCounter();
-                tsDataSource.commit();
-                tsDataSource.begin();
 
                 UserRestRankOrderCalc userRestRankOrderCalc = new UserRestRankOrderCalc();
                 userRestRankOrderCalc.updateUserRestRankOrderCalc();
-                tsDataSource.commit();
             }
         } catch (TasteSyncException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
+
             try {
                 tsDataSource.rollback();
             } catch (SQLException e1) {

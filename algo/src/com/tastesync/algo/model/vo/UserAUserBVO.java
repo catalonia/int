@@ -64,7 +64,11 @@ public class UserAUserBVO implements Serializable {
         }
 
         UserAUserBVO other = (UserAUserBVO) obj;
-
+        // add additional condition if swap is same then also equals.. that is A, B is same as B,A
+        if (userA.equals(other.userB) && userB.equals(other.userA)) {
+            return true;
+        }
+        
         if (userA == null) {
             if (other.userA != null) {
                 return false;
@@ -81,10 +85,7 @@ public class UserAUserBVO implements Serializable {
             return false;
         }
 
-        // add additional condition if swap is same then also equals.. that is A, B is same as B,A
-        if (userA.equals(other.userB) && userB.equals(other.userA)) {
-            return true;
-        }
+ 
 
         return true;
     }

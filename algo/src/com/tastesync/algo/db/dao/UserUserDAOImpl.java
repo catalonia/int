@@ -1,5 +1,6 @@
 package com.tastesync.algo.db.dao;
 
+import com.tastesync.algo.db.queries.TSDBCommonQueries;
 import com.tastesync.algo.db.queries.UserUserQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RecorequestReplyUserVO;
@@ -1292,7 +1293,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
     @Override
     public List<RestaurantUserVO> getUserRestaurantFav(
-        int algoIndicatorIdentifyUseridList) throws TasteSyncException {
+        int algoIndicatorIdentifyUseridList, boolean restaurantNeeded) throws TasteSyncException {
         TSDataSource tsDataSource = TSDataSource.getInstance();
 
         Connection connection = null;
@@ -1303,7 +1304,12 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             connection = tsDataSource.getConnection();
             tsDataSource.begin();
 
-            statement = connection.prepareStatement(UserUserQueries.USER_RESTAURANT_FAV_SELECT_SQL);
+            if (restaurantNeeded) {
+            	statement = connection.prepareStatement(UserUserQueries.RESTAURANTID_USER_RESTAURANT_FAV_SELECT_SQL);
+            } else { 
+                statement = connection.prepareStatement(UserUserQueries.USERID_USER_RESTAURANT_FAV_SELECT_SQL);
+            } 
+            
             statement.setInt(1, algoIndicatorIdentifyUseridList);
             resultset = statement.executeQuery();
 
@@ -1315,9 +1321,10 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             while (resultset.next()) {
                 userId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "user_restaurant_fav.user_id"));
+                if (restaurantNeeded) {
                 restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "user_restaurant_fav.restaurant_id"));
-
+                }
                 restaurantUserVO = new RestaurantUserVO(userId, restaurantId);
                 restaurantFavUsersList.add(restaurantUserVO);
             }
@@ -1358,6 +1365,8 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement = connection.prepareStatement(UserUserQueries.RESTAURANT_NEIGHBOURHOOD_CITY_SELECT_SQL);
 
             statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            statement.setString(2, flaggedRestaurantUserVO.getRestaurantId());
+            
             resultset = statement.executeQuery();
 
             String restaurantCityId = null;
@@ -1383,6 +1392,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             statement = connection.prepareStatement(UserUserQueries.RESTAURANT_PRICERANGE_SELECT_SQL);
             statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
+            statement.setString(2, flaggedRestaurantUserVO.getRestaurantId());
             resultset = statement.executeQuery();
 
             String priceId = null;
@@ -1391,12 +1401,14 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
                 priceId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "restaurant.price_range"));
 
-                statementInner = connection.prepareStatement(UserUserQueries.USER_PRICE_INSERT_SQL);
-                statementInner.setInt(1, 1);
-                statementInner.setString(2, priceId);
-                statementInner.setString(3, flaggedRestaurantUserVO.getUserId());
-                statementInner.executeUpdate();
-                statementInner.close();
+                if (priceId!=null && !priceId.isEmpty() && !"0".equals(priceId)) {
+                    statementInner = connection.prepareStatement(UserUserQueries.USER_PRICE_INSERT_SQL);
+                    statementInner.setInt(1, 1);
+                    statementInner.setString(2, priceId);
+                    statementInner.setString(3, flaggedRestaurantUserVO.getUserId());
+                    statementInner.executeUpdate();
+                    statementInner.close();
+                }
             }
 
             statement.close();
@@ -1509,8 +1521,12 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
 
             int userXFollowUserY = 0;
 
+            int rowCount = 0;
             if (resultset.next()) {
-                userXFollowUserY = 1;
+            	rowCount = resultset.getInt(1);
+            	if (rowCount > 0) {
+                    userXFollowUserY = 1;
+            	}
             }
 
             statement.close();

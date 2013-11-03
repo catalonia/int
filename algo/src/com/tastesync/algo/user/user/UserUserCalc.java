@@ -7,6 +7,7 @@ import com.tastesync.algo.model.vo.RestaurantNeighbourhoodVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
 import com.tastesync.algo.model.vo.UserAUserBVO;
 import com.tastesync.algo.model.vo.UserFolloweeUserFollowerVO;
+import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -24,6 +25,7 @@ public class UserUserCalc {
      */
     private static final Logger logger = Logger.getLogger(UserUserCalc.class);
     private UserUserDAO userUserDAO = new UserUserDAOImpl();
+    private boolean printExtraDebug = false;
 
     public UserUserCalc() {
         super();
@@ -40,45 +42,49 @@ public class UserUserCalc {
         int algoIndicatorIdentifyUseridList = 2;
 
         //userA list
-        List<RestaurantUserVO> restaurantFavUsersList = userUserDAO.getUserRestaurantFav(algoIndicatorIdentifyUseridList);
+        List<RestaurantUserVO> restaurantFavUsersList = userUserDAO.getUserRestaurantFav(algoIndicatorIdentifyUseridList,
+                false);
 
         List<String> userAList = new ArrayList<String>(restaurantFavUsersList.size());
 
-        for (String userA : userAList) {
-            if (!userAList.contains(userA)) {
-                userAList.add(userA);
+        for (RestaurantUserVO userARestaurantFavUsers : restaurantFavUsersList) {
+            if (!userAList.contains(userARestaurantFavUsers.getUserId())) {
+                userAList.add(userARestaurantFavUsers.getUserId());
             }
         }
 
         //userA + userB list
-        List<String> usersIdAllList = userUserDAO.getAllUsers();
+        List<String> userBothBandAList = userUserDAO.getAllUsers();
 
-        List<String> userBList = new ArrayList<String>(usersIdAllList.size() -
-                restaurantFavUsersList.size());
-
-        for (String userB : usersIdAllList) {
-            if (!userAList.contains(userB)) {
-                if (!userBList.contains(userB)) {
-                    userBList.add(userB);
-                }
-            }
-        }
+        //        List<String> userBList = new ArrayList<String>(usersIdAllList.size());
+        //
+        //        for (String userB : usersIdAllList) {
+        //            if (!userAList.contains(userB)) {
+        //                if (!userBList.contains(userB)) {
+        //                    userBList.add(userB);
+        //                }
+        //            }
+        //        }
 
         // add user A and user B pair to a file
-        List<UserAUserBVO> userAUserBVOList = new ArrayList<UserAUserBVO>(userAList.size() * userBList.size());
+        List<UserAUserBVO> userAUserBVOList = new ArrayList<UserAUserBVO>(userAList.size() * userBothBandAList.size());
         UserAUserBVO userAUserBVO = null;
 
         // create userA userB pair
         for (String userA : userAList) {
-            for (String userB : userBList) {
-                userAUserBVO = new UserAUserBVO(userA, userB);
+            for (String userB : userBothBandAList) {
+                if (!userA.equals(userB)) {
+                    userAUserBVO = new UserAUserBVO(userA, userB);
 
-                if (!userAUserBVOList.contains(userAUserBVO)) {
-                    userAUserBVOList.add(userAUserBVO);
-                } else {
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Pair UserA/UserB already found. " +
-                            userAUserBVO.toString());
+                    if (!userAUserBVOList.contains(userAUserBVO)) {
+                        userAUserBVOList.add(userAUserBVO);
+                    } else {
+                        if (printExtraDebug) {
+                            if (logger.isInfoEnabled()) {
+                                logger.info("Pair UserA/UserB already found. " +
+                                    userAUserBVO.toString());
+                            }
+                        }
                     }
                 }
             }
@@ -86,7 +92,7 @@ public class UserUserCalc {
 
         // reset list to null
         userAList = null;
-        userBList = null;
+        userBothBandAList = null;
 
         //  create A and B pairs
         algoIndicatorIdentifyUseridList = 1;
@@ -100,10 +106,12 @@ public class UserUserCalc {
             if (!userAUserBVOList.contains(userAUserBVO)) {
                 userAUserBVOList.add(userAUserBVO);
             } else {
-                if (logger.isDebugEnabled()) {
-                    logger.info(
-                        "From Follow data. - Pair UserA/UserB already found. " +
-                        userAUserBVO.toString());
+                if (printExtraDebug) {
+                    if (logger.isDebugEnabled()) {
+                        logger.info(
+                            "From Follow data. - Pair UserA/UserB already found. " +
+                            userAUserBVO.toString());
+                    }
                 }
             }
         }
@@ -251,6 +259,25 @@ public class UserUserCalc {
                     1);
             tsDataSource.begin();
 
+            if (printExtraDebug) {
+                System.out.println("userAFollowUserB=" + userAFollowUserB +
+                    " userBFollowUserA=" + userBFollowUserA +
+                    " numCommonNCFavRest=" + numCommonNCFavRest +
+                    " minNumUserABFavNCRest=" + minNumUserABFavNCRest +
+                    " (numCommonNCFavRest / minNumUserABFavNCRest)=" +
+                    (numCommonNCFavRest / minNumUserABFavNCRest) +
+                    "numCommonNbrhoodNCFavRest=" + numCommonNbrhoodNCFavRest +
+                    "minNumUserABFavNCRest=" + minNumUserABFavNCRest +
+                    "numCommonNbrhoodNCFavRest / minNumUserABFavNCRest)=" +
+                    (numCommonNbrhoodNCFavRest / minNumUserABFavNCRest) +
+                    " numCommonNCFavRestClusters=" +
+                    numCommonNCFavRestClusters +
+                    " minNumUserABFavNCRestClusters=" +
+                    minNumUserABFavNCRestClusters +
+                    " (numCommonNCFavRestClusters / minNumUserABFavNCRestClusters)=" +
+                    (numCommonNCFavRestClusters / minNumUserABFavNCRestClusters));
+            }
+
             // -- Tier 1 logic
             if ((userAFollowUserB == 1) || (userBFollowUserA == 1) ||
                     ((numCommonNCFavRest / minNumUserABFavNCRest) >= 0.5) ||
@@ -294,7 +321,7 @@ public class UserUserCalc {
             //TODO
             //USER_RESTAURANT_FAV_UPDATE_SQL shud have a different algo_indicator? 
             userUserDAO.submitRestaurantFav(userAUserBVOValue.getUserA(), null,
-                0);
+                0, TSConstants.ALGO_TYPE.ALGO1);
             userUserDAO.submitUserFollowDataUpdate(userAUserBVOValue.getUserA(),
                 userAUserBVOValue.getUserB(), 0);
             tsDataSource.commit();

@@ -4,6 +4,7 @@ import com.tastesync.algo.db.dao.UserUserDAO;
 import com.tastesync.algo.db.dao.UserUserDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
+import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -31,7 +32,7 @@ public class UserTopicCalc {
 
         algoIndicatorIdentifyUseridList = 3;
 
-        List<RestaurantUserVO> restaurantFavUsersList = userUserDAO.getUserRestaurantFav(algoIndicatorIdentifyUseridList);
+        List<RestaurantUserVO> restaurantFavUsersList = userUserDAO.getUserRestaurantFav(algoIndicatorIdentifyUseridList, true);
 
         //Combine all flagged userId, restaurantId lists into one list.
         List<RestaurantUserVO> restaurantUsersList = new ArrayList<RestaurantUserVO>();
@@ -84,7 +85,7 @@ public class UserTopicCalc {
 
         for (RestaurantUserVO restaurantUserVO : restaurantFavUsersList) {
             userUserDAO.submitRestaurantFav(restaurantUserVO.getUserId(),
-                restaurantUserVO.getRestaurantId(), 2);
+                restaurantUserVO.getRestaurantId(), 2, TSConstants.ALGO_TYPE.ALGO1);
         }
 
         tsDataSource.commit();

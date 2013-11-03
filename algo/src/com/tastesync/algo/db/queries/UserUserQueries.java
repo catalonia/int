@@ -1,5 +1,7 @@
 package com.tastesync.algo.db.queries;
 
+import com.tastesync.algo.util.TSConstants;
+
 public interface UserUserQueries extends TSDBCommonQueries {
     //2 for calculation 1.
     public static String RECOREQUEST_USER_ALGO_SELECT_SQL = "" +
@@ -171,7 +173,13 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "       restaurant_tips_tastesync.restaurant_id " +
         "FROM   restaurant_tips_tastesync " +
         "WHERE  restaurant_tips_tastesync.algo1_ind = ? ";
-    public static String USER_RESTAURANT_FAV_SELECT_SQL = "" +
+   
+    public static String USERID_USER_RESTAURANT_FAV_SELECT_SQL = "" +
+            "SELECT DISTINCT user_restaurant_fav.user_id " +
+            "FROM   user_restaurant_fav " +
+            "WHERE  user_restaurant_fav.algo1_ind = ?";
+    
+    public static String RESTAURANTID_USER_RESTAURANT_FAV_SELECT_SQL = "" +
         "SELECT user_restaurant_fav.user_id, " +
         "       user_restaurant_fav.restaurant_id " +
         "FROM   user_restaurant_fav " +

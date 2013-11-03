@@ -17,7 +17,7 @@ public interface PiUserRecoQueries extends UserRecoQueries {
         "       AND user_city_nbrhood_match.match_count >= ? " +
         "       AND user_city_nbrhood_match.city_id = ? ";
     public static String PI_RECO_LOG_SELECT_SQL = "" +
-        "SELECT pi_reco_log.pi_user_id " + "FROM   pi_reco_log " +
+        "SELECT DISTINCT pi_reco_log.pi_user_id " + "FROM   pi_reco_log " +
         "WHERE  pi_reco_log.user_id = ? ";
     public static String PI_RECOMMENDATIONS_ALL_SELECT_SQL = "" +
         "SELECT pi_recommendations.recommendation_id " +
@@ -52,11 +52,11 @@ public interface PiUserRecoQueries extends UserRecoQueries {
     public static String COUNT_PI_RECO_OCCASION_MATCH_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   pi_reco_occasion " +
         "WHERE  pi_reco_occasion.recommendation_id = ? " +
-        "       AND user_occasion_match.occasion_id IN (1_REPLACE_PARAM) ";
+        "       AND pi_reco_occasion.occasion_id IN (1_REPLACE_PARAM) ";
     public static String EXCLUDE_RESTAURANT_ID_FRM_PI_RECOMMENDATIONS_SELECT_SQL =
         "" + "SELECT pi_recommendations.recommendation_id " +
         "FROM   pi_recommendations " +
-        "WHERE  pi_recommendations.restaurant_id = (SELECT " +
+        "WHERE  pi_recommendations.restaurant_id IN (SELECT " +
         "       pi_recommendations.restaurant_id " +
         "                                           FROM   pi_recommendations, " +
         "                                                  pi_reco_log " +

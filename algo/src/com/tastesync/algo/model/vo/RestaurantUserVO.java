@@ -21,4 +21,12 @@ public class RestaurantUserVO implements Serializable {
     public String getRestaurantId() {
         return restaurantId;
     }
+
+	@Override
+	public String toString() {
+		return "RestaurantUserVO [userId=" + userId + ", restaurantId="
+				+ restaurantId + "]";
+	}
+    
+    
 }

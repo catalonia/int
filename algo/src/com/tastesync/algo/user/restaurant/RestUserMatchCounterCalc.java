@@ -5,6 +5,7 @@ import com.tastesync.algo.db.dao.UserRestaurantDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
+import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -97,7 +98,7 @@ public class RestUserMatchCounterCalc {
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantFavUserList) {
             userRestaurantDAO.submitRestaurantFav(restaurantUserVO.getUserId(),
-                restaurantUserVO.getRestaurantId(), 0);
+                restaurantUserVO.getRestaurantId(), 0, TSConstants.ALGO_TYPE.ALGO2);
         }
 
         tsDataSource.commit();

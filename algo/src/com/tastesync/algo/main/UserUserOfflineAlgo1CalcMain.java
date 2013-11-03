@@ -24,26 +24,17 @@ public class UserUserOfflineAlgo1CalcMain {
 
                 connection = tsDataSource.getConnection();
 
-                tsDataSource.begin();
-
                 SupplyInventoryCalc supplyInventoryCalc = new SupplyInventoryCalc();
                 supplyInventoryCalc.processAllUserFlaggedUserListSupplyInventory();
-                tsDataSource.commit();
-                tsDataSource.begin();
 
                 DemandPriorityCalc demandPriorityCalc = new DemandPriorityCalc();
                 demandPriorityCalc.processAllUserFlaggedUserListDemandPriority();
-                tsDataSource.commit();
-                tsDataSource.begin();
 
                 UserTopicCalc userTopicCalc = new UserTopicCalc();
                 userTopicCalc.processAllUserFlaggedUserListUserTopic();
-                tsDataSource.commit();
-                tsDataSource.begin();
 
                 UserUserCalc userUserCalc = new UserUserCalc();
                 userUserCalc.processAllUserFlaggedUserListUserUser();
-                tsDataSource.commit();
             }
         } catch (TasteSyncException e) {
             e.printStackTrace();
