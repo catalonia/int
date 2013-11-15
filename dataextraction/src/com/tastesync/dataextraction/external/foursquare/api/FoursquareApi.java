@@ -805,7 +805,6 @@ public class FoursquareApi {
         }
     }
 
-    //TODO
     public Result<Menu> venuesMenus(String venueId, String YYYYMMDD)
         throws FoursquareApiException {
         try {
@@ -1821,7 +1820,6 @@ public class FoursquareApi {
         throws JSONException, FoursquareApiException {
         String url = getApiRequestUrl(path, auth, params);
 
-        //TODO
         //System.out.println("URL="+url);
         Response response = ioHandler.fetchData(url, method);
 
