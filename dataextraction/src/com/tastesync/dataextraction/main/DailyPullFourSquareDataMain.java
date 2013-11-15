@@ -11,6 +11,11 @@ import com.tastesync.dataextraction.process.RestaurantFactual4SqData;
 import com.tastesync.dataextraction.process.WriteFactualIdDataInfo;
 import com.tastesync.dataextraction.util.TSConstants;
 
+import com.tastesync.db.pool.TSDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import java.text.SimpleDateFormat;
 
 import java.util.Calendar;
@@ -20,6 +25,41 @@ import java.util.TimeZone;
 
 
 public class DailyPullFourSquareDataMain {
+    private static boolean isProcessToBeRunToday(Date currentDate) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(
+                    "US/Eastern"));
+        calendar.setTime(currentDate);
+
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+        // "Sunday"
+        case 1:
+
+        // "Thursday"
+        case 5:
+
+        // "Friday"
+        case 6:
+
+        // "Saturday"
+        case 7:
+            return false;
+
+        // "Monday"
+        case 2:
+
+        // "Tuesday"
+        case 3:
+
+        // "Wednesday"
+        case 4:
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * @param args
      */
@@ -48,6 +88,7 @@ public class DailyPullFourSquareDataMain {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
                 break;
             }
 
@@ -64,14 +105,14 @@ public class DailyPullFourSquareDataMain {
                     if (calendar.get(Calendar.HOUR_OF_DAY) > 8) {
                         // further logics to wait
                         System.out.println("hours=" +
-                            (1+24 - calendar.get(Calendar.HOUR_OF_DAY)) +
+                            ((1 + 24) - calendar.get(Calendar.HOUR_OF_DAY)) +
                             "SLEEP for " +
-                            (3600000 * (1+24 -
+                            (3600000 * ((1 + 24) -
                             calendar.get(Calendar.HOUR_OF_DAY))));
                         Thread.currentThread();
 
                         try {
-                            Thread.sleep(3600000 * (1+24 -
+                            Thread.sleep(3600000 * ((1 + 24) -
                                 calendar.get(Calendar.HOUR_OF_DAY)));
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -117,13 +158,17 @@ public class DailyPullFourSquareDataMain {
 
             List<FactualDataVO> factualIdList;
             DailyRestaurantFactual4SqData dailyRestaurantFactual4SqData = new DailyRestaurantFactual4SqData();
+            TSDataSource tsDataSource = TSDataSource.getInstance();
+            Connection connection = null;
+            boolean sleep = false;
 
             try {
                 int pullEligInd = 2;
                 int beforeNDays = 28;
                 int lastMatchInd = 1;
-                dailyRestaurantFactual4SqData.identifyRestaurantsFourSqExtractUsingUpdate(pullEligInd,
-                    beforeNDays, lastMatchInd);
+                connection = tsDataSource.getConnection();
+                dailyRestaurantFactual4SqData.identifyRestaurantsFourSqExtractUsingUpdate(tsDataSource,
+                    connection, pullEligInd, beforeNDays, lastMatchInd);
 
                 pullEligInd = 3;
 
@@ -132,25 +177,28 @@ public class DailyPullFourSquareDataMain {
                 lastMatchInd = 1;
 
                 int accessNDays = 30;
-                dailyRestaurantFactual4SqData.identifyUserAccessRestaurantAttempted(pullEligInd,
-                    lastUpdatedNDays, lastMatchInd, accessNDays);
+                dailyRestaurantFactual4SqData.identifyUserAccessRestaurantAttempted(tsDataSource,
+                    connection, pullEligInd, lastUpdatedNDays, lastMatchInd,
+                    accessNDays);
 
                 pullEligInd = 1;
                 beforeNDays = 42;
                 lastMatchInd = 0;
 
-                dailyRestaurantFactual4SqData.identifyRestaurantsFourSqExtractUsingUpdate(pullEligInd,
-                    beforeNDays, lastMatchInd);
+                dailyRestaurantFactual4SqData.identifyRestaurantsFourSqExtractUsingUpdate(tsDataSource,
+                    connection, pullEligInd, beforeNDays, lastMatchInd);
 
                 pullEligInd = 1;
                 lastUpdatedNDays = 28;
 
                 lastMatchInd = 1;
                 accessNDays = 30;
-                dailyRestaurantFactual4SqData.identifyUserAccessRestaurantAttempted(pullEligInd,
-                    lastUpdatedNDays, lastMatchInd, accessNDays);
+                dailyRestaurantFactual4SqData.identifyUserAccessRestaurantAttempted(tsDataSource,
+                    connection, pullEligInd, lastUpdatedNDays, lastMatchInd,
+                    accessNDays);
 
-                factualIdList = dailyRestaurantFactual4SqData.getFactualDataVOListsForExtraction();
+                factualIdList = dailyRestaurantFactual4SqData.getFactualDataVOListsForExtraction(tsDataSource,
+                        connection);
                 writeFactualIdDataInfo.writeFactualDataToFile(outputFilePath,
                     factualIdList);
 
@@ -166,7 +214,9 @@ public class DailyPullFourSquareDataMain {
                     strNowDate + "_daily_INVALID_Factual_4SQ_outputFile.txt";
                 RestaurantFactual4SqData restaurantFactual4SqData = new RestaurantFactual4SqData();
 
-                restaurantFactual4SqData.processRestaurantFactual4SqData(TSConstants.DATAEXTRACTION_SOURCETYPE.FOURSQUARE,
+                restaurantFactual4SqData.processRestaurantFactual4SqData(tsDataSource,
+                    connection,
+                    TSConstants.DATAEXTRACTION_SOURCETYPE.FOURSQUARE,
                     TSConstants.CLIENT_ID, TSConstants.CLIENT_SECRET,
                     TSConstants.REDIRECURI, defaultIOHandler, foursquareApi,
                     inputFactualIdDataFile, outputSqlFilePath,
@@ -185,8 +235,18 @@ public class DailyPullFourSquareDataMain {
                 if (oExecResult.contains("ERROR:")) {
                     //TODO rename the output sql file
                 }
+
+                tsDataSource.closeConnection(connection);
             } catch (TasteSyncException e) {
                 e.printStackTrace();
+                sleep = true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                tsDataSource.closeConnection(connection);
+            }
+
+            if (sleep) {
                 // further logics to wait
                 System.out.println("SLEEP for " + (60000 * 2));
                 Thread.currentThread();
@@ -198,42 +258,8 @@ public class DailyPullFourSquareDataMain {
                 }
             }
 
+            sleep = false;
             System.out.println("************ End ************");
         }
-    }
-
-    private static boolean isProcessToBeRunToday(Date currentDate) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(
-                    "US/Eastern"));
-        calendar.setTime(currentDate);
-
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
-
-        switch (day) {
-        // "Sunday"
-        case 1:
-
-        // "Thursday"
-        case 5:
-
-        // "Friday"
-        case 6:
-
-        // "Saturday"
-        case 7:
-            return false;
-
-        // "Monday"
-        case 2:
-
-        // "Tuesday"
-        case 3:
-
-        // "Wednesday"
-        case 4:
-            return true;
-        }
-
-        return false;
     }
 }
