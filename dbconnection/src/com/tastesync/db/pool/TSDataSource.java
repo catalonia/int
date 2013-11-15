@@ -33,36 +33,151 @@ public class TSDataSource {
 
     //  "jdbc:mysql://localhost:3306/tastesyncdb");
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/Delta3_3May2013?generateSimpleParameterMetadata=true";
-    private static final String DEFAULT_MAX_ACTIVE = "10";
-    private static final String DEFAULT_MAX_IDLE = "8";
+    private static final String DEFAULT_MAX_ACTIVE = "100";
+    private static final String DEFAULT_MAX_IDLE = "30";
     private static final String DEFAULT_MIN_IDLE = "10";
-    private static final String DEFAULT_MAX_WAIT = "10";
+    private static final String DEFAULT_MAX_WAIT = "10000";
     private static final String DEFAULT_TEST_ON_BORROW = "true";
     private static final String DEFAULT_USERNAME = "root";
     private static final String DEFAULT_PASSWORD = "";
     private static final String DEFAULT_VALIDATION_QUERY = "SELECT 1";
     private static final String DEFAULT_REMOVED_ABANDONED = "true";
-    private static final String DEFAULT_REMOVED_ABANDONED_TIMEOUT = "1";
+    private static final String DEFAULT_REMOVED_ABANDONED_TIMEOUT = "300";
     private static final String DEFAULT_LOG_ABANDONED = "true";
     private static final String DEFAULT_DRIVERNAME = "com.mysql.jdbc.Driver";
+
+    static {
+        initialize();
+    }
+
     private Connection conn = null;
     private boolean autoCommit = true;
 
     private TSDataSource() {
-        //Local init / Testing!
-        initialize();
+        super();
     }
 
-    public static BasicDataSource getPoolDSInstance() {
-        return poolDSInstance;
+    public void begin() {
+        setAutoCommit(false);
     }
 
-    public static void setPoolDSInstance(BasicDataSource poolDSInstance) {
-        TSDataSource.poolDSInstance = poolDSInstance;
+    public void close() {
+        if (conn != null) {
+            try {
+                if (!conn.getAutoCommit()) {
+                    try {
+                        conn.commit();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                if (!conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException sqlex) {
+                sqlex.printStackTrace();
+            } finally {
+                conn = null;
+                autoCommit = true;
+            }
+        }
     }
 
-    public static TSDataSource getInstance() {
-        return TSDataSourceHolder.tsDataSource;
+    public void closeConnection(Statement statement, ResultSet resultset) {
+        try {
+            if (null != statement) {
+                statement.close();
+            }
+
+            if (null != resultset) {
+                resultset.close();
+            }
+        } catch (SQLException sqle1) {
+            sqle1.printStackTrace();
+        }
+    }
+
+    public void closeConnection(Connection conection) {
+        try {
+            if (null != conection) {
+                conection.close();
+            }
+        } catch (SQLException sqle1) {
+            sqle1.printStackTrace();
+        }
+    }
+
+    private void closeConnection1(Connection conection, Statement statement,
+        ResultSet resultset) {
+        try {
+            if (null != statement) {
+                statement.close();
+            }
+
+            if (null != resultset) {
+                resultset.close();
+            }
+
+            if (null != conection) {
+                conection.close();
+            }
+        } catch (SQLException sqle1) {
+            sqle1.printStackTrace();
+        }
+    }
+
+    public void commit() throws SQLException {
+        if (conn != null) {
+            if (getAutoCommit()) {
+                System.out.println(
+                    "Cannot commit a transaction without a begin");
+            }
+
+            conn.commit();
+        }
+
+        setAutoCommit(true);
+    }
+
+    public boolean getAutoCommit() {
+        return autoCommit;
+    }
+
+    public Connection getConnection(String username, String password) {
+        if (conn == null) {
+            try {
+                //Double check
+                if (TSDataSource.getPoolDSInstance() == null) {
+                    InitialContext initContext;
+                    Context envContext;
+
+                    try {
+                        initContext = new InitialContext();
+
+                        envContext = (Context) initContext.lookup(
+                                "java:comp/env");
+                        TSDataSource.setPoolDSInstance((BasicDataSource) envContext.lookup(
+                                TSDB_JNDI));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                conn = poolDSInstance.getConnection(username, password);
+
+                if (conn == null) {
+                    throw new SQLException("No Database Connection available");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                logger.error("Connection unavailable: " + e);
+                logger.warn("Connection unavailable, close the connection " +
+                    "to be able to get another connection ");
+            }
+        }
+
+        return conn;
     }
 
     public Connection getConnection() throws SQLException {
@@ -102,60 +217,12 @@ public class TSDataSource {
         return conn;
     }
 
-    public Connection getConnection(String username, String password) {
-        if (conn == null) {
-            try {
-                //Double check
-                if (TSDataSource.getPoolDSInstance() == null) {
-                    InitialContext initContext;
-                    Context envContext;
-
-                    try {
-                        initContext = new InitialContext();
-
-                        envContext = (Context) initContext.lookup(
-                                "java:comp/env");
-                        TSDataSource.setPoolDSInstance((BasicDataSource) envContext.lookup(
-                                TSDB_JNDI));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                conn = poolDSInstance.getConnection(username, password);
-
-                if (conn == null) {
-                    throw new SQLException("No Database Connection available");
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                logger.error("Connection unavailable: " + e);
-                logger.warn("Connection unavailable, close the connection " +
-                    "to be able to get another connection ");
-            }
-        }
-
-        return conn;
+    public static TSDataSource getInstance() {
+        return new TSDataSource();
     }
 
-    private static void setDefaultProperties(Properties properties) {
-        //properties.setProperty("url",
-        properties.setProperty("url", DEFAULT_URL);
-        properties.setProperty("maxActive", DEFAULT_MAX_ACTIVE);
-        properties.setProperty("maxIdle", DEFAULT_MAX_IDLE);
-        properties.setProperty("minIdle", DEFAULT_MIN_IDLE);
-        properties.setProperty("maxWait", DEFAULT_MAX_WAIT);
-        properties.setProperty("testOnBorrow", DEFAULT_TEST_ON_BORROW);
-        properties.setProperty("username", DEFAULT_USERNAME);
-        properties.setProperty("password", DEFAULT_PASSWORD);
-        properties.setProperty("validationQuery", DEFAULT_VALIDATION_QUERY);
-        properties.setProperty("removeAbandoned", DEFAULT_REMOVED_ABANDONED);
-        properties.setProperty("removeAbandonedTimeout",
-            DEFAULT_REMOVED_ABANDONED_TIMEOUT);
-        properties.setProperty("logAbandoned", DEFAULT_LOG_ABANDONED);
-        properties.setProperty("driverClassName", DEFAULT_DRIVERNAME);
-        properties.setProperty("driverClassName",
-            "com.p6spy.engine.spy.P6SpyDriver");
+    public static BasicDataSource getPoolDSInstance() {
+        return poolDSInstance;
     }
 
     private static void initialize() {
@@ -339,7 +406,6 @@ public class TSDataSource {
                 System.out.println("Final database properties=" + properties);
                 poolDSInstance = (BasicDataSource) BasicDataSourceFactory.createDataSource(properties);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
 
                 if (poolDSInstance != null) {
@@ -359,29 +425,6 @@ public class TSDataSource {
         }
     }
 
-    public void closeConnection(Connection conection, Statement statement,
-        ResultSet resultset) {
-        try {
-            if (null != statement) {
-                statement.close();
-            }
-
-            if (null != resultset) {
-                resultset.close();
-            }
-
-            if (null != conection) {
-                conection.close();
-            }
-        } catch (SQLException sqle1) {
-            sqle1.printStackTrace();
-        }
-    }
-
-    public boolean getAutoCommit() {
-        return autoCommit;
-    }
-
     public void rollback() throws SQLException {
         if (conn != null) {
             if (getAutoCommit()) {
@@ -390,19 +433,6 @@ public class TSDataSource {
             }
 
             conn.rollback();
-        }
-
-        setAutoCommit(true);
-    }
-
-    public void commit() throws SQLException {
-        if (conn != null) {
-            if (getAutoCommit()) {
-                System.out.println(
-                    "Cannot commit a transaction without a begin");
-            }
-
-            conn.commit();
         }
 
         setAutoCommit(true);
@@ -418,6 +448,30 @@ public class TSDataSource {
                 sqle.printStackTrace();
             }
         }
+    }
+
+    private static void setDefaultProperties(Properties properties) {
+        //properties.setProperty("url",
+        properties.setProperty("url", DEFAULT_URL);
+        properties.setProperty("maxActive", DEFAULT_MAX_ACTIVE);
+        properties.setProperty("maxIdle", DEFAULT_MAX_IDLE);
+        properties.setProperty("minIdle", DEFAULT_MIN_IDLE);
+        properties.setProperty("maxWait", DEFAULT_MAX_WAIT);
+        properties.setProperty("testOnBorrow", DEFAULT_TEST_ON_BORROW);
+        properties.setProperty("username", DEFAULT_USERNAME);
+        properties.setProperty("password", DEFAULT_PASSWORD);
+        properties.setProperty("validationQuery", DEFAULT_VALIDATION_QUERY);
+        properties.setProperty("removeAbandoned", DEFAULT_REMOVED_ABANDONED);
+        properties.setProperty("removeAbandonedTimeout",
+            DEFAULT_REMOVED_ABANDONED_TIMEOUT);
+        properties.setProperty("logAbandoned", DEFAULT_LOG_ABANDONED);
+        properties.setProperty("driverClassName", DEFAULT_DRIVERNAME);
+        properties.setProperty("driverClassName",
+            "com.p6spy.engine.spy.P6SpyDriver");
+    }
+
+    public static void setPoolDSInstance(BasicDataSource poolDSInstance) {
+        TSDataSource.poolDSInstance = poolDSInstance;
     }
 
     public synchronized boolean testConnection() {
@@ -436,36 +490,5 @@ public class TSDataSource {
         }
 
         return isConnected;
-    }
-
-    public void begin() {
-        setAutoCommit(false);
-    }
-
-    public void close() {
-        if (conn != null) {
-            try {
-                if (!conn.getAutoCommit()) {
-                    try {
-                        conn.commit();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-
-                if (!conn.isClosed()) {
-                    conn.close();
-                }
-            } catch (SQLException sqlex) {
-                sqlex.printStackTrace();
-            } finally {
-                conn = null;
-                autoCommit = true;
-            }
-        }
-    }
-
-    public static class TSDataSourceHolder {
-        public static TSDataSource tsDataSource = new TSDataSource();
     }
 }
