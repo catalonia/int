@@ -145,7 +145,7 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "           user_restaurant_reco.recommender_user_id " +
         "       AND user_friend_tastesync.friend_trusted_flag = 1 " +
         "       AND user_restaurant_reco.restaurant_id = ? ";
-    public static String USER_RESTAURANT_MATCH_COUNTER_MATCH_INSERT_SQL = "" +
+    public static String USER_RESTAURANT_MATCH_COUNTER_MATCH_INSERT_SQL1 = "" +
         "INSERT INTO user_restaurant_match_counter " +
         "            (user_restaurant_match_counter.calc_flag, " +
         "             user_restaurant_match_counter.match_counter, " +

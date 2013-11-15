@@ -3,51 +3,65 @@ package com.tastesync.algo.db.dao;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
 
+import com.tastesync.db.pool.TSDataSource;
+
+import java.sql.Connection;
+
 import java.util.List;
 
 
 public interface PiUserRecoDAO extends UserRecoDAO {
-    List<String> getPiUsersCategoryCityNbrhoodList(String cityId,
-        String nbrHoodId) throws TasteSyncException;
+    List<String> getAllReccomendationIds(TSDataSource tsDataSource,
+        Connection connection) throws TasteSyncException;
 
-    List<String> getPiUserAlreadyAssignedToUser(String userId)
-        throws TasteSyncException;
-
-    int getCountPiUserCuistier2Match(String recommendationId,
-        List<String> cuisineTier2IdList) throws TasteSyncException;
-
-    int getCountPiRecoUserCuistier2MatchMapper(String recommendationId,
+    int getCountPiRecoUserCuistier2MatchMapper(TSDataSource tsDataSource,
+        Connection connection, String recommendationId,
         List<String> cuisineTier1IdList) throws TasteSyncException;
 
-    int getCountPiRecoUserPriceMatch(String recommendationId,
-        List<String> priceIdList) throws TasteSyncException;
-
-    int getCountPiRecoUserThemeMatch(String recommendationId,
-        List<String> themeIdList) throws TasteSyncException;
-
-    int getCountPiRecoUserWhoareyouwithMatch(String userecommendationIdrId,
-        List<String> whoareyouwithIdList) throws TasteSyncException;
-
-    int getCountPiRecoUserTypeofrestMatch(String recommendationId,
-        List<String> typeOfRestaurantIdList) throws TasteSyncException;
-
-    int getCountPiRecoUserOccasionMatch(String recommendationId,
+    int getCountPiRecoUserOccasionMatch(TSDataSource tsDataSource,
+        Connection connection, String recommendationId,
         List<String> occasionIdList) throws TasteSyncException;
 
-    List<String> getAllReccomendationIds() throws TasteSyncException;
-
-    List<String> getExcludedRecommendationIdList(String userId)
+    int getCountPiRecoUserPriceMatch(TSDataSource tsDataSource,
+        Connection connection, String recommendationId, List<String> priceIdList)
         throws TasteSyncException;
+
+    int getCountPiRecoUserThemeMatch(TSDataSource tsDataSource,
+            Connection connection,String recommendationId,
+        List<String> themeIdList) throws TasteSyncException;
+
+    int getCountPiRecoUserTypeofrestMatch(TSDataSource tsDataSource,
+        Connection connection, String recommendationId,
+        List<String> typeOfRestaurantIdList) throws TasteSyncException;
+
+    int getCountPiRecoUserWhoareyouwithMatch(TSDataSource tsDataSource,
+        Connection connection, String userecommendationIdrId,
+        List<String> whoareyouwithIdList) throws TasteSyncException;
+
+    int getCountPiUserCuistier2Match(TSDataSource tsDataSource,
+        Connection connection, String recommendationId,
+        List<String> cuisineTier2IdList) throws TasteSyncException;
+
+    List<String> getExcludedRecommendationIdList(TSDataSource tsDataSource,
+        Connection connection, String userId) throws TasteSyncException;
 
     PiRestaurantRecommendationVO getPiRecommendationIdText(
+        TSDataSource tsDataSource, Connection connection,
         String recommendationId) throws TasteSyncException;
 
-    void submitPiRecoLog(String userId, String assignedPiUserId,
+    List<String> getPiUserAlreadyAssignedToUser(TSDataSource tsDataSource,
+        Connection connection, String userId) throws TasteSyncException;
+
+    List<String> getPiUsersCategoryCityNbrhoodList(TSDataSource tsDataSource,
+        Connection connection, String cityId, String nbrHoodId)
+        throws TasteSyncException;
+
+    void submitPiRecoLog(TSDataSource tsDataSource, Connection connection,
+        String userId, String assignedPiUserId,
         PiRestaurantRecommendationVO piRestaurantRecommendationVO)
         throws TasteSyncException;
-    
-    void submitRecommendationRequestAnswer(String recorequestId,
-            String recommenderUserId, String[] restaurantIdList, String replyText)
-            throws TasteSyncException;
-    
+
+    void submitRecommendationRequestAnswer(TSDataSource tsDataSource,
+        Connection connection, String recorequestId, String recommenderUserId,
+        String[] restaurantIdList, String replyText) throws TasteSyncException;
 }

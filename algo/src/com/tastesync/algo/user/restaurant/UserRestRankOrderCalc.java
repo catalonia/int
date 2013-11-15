@@ -6,9 +6,12 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.algo.model.vo.RestaurantPopularityTierVO;
 import com.tastesync.algo.model.vo.RestaurantUserVO;
+
 import com.tastesync.db.pool.TSDataSource;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,11 +20,13 @@ import java.util.List;
 public class UserRestRankOrderCalc {
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
-    public void updateUserRestRankOrderCalc() throws TasteSyncException, SQLException {
-    	TSDataSource tsDataSource = TSDataSource.getInstance();
+    public void updateUserRestRankOrderCalc(TSDataSource tsDataSource,
+        Connection connection) throws TasteSyncException {
         int algoIndicatorIdentifyRestaurantIdList = 0;
-        List<RestaurantCityVO> flaggedRestaurantList = userRestaurantDAO.getFlaggedRestaurantList(algoIndicatorIdentifyRestaurantIdList);
-        List<String> usersIdList = userRestaurantDAO.getAllUsers();
+        List<RestaurantCityVO> flaggedRestaurantList = userRestaurantDAO.getFlaggedRestaurantList(tsDataSource,
+                connection, algoIndicatorIdentifyRestaurantIdList);
+        List<String> usersIdList = userRestaurantDAO.getAllUsers(tsDataSource,
+                connection);
 
         RankRestaurantsSingleUserCalcHelper rankRestaurantsSingleUserCalcHelper = new RankRestaurantsSingleUserCalcHelper();
         RestaurantUserVO restaurantUserVO = null;
@@ -41,33 +46,47 @@ public class UserRestRankOrderCalc {
 
             for (RestaurantUserVO flaggedRestaurantUserVO : restaurantUserVOList) {
                 LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
-                    userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(flaggedRestaurantUserVO);
+                    userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(tsDataSource,
+                        connection, flaggedRestaurantUserVO);
 
                 //numUserRestaurantMatchCount restaurantTier
                 for (RestaurantPopularityTierVO aRestaurantPopularityTierVOList : restaurantPopularityTierVOList) {
                     numUserRestaurantMatchCount = String.valueOf(userRestaurantDAO.getUserMatchCounter(
-                            userId,
-                            flaggedRestaurantUserVO.getRestaurantId()));
-                    aRestaurantPopularityTierVOList
-                            .setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
+                                tsDataSource, connection, userId,
+                                flaggedRestaurantUserVO.getRestaurantId()));
+                    aRestaurantPopularityTierVOList.setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
                     restaurantTier = String.valueOf(userRestaurantDAO.getRestaurantInfoTierId(
-                            userId,
-                            flaggedRestaurantUserVO.getRestaurantId()));
-                    aRestaurantPopularityTierVOList
-                            .setPopularityTierId(restaurantTier);
+                                tsDataSource, connection, userId,
+                                flaggedRestaurantUserVO.getRestaurantId()));
+                    aRestaurantPopularityTierVOList.setPopularityTierId(restaurantTier);
                     aRestaurantPopularityTierVOList.setUserId(userId);
                 }
 
                 // check numUserRestaurantMatchCount
                 List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
 
-                tsDataSource.begin();
-                // final insert
-                userRestaurantDAO.submitAssignedRankUserRestaurant(list1ofrestaurants);
+                try {
+                    tsDataSource.begin();
+                    // final insert
+                    userRestaurantDAO.submitAssignedRankUserRestaurant(tsDataSource,
+                        connection, list1ofrestaurants);
+                    tsDataSource.commit();
+                    tsDataSource.begin();
+                    userRestaurantDAO.submitFlaggedRestaurant(tsDataSource,
+                        connection, flaggedRestaurantUserVO.getRestaurantId(),
+                        -1);
+                    tsDataSource.commit();
+                } catch (SQLException e) {
+                    e.printStackTrace();
 
-                userRestaurantDAO.submitFlaggedRestaurant(flaggedRestaurantUserVO.getRestaurantId(),
-                    -1);
-                tsDataSource.commit();
+                    try {
+                        tsDataSource.rollback();
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    }
+
+                    throw new TasteSyncException(e.getMessage());
+                }
             }
         }
     }

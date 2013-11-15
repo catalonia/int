@@ -43,7 +43,7 @@ public class RestaurantsSearchResultsHelper {
     }
 
     // return list of restaurantIds based on different parameters
-    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(TSDataSource tsDataSource, Connection connection,
         String userId, String restaurantId, String neighborhoodId,
         String cityId, String stateName, String[] priceIdList, String rating,
         String savedFlag, String favFlag, String dealFlag, String chainFlag,
@@ -60,9 +60,7 @@ public class RestaurantsSearchResultsHelper {
                 rating, savedFlag, favFlag, dealFlag, chainFlag, paginationId,
                 cuisineTier2IdArray, themeIdArray, whoareyouwithIdArray,
                 typeOfRestaurantIdArray, occasionIdArray);
-        TSDataSource tsDataSource = TSDataSource.getInstance();
 
-        Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
@@ -81,7 +79,6 @@ public class RestaurantsSearchResultsHelper {
             StringBuffer consolidatedSearchQuery = buildConsolidatedQuery(executingCount,
                     inputRestaurantSearchVO);
             // query is built. now bind the parameters!
-            connection = tsDataSource.getConnection();
             statement = connection.prepareStatement(consolidatedSearchQuery.toString());
 
             resultset = bindParametersForConsolidatedQuery(executingCount,
@@ -131,23 +128,18 @@ public class RestaurantsSearchResultsHelper {
                 "Error while showListOfRestaurantsSearchResults= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(statement, resultset);
         }
     }
 
-    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(
+    public RestaurantsSearchResultsVO showListOfRestaurantsSearchResultsBasedOnUserCity(TSDataSource tsDataSource, Connection connection,
         String userId, String cityId, String paginationId)
         throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         //once do count(*), second time do select using limit derived from paginationId
         try {
-            connection = tsDataSource.getConnection();
             statement = connection.prepareStatement(UserRestaurantQueries.COUNT_USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL);
 
             statement.setString(1, cityId);
@@ -209,8 +201,7 @@ public class RestaurantsSearchResultsHelper {
                 "Error while showListOfRestaurantsSearchResults= " +
                 e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection( statement, resultset);
         }
     }
 

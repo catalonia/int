@@ -10,6 +10,7 @@ import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.db.pool.TSDataSource;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
@@ -28,20 +29,24 @@ public class SupplyInventoryCalc {
     }
 
     //-- Identify flagged users
-    public void processAllUserFlaggedUserListSupplyInventory()
+    public void processAllUserFlaggedUserListSupplyInventory(
+        TSDataSource tsDataSource, Connection connection)
         throws TasteSyncException, SQLException {
-    	TSDataSource tsDataSource = TSDataSource.getInstance();
         int algoIndicatorIdentifyUseridList = 2;
-        List<String> recorequestUserFlaggedUserList = userUserDAO.getRecorequestUserFlaggedUserList(algoIndicatorIdentifyUseridList);
+        List<String> recorequestUserFlaggedUserList = userUserDAO.getRecorequestUserFlaggedUserList(tsDataSource,
+                connection, algoIndicatorIdentifyUseridList);
         algoIndicatorIdentifyUseridList = 1;
 
-        List<String> recorequestTsAssignedFlaggedUserList = userUserDAO.getRecorequestTsAssignedFlaggedUserList(algoIndicatorIdentifyUseridList);
+        List<String> recorequestTsAssignedFlaggedUserList = userUserDAO.getRecorequestTsAssignedFlaggedUserList(tsDataSource,
+                connection, algoIndicatorIdentifyUseridList);
         algoIndicatorIdentifyUseridList = 4;
 
-        List<String> recorequestReplyUserFlaggedUserList = userUserDAO.getRecorequestReplyUserFlaggedUserList(algoIndicatorIdentifyUseridList);
+        List<String> recorequestReplyUserFlaggedUserList = userUserDAO.getRecorequestReplyUserFlaggedUserList(tsDataSource,
+                connection, algoIndicatorIdentifyUseridList);
         algoIndicatorIdentifyUseridList = 4;
 
-        List<String> recorequestReplyUserForSameRecorequestIdFlaggedUserList = userUserDAO.getRecorequestReplyUserForSameRecorequestIdFlaggedUserList(algoIndicatorIdentifyUseridList);
+        List<String> recorequestReplyUserForSameRecorequestIdFlaggedUserList = userUserDAO.getRecorequestReplyUserForSameRecorequestIdFlaggedUserList(tsDataSource,
+                connection, algoIndicatorIdentifyUseridList);
 
         //Combine all flagged userId lists into one list.
         List<String> allUserFlaggedUserList = new ArrayList<String>();
@@ -83,30 +88,36 @@ public class SupplyInventoryCalc {
 
         double numRecorequestsAssignedTotal = 0;
         double numUserRecorequestsAssignedRepliedWithin10Mins = 0;
-        
 
         for (String flagUserId : allUserFlaggedUserList) {
-            numRecorequestsAssignedToday = userUserDAO.getNumRecorequestsAssignedToday(flagUserId);
+            numRecorequestsAssignedToday = userUserDAO.getNumRecorequestsAssignedToday(tsDataSource,
+                    connection, flagUserId);
 
-            numRecorequestsAssignedTodayReplied = userUserDAO.getNumRecorequestsAssignedTodayReplied(flagUserId);
+            numRecorequestsAssignedTodayReplied = userUserDAO.getNumRecorequestsAssignedTodayReplied(tsDataSource,
+                    connection, flagUserId);
 
-            numRecorequestsAssigned7Days = userUserDAO.getNumRecorequestsAssignedNDays(flagUserId,
-                    -7);
+            numRecorequestsAssigned7Days = userUserDAO.getNumRecorequestsAssignedNDays(tsDataSource,
+                    connection, flagUserId, -7);
 
-            numRecorequestsAssigned7DaysReplied = userUserDAO.getNumRecorequestsAssignedNDaysReplied(flagUserId,
-                    -7);
+            numRecorequestsAssigned7DaysReplied = userUserDAO.getNumRecorequestsAssignedNDaysReplied(tsDataSource,
+                    connection, flagUserId, -7);
 
-            numRecorequestsInitiatedTotal = userUserDAO.getNumRecorequestsInitiatedTotal(flagUserId);
+            numRecorequestsInitiatedTotal = userUserDAO.getNumRecorequestsInitiatedTotal(tsDataSource,
+                    connection, flagUserId);
 
-            numRecorequestsAssignedTotal = userUserDAO.getNumRecorequestsAssignedTotal(flagUserId);
+            numRecorequestsAssignedTotal = userUserDAO.getNumRecorequestsAssignedTotal(tsDataSource,
+                    connection, flagUserId);
 
             if (numRecorequestsInitiatedTotal >= TSConstants.MAX_RECOREQUEST_CONSIDERED) {
-                List<RecorequestUserVO> recorequestUserVOList = userUserDAO.getLastNRecorequestsUserRecorequestId(flagUserId);
+                List<RecorequestUserVO> recorequestUserVOList = userUserDAO.getLastNRecorequestsUserRecorequestId(tsDataSource,
+                        connection, flagUserId);
 
                 numUserRecorequestsRepliedWithin10Mins = 0;
 
                 for (RecorequestUserVO recorequestUserVOElement : recorequestUserVOList) {
-                    RecorequestReplyUserVO recorequestReplyUserVO = userUserDAO.recorequestsAssignedFirstReplyId(recorequestUserVOElement.getRecorequestId());
+                    RecorequestReplyUserVO recorequestReplyUserVO = userUserDAO.recorequestsAssignedFirstReplyId(tsDataSource,
+                            connection,
+                            recorequestUserVOElement.getRecorequestId());
 
                     // increment if the reply is withing 10 minutes of assignment!!
                     //Time in milli seoncds - 10 minutes = 
@@ -123,12 +134,15 @@ public class SupplyInventoryCalc {
             }
 
             if (numRecorequestsAssignedTotal >= TSConstants.MAX_RECOREQUEST_CONSIDERED) {
-                List<RecorequestTsAssignedVO> recorequestTsAssignedVOList = userUserDAO.getLastNRecorequestsAssignedRecorequestId(flagUserId);
+                List<RecorequestTsAssignedVO> recorequestTsAssignedVOList = userUserDAO.getLastNRecorequestsAssignedRecorequestId(tsDataSource,
+                        connection, flagUserId);
 
                 numUserRecorequestsAssignedRepliedWithin10Mins = 0;
 
                 for (RecorequestTsAssignedVO recorequestTsAssignedVOElement : recorequestTsAssignedVOList) {
-                    RecorequestReplyUserVO recorequestReplyUserVO = userUserDAO.recorequestsAssignedFirstReplyId(recorequestTsAssignedVOElement.getRecorequestId());
+                    RecorequestReplyUserVO recorequestReplyUserVO = userUserDAO.recorequestsAssignedFirstReplyId(tsDataSource,
+                            connection,
+                            recorequestTsAssignedVOElement.getRecorequestId());
 
                     // increment if the reply is withing 10 minutes of assignment!!
                     //Time in milli seoncds - 10 minutes = 
@@ -151,47 +165,54 @@ public class SupplyInventoryCalc {
                     numRecorequestsAssignedTodayReplied) >= 2) ||
                     ((numRecorequestsAssigned7Days -
                     numRecorequestsAssigned7DaysReplied) >= 2)) {
-                userUserDAO.submitUserRecoSupplyTier(flagUserId, 4);
+                userUserDAO.submitUserRecoSupplyTier(tsDataSource, connection,
+                    flagUserId, 4);
             } else {
                 //-- TODO: Tier 1 IF User if online right now 
-                boolean isUserOnline = userUserDAO.isUserOnlin(flagUserId);
+                boolean isUserOnline = userUserDAO.isUserOnlin(tsDataSource,
+                        connection, flagUserId);
 
                 if (isUserOnline) {
-                    userUserDAO.submitUserRecoSupplyTier(flagUserId, 1);
+                    userUserDAO.submitUserRecoSupplyTier(tsDataSource,
+                        connection, flagUserId, 1);
                 } else {
                     if (((numRecorequestsInitiatedTotal >= TSConstants.MAX_RECOREQUEST_CONSIDERED) &&
                             ((numUserRecorequestsRepliedWithin10Mins / numRecorequestsInitiatedTotal) >= 0.6)) ||
                             ((numRecorequestsAssignedTotal >= TSConstants.MAX_RECOREQUEST_CONSIDERED) &&
                             ((numUserRecorequestsAssignedRepliedWithin10Mins / numRecorequestsInitiatedTotal) >= 0.6)) ||
                             (numRecorequestsAssigned7Days == 0)) {
-                        userUserDAO.submitUserRecoSupplyTier(flagUserId, 2);
+                        userUserDAO.submitUserRecoSupplyTier(tsDataSource,
+                            connection, flagUserId, 2);
                     } else {
-                        userUserDAO.submitUserRecoSupplyTier(flagUserId, 3);
+                        userUserDAO.submitUserRecoSupplyTier(tsDataSource,
+                            connection, flagUserId, 3);
                     }
                 }
             }
-
-            tsDataSource.commit();
         }
 
+        tsDataSource.commit();
         tsDataSource.begin();
 
         for (String flaggedUserId : recorequestUserFlaggedUserList) {
-            userUserDAO.submitRecorrequestUser(flaggedUserId, 1);
+            userUserDAO.submitRecorrequestUser(tsDataSource, connection,
+                flaggedUserId, 1);
         }
 
         tsDataSource.commit();
         tsDataSource.begin();
 
         for (String flaggedUserId : recorequestTsAssignedFlaggedUserList) {
-            userUserDAO.submitRecorrequestAssigned(flaggedUserId, 0);
+            userUserDAO.submitRecorrequestAssigned(tsDataSource, connection,
+                flaggedUserId, 0);
         }
 
         tsDataSource.commit();
         tsDataSource.begin();
 
         for (String flaggedUserId : recorequestReplyUserFlaggedUserList) {
-            userUserDAO.submitRecorrequestReplyUserAlgo1(flaggedUserId, 3);
+            userUserDAO.submitRecorrequestReplyUserAlgo1(tsDataSource,
+                connection, flaggedUserId, 3);
         }
 
         tsDataSource.commit();

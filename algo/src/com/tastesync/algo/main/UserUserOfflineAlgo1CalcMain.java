@@ -14,27 +14,29 @@ import java.sql.SQLException;
 
 public class UserUserOfflineAlgo1CalcMain {
     public static void main(String[] args) {
-        TSDataSource tsDataSource = null;
+        TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
         try {
+            //Get DB connection object
+            connection = tsDataSource.getConnection();
+
             while (true) {
-                //Get DB connection object
-                tsDataSource = TSDataSource.getInstance();
-
-                connection = tsDataSource.getConnection();
-
                 SupplyInventoryCalc supplyInventoryCalc = new SupplyInventoryCalc();
-                supplyInventoryCalc.processAllUserFlaggedUserListSupplyInventory();
+                supplyInventoryCalc.processAllUserFlaggedUserListSupplyInventory(tsDataSource,
+                    connection);
 
                 DemandPriorityCalc demandPriorityCalc = new DemandPriorityCalc();
-                demandPriorityCalc.processAllUserFlaggedUserListDemandPriority();
+                demandPriorityCalc.processAllUserFlaggedUserListDemandPriority(tsDataSource,
+                    connection);
 
                 UserTopicCalc userTopicCalc = new UserTopicCalc();
-                userTopicCalc.processAllUserFlaggedUserListUserTopic();
+                userTopicCalc.processAllUserFlaggedUserListUserTopic(tsDataSource,
+                    connection);
 
                 UserUserCalc userUserCalc = new UserUserCalc();
-                userUserCalc.processAllUserFlaggedUserListUserUser();
+                userUserCalc.processAllUserFlaggedUserListUserUser(tsDataSource,
+                    connection);
             }
         } catch (TasteSyncException e) {
             e.printStackTrace();
@@ -47,10 +49,7 @@ public class UserUserOfflineAlgo1CalcMain {
                 e1.printStackTrace();
             }
         } finally {
-            if (tsDataSource != null) {
-                tsDataSource.close();
-                tsDataSource.closeConnection(connection, null, null);
-            }
+        	tsDataSource.closeConnection(connection);
         }
     }
 }

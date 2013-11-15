@@ -153,11 +153,11 @@ public class RankRestaurantsSingleUserCalcHelper {
         //shuffle
         Collections.shuffle(numTier1Match1);
 
-        for (int i = 0; i < numTier1Match1.size(); ++i) {
+        for (RestaurantPopularityTierVO numTier1Match1Element : numTier1Match1) {
             ++currentRankNumber;
             // set rank number
-            numTier1Match0.get(i).setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(numTier1Match1.get(i));
+            numTier1Match1Element.setRankNumber(currentRankNumber);
+            restaurantsRankMatch1List.add(numTier1Match1Element);
         }
 
         //shuffle

@@ -13,25 +13,26 @@ import java.sql.SQLException;
 
 public class UserRestaurantOfflineAlgo2CalcMain {
     public static void main(String[] args) {
-        TSDataSource tsDataSource = null;
+        TSDataSource tsDataSource = TSDataSource.getInstance();
         Connection connection = null;
 
         try {
+            //Get DB connection object
+            connection = tsDataSource.getConnection();
+
             while (true) {
-                //Get DB connection object
-                tsDataSource = TSDataSource.getInstance();
-
-                connection = tsDataSource.getConnection();
-
                 //Run algo calc
                 RestInfoPopularityTierCalc restInfoPopularityTierCalc = new RestInfoPopularityTierCalc();
-                restInfoPopularityTierCalc.processAllFlaggedRestaurantListRestInfoPopularityTier();
+                restInfoPopularityTierCalc.processAllFlaggedRestaurantListRestInfoPopularityTier(tsDataSource,
+                    connection);
 
                 RestUserMatchCounterCalc restUserMatchCounterCalc = new RestUserMatchCounterCalc();
-                restUserMatchCounterCalc.processAllFlaggedRestaurantListRestUserMatchCounter();
+                restUserMatchCounterCalc.processAllFlaggedRestaurantListRestUserMatchCounter(tsDataSource,
+                    connection);
 
                 UserRestRankOrderCalc userRestRankOrderCalc = new UserRestRankOrderCalc();
-                userRestRankOrderCalc.updateUserRestRankOrderCalc();
+                userRestRankOrderCalc.updateUserRestRankOrderCalc(tsDataSource,
+                    connection);
             }
         } catch (TasteSyncException e) {
             e.printStackTrace();
@@ -44,10 +45,7 @@ public class UserRestaurantOfflineAlgo2CalcMain {
                 e1.printStackTrace();
             }
         } finally {
-            if (tsDataSource != null) {
-                tsDataSource.close();
-                tsDataSource.closeConnection(connection, null, null);
-            }
+        	tsDataSource.closeConnection(connection);
         }
     }
 }

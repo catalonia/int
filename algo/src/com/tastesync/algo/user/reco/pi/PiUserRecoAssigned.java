@@ -9,7 +9,12 @@ import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
+import com.tastesync.db.pool.TSDataSource;
+
 import org.apache.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +38,109 @@ public class PiUserRecoAssigned {
         super();
     }
 
-    public void processingPiAssignRecorequestToUsers(String recoRequestId,
+    private PiRestaurantRecommendationVO getPiRestaurantRecommendation(
+        TSDataSource tsDataSource, Connection connection,
+        String initiatorUserId, List<String> cuisineTier2IdList,
+        List<String> cuisineTier1IdList, List<String> priceIdList,
+        List<String> themeIdList, List<String> whoareyouwithIdList,
+        List<String> typeOfRestaurantIdList, List<String> occasionIdList)
+        throws TasteSyncException {
+        List<String> allRecommendationIdsList = piUserRecoDAO.getAllReccomendationIds(tsDataSource,
+                connection);
+        int topicMatchCounter = 0;
+        double topicMatchRate;
+        int numRecorequestParams = cuisineTier2IdList.size() +
+            cuisineTier1IdList.size() + priceIdList.size() +
+            themeIdList.size() + whoareyouwithIdList.size();
+
+        List<PiRecommendationsTopicMatchRateVO> piRecommendationsTopicMatchRateVOList =
+            new LinkedList<PiRecommendationsTopicMatchRateVO>();
+
+        PiRecommendationsTopicMatchRateVO piRecommendationsTopicMatchRateVO = null;
+
+        for (String recommendationId : allRecommendationIdsList) {
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiUserCuistier2Match(tsDataSource,
+                    connection, recommendationId, cuisineTier2IdList);
+
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiRecoUserCuistier2MatchMapper(tsDataSource,
+                    connection, recommendationId, cuisineTier1IdList);
+
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiRecoUserPriceMatch(tsDataSource,
+                    connection, recommendationId, priceIdList);
+
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiRecoUserThemeMatch(tsDataSource,
+                    connection, recommendationId, themeIdList);
+
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiRecoUserWhoareyouwithMatch(tsDataSource,
+                    connection, recommendationId, whoareyouwithIdList);
+
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiRecoUserTypeofrestMatch(tsDataSource,
+                    connection, recommendationId, typeOfRestaurantIdList);
+
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiRecoUserOccasionMatch(tsDataSource,
+                    connection, recommendationId, occasionIdList);
+
+            topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
+
+            piRecommendationsTopicMatchRateVO = new PiRecommendationsTopicMatchRateVO(recommendationId,
+                    topicMatchRate);
+            piRecommendationsTopicMatchRateVOList.add(piRecommendationsTopicMatchRateVO);
+        }
+
+        Collections.sort(piRecommendationsTopicMatchRateVOList,
+            new Comparator<PiRecommendationsTopicMatchRateVO>() {
+                public int compare(PiRecommendationsTopicMatchRateVO o1,
+                    PiRecommendationsTopicMatchRateVO o2) {
+                    return Double.valueOf(o1.getTopicMatchRate())
+                                 .compareTo(o2.getTopicMatchRate());
+                }
+            });
+
+        List<String> excludedRecommendationIdsList = piUserRecoDAO.getExcludedRecommendationIdList(tsDataSource,
+                connection, initiatorUserId);
+
+        for (Iterator<PiRecommendationsTopicMatchRateVO> it = piRecommendationsTopicMatchRateVOList.iterator();
+                it.hasNext();) {
+            PiRecommendationsTopicMatchRateVO piRecommendationsTopicMatchRateVOElement =
+                it.next();
+
+            if (excludedRecommendationIdsList.contains(
+                        piRecommendationsTopicMatchRateVOElement.getRecommendationId())) {
+                it.remove();
+            }
+        }
+
+        PiRestaurantRecommendationVO piRestaurantRecommendationVO = null;
+
+        //from the remaining list. pick the first one.
+        if (piRecommendationsTopicMatchRateVOList.size() > 0) {
+            if (logger.isInfoEnabled()) {
+                logger.info("piRestaurantRecommendationVO Found " +
+                    piRecommendationsTopicMatchRateVOList.get(0));
+            }
+
+            piRestaurantRecommendationVO = piUserRecoDAO.getPiRecommendationIdText(tsDataSource,
+                    connection,
+                    piRecommendationsTopicMatchRateVOList.get(0)
+                                                         .getRecommendationId());
+        } else {
+            if (logger.isInfoEnabled()) {
+                logger.info("piRestaurantRecommendationVO Not Found");
+            }
+        }
+
+        return piRestaurantRecommendationVO;
+    }
+
+    public void processingPiAssignRecorequestToUsers(
+        TSDataSource tsDataSource, Connection connection, String recoRequestId,
         int recorequestIteration, String cityId, String nbrHoodId,
         String initiatorUserId, List<String> cuisineTier2IdList,
         List<String> cuisineTier1IdList, List<String> priceIdList,
@@ -41,22 +148,23 @@ public class PiUserRecoAssigned {
         List<String> typeOfRestaurantIdList, List<String> occasionIdList)
         throws TasteSyncException {
         //7A
-        List<String> temp1PiUsersUserIdList = piUserRecoDAO.getPiUsersCategoryCityNbrhoodList(cityId,
-                nbrHoodId);
+        List<String> temp1PiUsersUserIdList = piUserRecoDAO.getPiUsersCategoryCityNbrhoodList(tsDataSource,
+                connection, cityId, nbrHoodId);
 
         String temp1PiUsersUserId;
         boolean userReported;
         List<Integer> indexElementToBeRemovedFrmUserRecoSupplyTierVOList = new ArrayList<Integer>();
 
         //7B
-        List<String> piUsersAlreadyAssignedIdList = piUserRecoDAO.getPiUserAlreadyAssignedToUser(initiatorUserId);
+        List<String> piUsersAlreadyAssignedIdList = piUserRecoDAO.getPiUserAlreadyAssignedToUser(tsDataSource,
+                connection, initiatorUserId);
 
         // filter list of temp1users{userId}
         for (int i = 0; i < temp1PiUsersUserIdList.size(); ++i) {
             temp1PiUsersUserId = temp1PiUsersUserIdList.get(i);
 
-            userReported = piUserRecoDAO.isUserIdLinkedWithReportedInfo(initiatorUserId,
-                    temp1PiUsersUserId);
+            userReported = piUserRecoDAO.isUserIdLinkedWithReportedInfo(tsDataSource,
+                    connection, initiatorUserId, temp1PiUsersUserId);
 
             if (userReported) {
                 if (!indexElementToBeRemovedFrmUserRecoSupplyTierVOList.contains(
@@ -138,37 +246,44 @@ public class PiUserRecoAssigned {
 
                     matchCount = 1;
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserCuistier2Match(aTemp1PiUsersUserIdList,
+                        piUserRecoDAO.getCountUserCuistier2Match(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList,
                             cuisineTier2IdList, matchCount);
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserCuistier2MatchMapper(aTemp1PiUsersUserIdList,
+                        piUserRecoDAO.getCountUserCuistier2MatchMapper(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList,
                             cuisineTier1IdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserPriceMatch(aTemp1PiUsersUserIdList,
-                            priceIdList, matchCount);
+                        piUserRecoDAO.getCountUserPriceMatch(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList, priceIdList,
+                            matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserThemeMatch(aTemp1PiUsersUserIdList,
-                            themeIdList, matchCount);
+                        piUserRecoDAO.getCountUserThemeMatch(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList, themeIdList,
+                            matchCount);
 
                     //check matchCount not required?
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserWhoareyouwithMatch(aTemp1PiUsersUserIdList,
+                        piUserRecoDAO.getCountUserWhoareyouwithMatch(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList,
                             whoareyouwithIdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserTypeofrestMatch(aTemp1PiUsersUserIdList,
+                        piUserRecoDAO.getCountUserTypeofrestMatch(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList,
                             typeOfRestaurantIdList, matchCount);
 
                     topicMatchCounter = topicMatchCounter +
-                        piUserRecoDAO.getCountUserOccasionMatch(aTemp1PiUsersUserIdList,
+                        piUserRecoDAO.getCountUserOccasionMatch(tsDataSource,
+                            connection, aTemp1PiUsersUserIdList,
                             occasionIdList, matchCount);
 
                     topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
 
-                    userAUserBMatchTier = piUserRecoDAO.getUserAUserBMatchTier(initiatorUserId,
-                            aTemp1PiUsersUserIdList);
+                    userAUserBMatchTier = piUserRecoDAO.getUserAUserBMatchTier(tsDataSource,
+                            connection, initiatorUserId, aTemp1PiUsersUserIdList);
 
                     if ((topicMatchRate >= 0.6) &&
                             ((userAUserBMatchTier == 1) ||
@@ -238,144 +353,64 @@ public class PiUserRecoAssigned {
         }
 
         if (assigneduserUserId != null) {
-            piUserRecoDAO.submitPiRecorequestTsAssigned(recoRequestId,
-                assigneduserUserId);
-
-            //sleep for remaining time!!
             try {
-                long sleepTime = (long) (TSConstants.PI_ASSIGNED_START_SLEEP_TIME * ((Math.random() * 6) +
-                    2));
+                tsDataSource.begin();
+                piUserRecoDAO.submitPiRecorequestTsAssigned(tsDataSource,
+                    connection, recoRequestId, assigneduserUserId);
+                tsDataSource.commit();
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug(" SLEEP (in ms) for " + sleepTime);
-                }
+                //sleep for remaining time!!
+                try {
+                    long sleepTime = (long) (TSConstants.PI_ASSIGNED_START_SLEEP_TIME * ((Math.random() * 6) +
+                        2));
 
-                //TODO removed
-                if (1 != 1) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(" SLEEP (in ms) for " + sleepTime);
+                    }
+
                     Thread.currentThread();
                     Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+                tsDataSource.begin();
+
+                PiRestaurantRecommendationVO piRestaurantRecommendationVO = getPiRestaurantRecommendation(tsDataSource,
+                        connection, initiatorUserId, cuisineTier2IdList,
+                        cuisineTier1IdList, priceIdList, themeIdList,
+                        whoareyouwithIdList, typeOfRestaurantIdList,
+                        occasionIdList);
+
+                // Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
+
+                //  invoke underlying implementation as part of web service
+                piUserRecoDAO.submitRecommendationRequestAnswer(tsDataSource,
+                    connection, recoRequestId, assigneduserUserId,
+                    CommonFunctionsUtil.convertStringListAsArrayList(
+                        piRestaurantRecommendationVO.getRestaurantId()),
+                    piRestaurantRecommendationVO.getReccomendationText());
+
+                // log data
+                piUserRecoDAO.submitPiRecoLog(tsDataSource, connection,
+                    initiatorUserId, assigneduserUserId,
+                    piRestaurantRecommendationVO);
+                tsDataSource.commit();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+
+                try {
+                    tsDataSource.rollback();
+                } catch (SQLException e2) {
+                    e2.printStackTrace();
+                }
+
+                throw new TasteSyncException(e1.getMessage());
             }
-
-            PiRestaurantRecommendationVO piRestaurantRecommendationVO = getPiRestaurantRecommendation(initiatorUserId,
-                    cuisineTier2IdList, cuisineTier1IdList, priceIdList,
-                    themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
-                    occasionIdList);
-
-            // Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
-
-            //  invoke underlying implementation as part of web service
-            piUserRecoDAO.submitRecommendationRequestAnswer(recoRequestId,
-                assigneduserUserId,
-                CommonFunctionsUtil.convertStringListAsArrayList(
-                    piRestaurantRecommendationVO.getRestaurantId()),
-                piRestaurantRecommendationVO.getReccomendationText());
-
-            // log data
-            piUserRecoDAO.submitPiRecoLog(initiatorUserId, assigneduserUserId,
-                piRestaurantRecommendationVO);
         } else {
             if (logger.isInfoEnabled()) {
                 logger.info("No user is assigned!!!");
             }
         }
-    }
-
-    private PiRestaurantRecommendationVO getPiRestaurantRecommendation(
-        String initiatorUserId, List<String> cuisineTier2IdList,
-        List<String> cuisineTier1IdList, List<String> priceIdList,
-        List<String> themeIdList, List<String> whoareyouwithIdList,
-        List<String> typeOfRestaurantIdList, List<String> occasionIdList)
-        throws TasteSyncException {
-        List<String> allRecommendationIdsList = piUserRecoDAO.getAllReccomendationIds();
-        int topicMatchCounter = 0;
-        double topicMatchRate;
-        int numRecorequestParams = cuisineTier2IdList.size() +
-            cuisineTier1IdList.size() + priceIdList.size() +
-            themeIdList.size() + whoareyouwithIdList.size();
-
-        List<PiRecommendationsTopicMatchRateVO> piRecommendationsTopicMatchRateVOList =
-            new LinkedList<PiRecommendationsTopicMatchRateVO>();
-
-        PiRecommendationsTopicMatchRateVO piRecommendationsTopicMatchRateVO = null;
-
-        for (String recommendationId : allRecommendationIdsList) {
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiUserCuistier2Match(recommendationId,
-                    cuisineTier2IdList);
-
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiRecoUserCuistier2MatchMapper(recommendationId,
-                    cuisineTier1IdList);
-
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiRecoUserPriceMatch(recommendationId,
-                    priceIdList);
-
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiRecoUserThemeMatch(recommendationId,
-                    themeIdList);
-
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiRecoUserWhoareyouwithMatch(recommendationId,
-                    whoareyouwithIdList);
-
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiRecoUserTypeofrestMatch(recommendationId,
-                    typeOfRestaurantIdList);
-
-            topicMatchCounter = topicMatchCounter +
-                piUserRecoDAO.getCountPiRecoUserOccasionMatch(recommendationId,
-                    occasionIdList);
-
-            topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
-
-            piRecommendationsTopicMatchRateVO = new PiRecommendationsTopicMatchRateVO(recommendationId,
-                    topicMatchRate);
-            piRecommendationsTopicMatchRateVOList.add(piRecommendationsTopicMatchRateVO);
-        }
-
-        Collections.sort(piRecommendationsTopicMatchRateVOList,
-            new Comparator<PiRecommendationsTopicMatchRateVO>() {
-                public int compare(PiRecommendationsTopicMatchRateVO o1,
-                    PiRecommendationsTopicMatchRateVO o2) {
-                    return Double.valueOf(o1.getTopicMatchRate())
-                                 .compareTo(o2.getTopicMatchRate());
-                }
-            });
-
-        List<String> excludedRecommendationIdsList = piUserRecoDAO.getExcludedRecommendationIdList(initiatorUserId);
-
-        for (Iterator<PiRecommendationsTopicMatchRateVO> it = piRecommendationsTopicMatchRateVOList.iterator();
-                it.hasNext();) {
-            PiRecommendationsTopicMatchRateVO piRecommendationsTopicMatchRateVOElement =
-                it.next();
-
-            if (excludedRecommendationIdsList.contains(
-                        piRecommendationsTopicMatchRateVOElement.getRecommendationId())) {
-                it.remove();
-            }
-        }
-
-        PiRestaurantRecommendationVO piRestaurantRecommendationVO = null;
-
-        //from the remaining list. pick the first one.
-        if (piRecommendationsTopicMatchRateVOList.size() > 0) {
-            if (logger.isInfoEnabled()) {
-                logger.info("piRestaurantRecommendationVO Found " +
-                    piRecommendationsTopicMatchRateVOList.get(0));
-            }
-
-            piRestaurantRecommendationVO = piUserRecoDAO.getPiRecommendationIdText(piRecommendationsTopicMatchRateVOList.get(
-                        0).getRecommendationId());
-        } else {
-            if (logger.isInfoEnabled()) {
-                logger.info("piRestaurantRecommendationVO Not Found");
-            }
-        }
-
-        return piRestaurantRecommendationVO;
     }
 }

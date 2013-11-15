@@ -10,7 +10,12 @@ import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
+import com.tastesync.db.pool.TSDataSource;
+
 import org.apache.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,38 +30,48 @@ public class UserRecoAssigned {
      */
     private static final Logger logger = Logger.getLogger(UserRecoAssigned.class);
     private static final String NOT_USER_TOPIC_MATCH_4 = "not_user_topic_match_4";
-    private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
     private static final boolean printDebugExtra = false;
+    private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
 
     public UserRecoAssigned() {
         super();
     }
 
-    public void processAssignRecorequestToUsers(String recoRequestId,
-        int recorequestIteration) throws TasteSyncException {
-        String initiatorUserId = userRecoDAO.getInitiatorUserIdFromRecorequestId(recoRequestId);
+    public void processAssignRecorequestToUsers(TSDataSource tsDataSource,
+        Connection connection, String recoRequestId, int recorequestIteration)
+        throws TasteSyncException {
+        String initiatorUserId = userRecoDAO.getInitiatorUserIdFromRecorequestId(tsDataSource,
+                connection, recoRequestId);
 
         if (initiatorUserId == null) {
             throw new TasteSyncException("For recoRequestId=" + recoRequestId +
                 " Unknown userId= " + initiatorUserId);
         }
 
-        List<String> cuisineTier2IdList = userRecoDAO.getRecorequestCuisineTier2IdList(recoRequestId);
+        List<String> cuisineTier2IdList = userRecoDAO.getRecorequestCuisineTier2IdList(tsDataSource,
+                connection, recoRequestId);
 
-        List<String> cuisineTier1IdList = userRecoDAO.getRecorequestCuisineTier1IdList(recoRequestId);
+        List<String> cuisineTier1IdList = userRecoDAO.getRecorequestCuisineTier1IdList(tsDataSource,
+                connection, recoRequestId);
 
-        List<String> priceIdList = userRecoDAO.getRecorequestPriceIdList(recoRequestId);
+        List<String> priceIdList = userRecoDAO.getRecorequestPriceIdList(tsDataSource,
+                connection, recoRequestId);
 
-        List<String> themeIdList = userRecoDAO.getRecorequestThemeIdList(recoRequestId);
+        List<String> themeIdList = userRecoDAO.getRecorequestThemeIdList(tsDataSource,
+                connection, recoRequestId);
 
-        List<String> whoareyouwithIdList = userRecoDAO.getRecorequestWhoareyouwithIdList(recoRequestId);
+        List<String> whoareyouwithIdList = userRecoDAO.getRecorequestWhoareyouwithIdList(tsDataSource,
+                connection, recoRequestId);
 
-        List<String> typeOfRestaurantIdList = userRecoDAO.getRecorequestTypeofrestIdList(recoRequestId);
+        List<String> typeOfRestaurantIdList = userRecoDAO.getRecorequestTypeofrestIdList(tsDataSource,
+                connection, recoRequestId);
 
-        List<String> occasionIdList = userRecoDAO.getRecorequestOccasionIdList(recoRequestId);
+        List<String> occasionIdList = userRecoDAO.getRecorequestOccasionIdList(tsDataSource,
+                connection, recoRequestId);
 
         //single city, single neighboourhoodid
-        CityNeighbourhoodVO cityNeighbourhoodVO = userRecoDAO.getRecorequestCityIdNbrIdList(recoRequestId);
+        CityNeighbourhoodVO cityNeighbourhoodVO = userRecoDAO.getRecorequestCityIdNbrIdList(tsDataSource,
+                connection, recoRequestId);
 
         String cityId = null;
 
@@ -112,25 +127,27 @@ public class UserRecoAssigned {
         //                cuisineTier1IdList, priceIdList, themeIdList,
         //                whoareyouwithIdList, typeOfRestaurantIdList, occasionIdList,
         //                cityId, neighborhoodId);
-        int numSameParamRequests = userRecoDAO.getNumberOfSameParamRequests(initiatorUserId,
-                recoRequestId);
+        int numSameParamRequests = userRecoDAO.getNumberOfSameParamRequests(tsDataSource,
+                connection, initiatorUserId, recoRequestId);
         PiUserRecoAssigned piUserRecoAssigned = new PiUserRecoAssigned();
 
         // -- this implies Demand Tier 4
         if (numSameParamRequests > 1) {
-            piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                 recorequestIteration, cityId, neighborhoodId, initiatorUserId,
                 cuisineTier2IdList, cuisineTier1IdList, priceIdList,
                 themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
                 occasionIdList);
         } else {
-            int demandTier = userRecoDAO.getDemandTierForSingleUser(initiatorUserId);
+            int demandTier = userRecoDAO.getDemandTierForSingleUser(tsDataSource,
+                    connection, initiatorUserId);
 
             if ((demandTier == 1) || (demandTier == 2)) {
                 //4A
-                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(initiatorUserId,
-                        recoRequestId);
-                String fbUserId = userRecoDAO.getFBUserId(initiatorUserId);
+                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(tsDataSource,
+                        connection, initiatorUserId, recoRequestId);
+                String fbUserId = userRecoDAO.getFBUserId(tsDataSource,
+                        connection, initiatorUserId);
 
                 //4B
                 UserRecoSupplyTierVO userRecoSupplyTierVO = null;
@@ -139,7 +156,8 @@ public class UserRecoAssigned {
 
                 for (UserRecoSupplyTierVO anUserRecoSupplyTierVOList : userRecoSupplyTierVOList) {
                     userRecoSupplyTierVO = anUserRecoSupplyTierVOList;
-                    numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(userRecoSupplyTierVO.getUserId(),
+                    numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(tsDataSource,
+                            connection, userRecoSupplyTierVO.getUserId(),
                             cityId, neighborhoodId);
 
                     if (numUserCityNbrhoodMatchTopicFound > 0) {
@@ -159,7 +177,8 @@ public class UserRecoAssigned {
                 // filter list of temp1users{userId}
                 for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
                     userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
-                    userIdLinkedWithFbFriend = userRecoDAO.isUserIdLinkedWithFbFriend(userRecoSupplyTierVO.getUserId(),
+                    userIdLinkedWithFbFriend = userRecoDAO.isUserIdLinkedWithFbFriend(tsDataSource,
+                            connection, userRecoSupplyTierVO.getUserId(),
                             fbUserId);
 
                     if (userIdLinkedWithFbFriend) {
@@ -169,7 +188,8 @@ public class UserRecoAssigned {
                         }
                     }
 
-                    userReported = userRecoDAO.isUserIdLinkedWithReportedInfo(initiatorUserId,
+                    userReported = userRecoDAO.isUserIdLinkedWithReportedInfo(tsDataSource,
+                            connection, initiatorUserId,
                             userRecoSupplyTierVO.getUserId());
 
                     if (userReported) {
@@ -241,7 +261,7 @@ public class UserRecoAssigned {
                 boolean piassignedDone = false;
 
                 if (temp1usersTemp1FieldValue == 0) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,
                         initiatorUserId, cuisineTier2IdList,
                         cuisineTier1IdList, priceIdList, themeIdList,
@@ -275,30 +295,44 @@ public class UserRecoAssigned {
                             userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
                             matchCount = 1;
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserCuistier2Match(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserCuistier2Match(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     cuisineTier2IdList, matchCount);
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserCuistier2MatchMapper(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserCuistier2MatchMapper(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     cuisineTier1IdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserPriceMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserPriceMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     priceIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserThemeMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserThemeMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     themeIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserWhoareyouwithMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserWhoareyouwithMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     whoareyouwithIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserTypeofrestMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserTypeofrestMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     typeOfRestaurantIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserOccasionMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserOccasionMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     occasionIdList, matchCount);
 
                             if (numRecorequestParams == 0) {
@@ -307,7 +341,8 @@ public class UserRecoAssigned {
                                 topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
                             }
 
-                            userAUserBMatchTier = userRecoDAO.getUserAUserBMatchTier(initiatorUserId,
+                            userAUserBMatchTier = userRecoDAO.getUserAUserBMatchTier(tsDataSource,
+                                    connection, initiatorUserId,
                                     userRecoSupplyTierVO.getUserId());
 
                             if ((userRecoSupplyTierVO.getUserSupplyInvTier() == 1) &&
@@ -461,10 +496,22 @@ public class UserRecoAssigned {
                 }
 
                 if (assigneduserUserId != null) {
-                    userRecoDAO.submitRecorequestTsAssigned(recoRequestId,
-                        assigneduserUserId);
-                    userRecoDAO.submitUserRecoSupplyTier(assigneduserUserId, 0,
-                        1);
+
+                	try {
+                    	tsDataSource.begin();
+                        userRecoDAO.submitRecorequestTsAssigned(tsDataSource,
+                            connection, recoRequestId, assigneduserUserId);
+                        userRecoDAO.submitUserRecoSupplyTier(tsDataSource,
+                            connection, assigneduserUserId, 0, 1);
+						tsDataSource.commit();
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+			            try {
+			                tsDataSource.rollback();
+			            } catch (SQLException e2) {
+			                e2.printStackTrace();
+			            }
+					}
 
                     try {
                         CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -487,18 +534,18 @@ public class UserRecoAssigned {
                         e.printStackTrace();
                     }
 
-                    int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
-                            assigneduserUserId);
+                    int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(tsDataSource,
+                            connection, recoRequestId, assigneduserUserId);
 
                     if (demandTier == 1) {
                         if ((numReplyFromAssignedUser == 0) &&
                                 (recorequestIteration == 1)) {
                             recorequestIteration = 2;
-                            processAssignRecorequestToUsers(recoRequestId,
-                                recorequestIteration);
+                            processAssignRecorequestToUsers(tsDataSource,
+                                connection, recoRequestId, recorequestIteration);
                         } else if ((numReplyFromAssignedUser == 0) &&
                                 (recorequestIteration == 2)) {
-                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                                 recorequestIteration, cityId, neighborhoodId,
                                 initiatorUserId, cuisineTier2IdList,
                                 cuisineTier1IdList, priceIdList, themeIdList,
@@ -508,7 +555,7 @@ public class UserRecoAssigned {
                         }
                     } else if (demandTier == 2) {
                         if (numReplyFromAssignedUser == 0) {
-                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                                 recorequestIteration, cityId, neighborhoodId,
                                 initiatorUserId, cuisineTier2IdList,
                                 cuisineTier1IdList, priceIdList, themeIdList,
@@ -521,7 +568,7 @@ public class UserRecoAssigned {
 
                 //Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,
                         initiatorUserId, cuisineTier2IdList,
                         cuisineTier1IdList, priceIdList, themeIdList,
@@ -551,9 +598,10 @@ public class UserRecoAssigned {
                 //            	- After that, Execute: ELSE {GO to PROJECT PI LOGIC}
                 //            	-- This means that we are time-delaying Demand Tier 3 and then assigning to user ONLY if there is a Supply Tier 1 user avl. Else PROJECT PI
                 //4A
-                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(initiatorUserId,
-                        recoRequestId);
-                String fbUserId = userRecoDAO.getFBUserId(initiatorUserId);
+                List<UserRecoSupplyTierVO> userRecoSupplyTierVOList = userRecoDAO.getUserRecoSupplyTierVO(tsDataSource,
+                        connection, initiatorUserId, recoRequestId);
+                String fbUserId = userRecoDAO.getFBUserId(tsDataSource,
+                        connection, initiatorUserId);
 
                 //4B
                 UserRecoSupplyTierVO userRecoSupplyTierVO = null;
@@ -562,8 +610,8 @@ public class UserRecoAssigned {
 
                 for (UserRecoSupplyTierVO anUserRecoSupplyTierVOList : userRecoSupplyTierVOList) {
                     userRecoSupplyTierVO = anUserRecoSupplyTierVOList;
-                    numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(initiatorUserId,
-                            cityId, neighborhoodId);
+                    numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(tsDataSource,
+                            connection, initiatorUserId, cityId, neighborhoodId);
 
                     if (numUserCityNbrhoodMatchTopicFound > 0) {
                         temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH_4);
@@ -582,7 +630,8 @@ public class UserRecoAssigned {
                 // filter list of temp1users{userId}
                 for (int i = 0; i < userRecoSupplyTierVOList.size(); ++i) {
                     userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
-                    userIdLinkedWithFbFriend = userRecoDAO.isUserIdLinkedWithFbFriend(userRecoSupplyTierVO.getUserId(),
+                    userIdLinkedWithFbFriend = userRecoDAO.isUserIdLinkedWithFbFriend(tsDataSource,
+                            connection, userRecoSupplyTierVO.getUserId(),
                             fbUserId);
 
                     if (userIdLinkedWithFbFriend) {
@@ -592,7 +641,8 @@ public class UserRecoAssigned {
                         }
                     }
 
-                    userReported = userRecoDAO.isUserIdLinkedWithReportedInfo(initiatorUserId,
+                    userReported = userRecoDAO.isUserIdLinkedWithReportedInfo(tsDataSource,
+                            connection, initiatorUserId,
                             userRecoSupplyTierVO.getUserId());
 
                     if (userReported) {
@@ -643,7 +693,7 @@ public class UserRecoAssigned {
                 boolean piassignedDone = false;
 
                 if (temp1usersTemp1FieldValue == 0) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,
                         initiatorUserId, cuisineTier2IdList,
                         cuisineTier1IdList, priceIdList, themeIdList,
@@ -670,30 +720,44 @@ public class UserRecoAssigned {
                             userRecoSupplyTierVO = userRecoSupplyTierVOList.get(i);
                             matchCount = 1;
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserCuistier2Match(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserCuistier2Match(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     cuisineTier2IdList, matchCount);
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserCuistier2MatchMapper(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserCuistier2MatchMapper(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     cuisineTier1IdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserPriceMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserPriceMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     priceIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserThemeMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserThemeMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     themeIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserWhoareyouwithMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserWhoareyouwithMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     whoareyouwithIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserTypeofrestMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserTypeofrestMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     typeOfRestaurantIdList, matchCount);
 
                             topicMatchCounter = topicMatchCounter +
-                                userRecoDAO.getCountUserOccasionMatch(userRecoSupplyTierVO.getUserId(),
+                                userRecoDAO.getCountUserOccasionMatch(tsDataSource,
+                                    connection,
+                                    userRecoSupplyTierVO.getUserId(),
                                     occasionIdList, matchCount);
 
                             if (numRecorequestParams == 0) {
@@ -702,7 +766,8 @@ public class UserRecoAssigned {
                                 topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
                             }
 
-                            userAUserBMatchTier = userRecoDAO.getUserAUserBMatchTier(initiatorUserId,
+                            userAUserBMatchTier = userRecoDAO.getUserAUserBMatchTier(tsDataSource,
+                                    connection, initiatorUserId,
                                     userRecoSupplyTierVO.getUserId());
 
                             if ((userRecoSupplyTierVO.getUserSupplyInvTier() == 1) &&
@@ -744,9 +809,10 @@ public class UserRecoAssigned {
                 }
 
                 if (assigneduserUserId != null) {
-                    userRecoDAO.submitRecorequestTsAssigned(initiatorUserId,
-                        assigneduserUserId);
-                    userRecoDAO.submitUserRecoSupplyTier(initiatorUserId, 0, 1);
+                    userRecoDAO.submitRecorequestTsAssigned(tsDataSource,
+                        connection, initiatorUserId, assigneduserUserId);
+                    userRecoDAO.submitUserRecoSupplyTier(tsDataSource,
+                        connection, initiatorUserId, 0, 1);
 
                     try {
                         CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -769,11 +835,11 @@ public class UserRecoAssigned {
                         e.printStackTrace();
                     }
 
-                    int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(recoRequestId,
-                            assigneduserUserId);
+                    int numReplyFromAssignedUser = userRecoDAO.getCountRecorequestReplyUser(tsDataSource,
+                            connection, recoRequestId, assigneduserUserId);
 
                     if (numReplyFromAssignedUser == 0) {
-                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                             recorequestIteration, cityId, neighborhoodId,
                             initiatorUserId, cuisineTier2IdList,
                             cuisineTier1IdList, priceIdList, themeIdList,
@@ -785,7 +851,7 @@ public class UserRecoAssigned {
 
                 //Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(recoRequestId,
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
                         recorequestIteration, cityId, neighborhoodId,
                         initiatorUserId, cuisineTier2IdList,
                         cuisineTier1IdList, priceIdList, themeIdList,

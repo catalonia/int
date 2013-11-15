@@ -7,6 +7,9 @@ import com.tastesync.db.pool.TSDataSource;
 
 import org.apache.log4j.Logger;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 
 public class TriggerAlgo1ExecutionMain {
     /**
@@ -34,14 +37,21 @@ public class TriggerAlgo1ExecutionMain {
         }
 
         int recorequestIteration = 1;
+        TSDataSource tsDataSource = TSDataSource.getInstance();
+        Connection connection = null;
 
         try {
-            TSDataSource tsDataSource = TSDataSource.getInstance();
-
-            userRecoAssigned.processAssignRecorequestToUsers(recoRequestId,
-                recorequestIteration);
+            connection = tsDataSource.getConnection();
+            userRecoAssigned.processAssignRecorequestToUsers(tsDataSource,
+                connection, recoRequestId, recorequestIteration);
+            tsDataSource.closeConnection(connection);
         } catch (TasteSyncException e) {
-            logger.error("main(String[])", e); //$NON-NLS-1$
+            logger.error("main(String[])", e);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            tsDataSource.closeConnection(connection);
+            tsDataSource = null;
         }
     }
 }

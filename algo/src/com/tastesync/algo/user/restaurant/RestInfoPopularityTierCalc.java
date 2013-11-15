@@ -6,6 +6,7 @@ import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.db.pool.TSDataSource;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -20,12 +21,11 @@ public class RestInfoPopularityTierCalc {
 
 	// get restaurant if based on alog_ind
     //TODO need to be updated/reset whenever data from factual is updated
-    public void processAllFlaggedRestaurantListRestInfoPopularityTier()
-        throws TasteSyncException, SQLException {
-    	TSDataSource tsDataSource = TSDataSource.getInstance();
+    public void processAllFlaggedRestaurantListRestInfoPopularityTier(TSDataSource tsDataSource, Connection connection)
+        throws TasteSyncException {
         int algoIndicatorIdentifyRestaurantIdList = 1;
-        List<RestaurantCityVO> recorequestUserFlaggedUserList = userRestaurantDAO.getFlaggedRestaurantList(algoIndicatorIdentifyRestaurantIdList);
-        List<String> cityIdList = userRestaurantDAO.getFlaggedCityIdList(algoIndicatorIdentifyRestaurantIdList);
+        List<RestaurantCityVO> recorequestUserFlaggedUserList = userRestaurantDAO.getFlaggedRestaurantList(tsDataSource, connection,algoIndicatorIdentifyRestaurantIdList);
+        List<String> cityIdList = userRestaurantDAO.getFlaggedCityIdList(tsDataSource, connection,algoIndicatorIdentifyRestaurantIdList);
         int MAX_NUMBER_CITY_COVERAGE = 20;
 
         if (cityIdList.size() > MAX_NUMBER_CITY_COVERAGE) {
@@ -38,7 +38,7 @@ public class RestInfoPopularityTierCalc {
         int medianValueForSingleCityId = 0;
 
         for (String cityId : cityIdList) {
-            medianValueForSingleCityId = userRestaurantDAO.getMedianvalueForSingleCityIdList(cityId);
+            medianValueForSingleCityId = userRestaurantDAO.getMedianvalueForSingleCityIdList(tsDataSource, connection,cityId);
             cityMedianHashMap.put(cityId,
                     medianValueForSingleCityId);
         }
@@ -54,14 +54,24 @@ public class RestInfoPopularityTierCalc {
             }
 
             medianUsersNumberForCity = cityMedianHashMap.get(restaurantCityVO.getCityId());
-            tsDataSource.begin();
-            userRestaurantDAO.processSingleRestaurantIdCalc(restaurantCityVO.getRestaurantId(),
-                medianUsersNumberForCity);
-            tsDataSource.commit();
-            tsDataSource.begin();
-            userRestaurantDAO.submitFlaggedRestaurant(restaurantCityVO.getRestaurantId(),
-                algoIndicatorDone);
-            tsDataSource.commit();
+            
+            try {
+            	tsDataSource.begin();
+                userRestaurantDAO.processSingleRestaurantIdCalc(tsDataSource, connection,restaurantCityVO.getRestaurantId(),
+                    medianUsersNumberForCity);
+                userRestaurantDAO.submitFlaggedRestaurant(tsDataSource, connection,restaurantCityVO.getRestaurantId(),
+                    algoIndicatorDone);
+                				tsDataSource.commit();
+			} catch (SQLException e) {
+				e.printStackTrace();
+	            try {
+	                tsDataSource.rollback();
+	            } catch (SQLException e1) {
+	                e1.printStackTrace();
+	            }
+
+	            throw new TasteSyncException(e.getMessage());
+			}
         }
     }
 }
