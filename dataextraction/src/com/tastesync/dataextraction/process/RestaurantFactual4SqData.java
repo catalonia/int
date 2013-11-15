@@ -19,6 +19,8 @@ import com.tastesync.dataextraction.external.foursquare.api.io.DefaultIOHandler;
 import com.tastesync.dataextraction.model.FactualDataVO;
 import com.tastesync.dataextraction.util.TSConstants;
 
+import com.tastesync.db.pool.TSDataSource;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -28,6 +30,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import java.math.BigDecimal;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import java.text.SimpleDateFormat;
 
@@ -42,153 +47,44 @@ public class RestaurantFactual4SqData {
         super();
     }
 
-    public void processRestaurantFactual4SqData(
-        TSConstants.DATAEXTRACTION_SOURCETYPE dataExtractionSourceType,
-        String CLIENT_ID, String CLIENT_SECRET, String redirectURI,
-        DefaultIOHandler defaultIOHandler, FoursquareApi foursquareApi,
-        String inputFactualIdDataFile, String outputSqlFilePath,
-        String outputInvalidFactualDataFile) throws TasteSyncException {
-        String readLineFactualData = "3b59f129-2838-4633-bb02-af04111ed7e3";
-        String[] readLineFactualDataArray = new String[4];
+    private String correctedSqlStringData(String inputSqlStringData) {
+        String correctedInputSqlStringData = null;
+        correctedInputSqlStringData = (inputSqlStringData != null)
+            ? inputSqlStringData : "";
+        // additonal replacements!!
+        correctedInputSqlStringData = StringUtils.replace(correctedInputSqlStringData,
+                "\"", "\"\"");
 
-        FactualDataVO factualData = new FactualDataVO();
-
-        Date startDate = new Date();
-        Date stopDate = startDate;
-        long totalTimeTakenInMilliSeconds = 0;
-
-        int i = 0;
-
-        //read from the file
-        BufferedReader br = null;
-        BufferedWriter outputSqlFileWriter = null;
-        BufferedWriter outputInvalidDataFileWriter = null;
-        boolean callAgain = false;
-
-        int attempts = 0;
-        int requestNumber = 0;
-
-        try {
-            String sCurrentLine;
-
-            br = new BufferedReader(new FileReader(inputFactualIdDataFile));
-            outputSqlFileWriter = new BufferedWriter(new FileWriter(
-                        outputSqlFilePath));
-            outputInvalidDataFileWriter = new BufferedWriter(new FileWriter(
-                        outputInvalidFactualDataFile));
-            System.out.println(
-                "***********************START**************************");
-
-            while ((sCurrentLine = br.readLine()) != null) {
-                readLineFactualData = sCurrentLine.trim();
-
-                readLineFactualDataArray = readLineFactualData.split(TSConstants.DELIMITOR,
-                        -1);
-
-                factualData.setFactualId(readLineFactualDataArray[0]);
-                factualData.setRestuarantName(readLineFactualDataArray[1]);
-
-                if ("null".equals(readLineFactualDataArray[2]) ||
-                        "null".equals(readLineFactualDataArray[3])) {
-                    int pullEligInd = 0;
-                    int lastMatchInd = 0;
-                    String restaurantId = readLineFactualDataArray[0];
-
-                    pullEligInd = 0;
-                    lastMatchInd = 0;
-
-                    FoursquareDAO foursquareDAO = new FoursquareDAOImpl();
-                    foursquareDAO.matchFoursquareStatusUpdate(pullEligInd,
-                        lastMatchInd, restaurantId);
-                    continue;
-                }
-
-                factualData.setLatitude(new BigDecimal(
-                        readLineFactualDataArray[2]));
-                factualData.setLongtitude(new BigDecimal(
-                        readLineFactualDataArray[3]));
-                factualData.setPhoneNumber(readLineFactualDataArray[4]);
-
-                ++requestNumber;
-                System.out.println("Request Number" + requestNumber +
-                    " ;factualData=" + factualData.toString());
-
-                if (printExtraDebug) {
-                    System.out.println("readLineFactualDataArray=" +
-                        Arrays.toString(readLineFactualDataArray));
-                }
-
-                callAgain = processDataForSingleFactualId(dataExtractionSourceType,
-                        foursquareApi, factualData, outputSqlFileWriter,
-                        outputInvalidDataFileWriter);
-                attempts = 1;
-
-                while (callAgain) {
-                    ++attempts;
-                    callAgain = processDataForSingleFactualId(dataExtractionSourceType,
-                            foursquareApi, factualData, outputSqlFileWriter,
-                            outputInvalidDataFileWriter);
-
-                    if (attempts > TSConstants.MAX_ATTEMPTS) {
-                        throw new TasteSyncException("DONE attempts=" +
-                            attempts + " Something may be wrong!! Check");
-                    }
-                }
-
-                stopDate = new Date();
-                totalTimeTakenInMilliSeconds = (stopDate.getTime() -
-                    startDate.getTime());
-
-                System.out.println("milliSeconds" +
-                    totalTimeTakenInMilliSeconds + " ,in seconds " +
-                    (totalTimeTakenInMilliSeconds / 1000) + "." +
-                    (totalTimeTakenInMilliSeconds % 1000) + " ,in minutes " +
-                    (totalTimeTakenInMilliSeconds / 60000));
-                System.out.println(
-                    "***********************END**************************");
-
-                //TODO to be removed lator
-                ++i;
-
-                if (i == 2) {
-                    return;
-                }
-            } // end while
-        } // end try
-        catch (IOException e) {
-            e.printStackTrace();
-        } // end catch
-        finally {
-            try {
-                if (br != null) {
-                    br.close();
-                } // end if
-            } // end try
-            catch (IOException ex) {
-                ex.printStackTrace();
-            } // end catch
-
-            if (outputSqlFileWriter != null) {
-                try {
-                    outputSqlFileWriter.flush();
-                    outputSqlFileWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (outputInvalidDataFileWriter != null) {
-                try {
-                    outputInvalidDataFileWriter.flush();
-                    outputInvalidDataFileWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } // end finally
+        return correctedInputSqlStringData;
     }
 
-    private boolean processDataForSingleFactualId(
+    private String normalisedStringData(String inputStringData) {
+        String correctedInputStringData = null;
+        correctedInputStringData = (inputStringData != null) ? inputStringData
+                                                             : "";
+
+        correctedInputStringData = correctedInputStringData.toLowerCase();
+        // additonal replacements!!
+        correctedInputStringData = StringUtils.replace(correctedInputStringData,
+                " ", "");
+
+        correctedInputStringData = StringUtils.replace(correctedInputStringData,
+                "'", "");
+
+        correctedInputStringData = StringUtils.replace(correctedInputStringData,
+                "'", "");
+        correctedInputStringData = StringUtils.replace(correctedInputStringData,
+                "&", "");
+        correctedInputStringData = StringUtils.replace(correctedInputStringData,
+                "-", "");
+        correctedInputStringData = StringUtils.replace(correctedInputStringData,
+                "@", "");
+
+        return correctedInputStringData;
+    }
+
+    private boolean processDataForSingleFactualId(TSDataSource tsDataSource,
+        Connection connection,
         TSConstants.DATAEXTRACTION_SOURCETYPE dataExtractionSourceType,
         FoursquareApi foursquareApi, FactualDataVO factualData,
         BufferedWriter outputSqlFileWriter,
@@ -229,7 +125,7 @@ public class RestaurantFactual4SqData {
             String venueNameFromResult = null;
             String phoneNumberFromResult = null;
             boolean matchFound = false;
-            
+
             CompactVenue matchedCompactVenue = null;
             //TODO if foursquare id is availbale in restaurant_factual_4sq, then skip the below call!!
             //STEP 1
@@ -347,12 +243,29 @@ public class RestaurantFactual4SqData {
                     String restaurantId = factualId;
                     pullEligInd = 0;
                     lastMatchInd = 0;
+
                     if (venuesLength == 1) {
                         lastMatchInd = 1;
                     }
-                    FoursquareDAO foursquareDAO = new FoursquareDAOImpl();
-                    foursquareDAO.matchFoursquareStatusUpdate(pullEligInd,
-                        lastMatchInd, restaurantId);
+
+                    try {
+                        FoursquareDAO foursquareDAO = new FoursquareDAOImpl();
+
+                        tsDataSource.begin();
+                        foursquareDAO.matchFoursquareStatusUpdate(tsDataSource,
+                            connection, pullEligInd, lastMatchInd, restaurantId);
+                        tsDataSource.commit();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+
+                        try {
+                            tsDataSource.rollback();
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                        }
+
+                        throw new TasteSyncException(e.getMessage());
+                    }
                 }
 
                 if (venuesSearchResultList.getMeta().getCode() == 200) {
@@ -450,13 +363,15 @@ public class RestaurantFactual4SqData {
                                               .append(completeVenue.getStats()
                                                                    .getCheckinsCount())
                                               .append("\",");
+
                             if (completeVenue.getRating() != null) {
                                 outputStringBuffer.append("\"")
-                                .append(completeVenue.getRating()).append("\"");
+                                                  .append(completeVenue.getRating())
+                                                  .append("\"");
                             } else {
                                 outputStringBuffer.append(completeVenue.getRating());
                             }
-                            
+
                             outputStringBuffer.append(" );");
                             outputSqlFileWriter.write(outputStringBuffer.toString());
                             outputSqlFileWriter.newLine();
@@ -765,39 +680,166 @@ public class RestaurantFactual4SqData {
         return callAgain;
     }
 
-    private String correctedSqlStringData(String inputSqlStringData) {
-        String correctedInputSqlStringData = null;
-        correctedInputSqlStringData = (inputSqlStringData != null)
-            ? inputSqlStringData : "";
-        // additonal replacements!!
-        correctedInputSqlStringData = StringUtils.replace(correctedInputSqlStringData,
-                "\"", "\"\"");
+    public void processRestaurantFactual4SqData(TSDataSource tsDataSource,
+        Connection connection,
+        TSConstants.DATAEXTRACTION_SOURCETYPE dataExtractionSourceType,
+        String CLIENT_ID, String CLIENT_SECRET, String redirectURI,
+        DefaultIOHandler defaultIOHandler, FoursquareApi foursquareApi,
+        String inputFactualIdDataFile, String outputSqlFilePath,
+        String outputInvalidFactualDataFile) throws TasteSyncException {
+        String readLineFactualData = "3b59f129-2838-4633-bb02-af04111ed7e3";
+        String[] readLineFactualDataArray = new String[4];
 
-        return correctedInputSqlStringData;
-    }
+        FactualDataVO factualData = new FactualDataVO();
 
-    private String normalisedStringData(String inputStringData) {
-        String correctedInputStringData = null;
-        correctedInputStringData = (inputStringData != null) ? inputStringData
-                                                             : "";
+        Date startDate = new Date();
+        Date stopDate = startDate;
+        long totalTimeTakenInMilliSeconds = 0;
 
-        correctedInputStringData = correctedInputStringData.toLowerCase();
-        // additonal replacements!!
-        correctedInputStringData = StringUtils.replace(correctedInputStringData,
-                " ", "");
+        int i = 0;
 
-        correctedInputStringData = StringUtils.replace(correctedInputStringData,
-                "'", "");
+        //read from the file
+        BufferedReader br = null;
+        BufferedWriter outputSqlFileWriter = null;
+        BufferedWriter outputInvalidDataFileWriter = null;
+        boolean callAgain = false;
 
-        correctedInputStringData = StringUtils.replace(correctedInputStringData,
-                "'", "");
-        correctedInputStringData = StringUtils.replace(correctedInputStringData,
-                "&", "");
-        correctedInputStringData = StringUtils.replace(correctedInputStringData,
-                "-", "");
-        correctedInputStringData = StringUtils.replace(correctedInputStringData,
-                "@", "");
+        int attempts = 0;
+        int requestNumber = 0;
 
-        return correctedInputStringData;
+        try {
+            String sCurrentLine;
+
+            br = new BufferedReader(new FileReader(inputFactualIdDataFile));
+            outputSqlFileWriter = new BufferedWriter(new FileWriter(
+                        outputSqlFilePath));
+            outputInvalidDataFileWriter = new BufferedWriter(new FileWriter(
+                        outputInvalidFactualDataFile));
+            System.out.println(
+                "***********************START**************************");
+
+            while ((sCurrentLine = br.readLine()) != null) {
+                readLineFactualData = sCurrentLine.trim();
+
+                readLineFactualDataArray = readLineFactualData.split(TSConstants.DELIMITOR,
+                        -1);
+
+                factualData.setFactualId(readLineFactualDataArray[0]);
+                factualData.setRestuarantName(readLineFactualDataArray[1]);
+
+                if ("null".equals(readLineFactualDataArray[2]) ||
+                        "null".equals(readLineFactualDataArray[3])) {
+                    int pullEligInd = 0;
+                    int lastMatchInd = 0;
+                    String restaurantId = readLineFactualDataArray[0];
+
+                    pullEligInd = 0;
+                    lastMatchInd = 0;
+
+                    try {
+                        FoursquareDAO foursquareDAO = new FoursquareDAOImpl();
+                        foursquareDAO.matchFoursquareStatusUpdate(tsDataSource,
+                            connection, pullEligInd, lastMatchInd, restaurantId);
+                        tsDataSource.commit();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+
+                        try {
+                            tsDataSource.rollback();
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                        }
+
+                        throw new TasteSyncException(e.getMessage());
+                    }
+
+                    continue;
+                }
+
+                factualData.setLatitude(new BigDecimal(
+                        readLineFactualDataArray[2]));
+                factualData.setLongtitude(new BigDecimal(
+                        readLineFactualDataArray[3]));
+                factualData.setPhoneNumber(readLineFactualDataArray[4]);
+
+                ++requestNumber;
+                System.out.println("Request Number" + requestNumber +
+                    " ;factualData=" + factualData.toString());
+
+                if (printExtraDebug) {
+                    System.out.println("readLineFactualDataArray=" +
+                        Arrays.toString(readLineFactualDataArray));
+                }
+
+                callAgain = processDataForSingleFactualId(tsDataSource,
+                        connection, dataExtractionSourceType, foursquareApi,
+                        factualData, outputSqlFileWriter,
+                        outputInvalidDataFileWriter);
+                attempts = 1;
+
+                while (callAgain) {
+                    ++attempts;
+                    callAgain = processDataForSingleFactualId(tsDataSource,
+                            connection, dataExtractionSourceType,
+                            foursquareApi, factualData, outputSqlFileWriter,
+                            outputInvalidDataFileWriter);
+
+                    if (attempts > TSConstants.MAX_ATTEMPTS) {
+                        throw new TasteSyncException("DONE attempts=" +
+                            attempts + " Something may be wrong!! Check");
+                    }
+                }
+
+                stopDate = new Date();
+                totalTimeTakenInMilliSeconds = (stopDate.getTime() -
+                    startDate.getTime());
+
+                System.out.println("milliSeconds" +
+                    totalTimeTakenInMilliSeconds + " ,in seconds " +
+                    (totalTimeTakenInMilliSeconds / 1000) + "." +
+                    (totalTimeTakenInMilliSeconds % 1000) + " ,in minutes " +
+                    (totalTimeTakenInMilliSeconds / 60000));
+                System.out.println(
+                    "***********************END**************************");
+
+                //TODO to be removed lator
+                ++i;
+
+                if (i == -1) {
+                    return;
+                }
+            } // end while
+        } // end try
+        catch (IOException e) {
+            e.printStackTrace();
+        } // end catch
+        finally {
+            try {
+                if (br != null) {
+                    br.close();
+                } // end if
+            } // end try
+            catch (IOException ex) {
+                ex.printStackTrace();
+            } // end catch
+
+            if (outputSqlFileWriter != null) {
+                try {
+                    outputSqlFileWriter.flush();
+                    outputSqlFileWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (outputInvalidDataFileWriter != null) {
+                try {
+                    outputInvalidDataFileWriter.flush();
+                    outputInvalidDataFileWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } // end finally
     }
 }
