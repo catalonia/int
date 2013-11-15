@@ -1,7 +1,12 @@
 package com.tastesync.push.main;
 
+import com.tastesync.db.pool.TSDataSource;
+
 import com.tastesync.push.exception.TasteSyncException;
 import com.tastesync.push.services.PushService;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -25,22 +30,37 @@ public class DailyPushServiceNotificationsMain {
                 calendar.setTime(currentDate);
                 sleepNeeded(startHour, endHour, calendar);
 
-                // between 8 (AM) and 23 (11 PM)
+                // -- invoke via script to trigger push notification for Did You Like using recoreply_didyoulike_notif 
+                // -- see below. This script should be executed between 8AM and 23pm EST so that notifications are not sent to Users at night.
+                //Check time
                 if ((calendar.get(Calendar.HOUR_OF_DAY) >= startHour) &&
                         (calendar.get(Calendar.HOUR_OF_DAY) <= endHour)) {
                     System.out.println("Executing PUSH notifications " +
                         calendar);
-                    pushService.dailyPushServiceNotifications();
+
+                    TSDataSource tsDataSource = TSDataSource.getInstance();
+                    Connection connection = null;
+
+                    try {
+                        connection = tsDataSource.getConnection();
+                        pushService.dailyPushServiceNotifications(tsDataSource,
+                            connection);
+                        tsDataSource.closeConnection(connection);
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                    } finally {
+                        tsDataSource.closeConnection(connection);
+                    }
 
                     // sleep for 1 hour
                     // further logics to wait
                     System.out.println("hours=" +
                         (calendar.get(Calendar.HOUR_OF_DAY)) + "SLEEP for " +
-                        (360000 * startHour));
+                        (360000));
                     Thread.currentThread();
 
                     try {
-                        Thread.sleep(360000 * startHour);
+                        Thread.sleep(360000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

@@ -34,6 +34,7 @@
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/tomcat-util.jar"/>
 	<classpathentry kind="lib" path="libExtras/tomcat-juli.jar"/>
 	<classpathentry kind="lib" path="libExtras/p6spy-2.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="libExtras/mysql-connector-java-5.1.23-bin.jar"/>
+	<classpathentry kind="lib" path="lib/joda-time-2.1.jar"/>
+	<classpathentry kind="lib" path="libExtras/mysql-connector-java-5.1.27-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

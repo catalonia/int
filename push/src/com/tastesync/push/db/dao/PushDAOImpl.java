@@ -21,17 +21,54 @@ import java.util.List;
 
 public class PushDAOImpl implements PushDAO {
     @Override
-    public List<UserNotificationsPushVO> getAllNotifcationsForPush()
+    public List<String> getAllDeviceTokensForSingleUser(
+        TSDataSource tsDataSource, Connection connection, String userId)
         throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
-            connection = tsDataSource.getConnection();
+            List<String> deviceTokenList = new ArrayList<String>();
 
+            statement = connection.prepareStatement(PushQueries.DEVICE_TOKEN_SELECT_SQL);
+            statement.setString(1, userId);
+
+            resultset = statement.executeQuery();
+
+            String deviceToken;
+
+            while (resultset.next()) {
+                //deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                //          "USER_DEVICE_OAUTH.DEVICE_TOKEN"));
+                deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "DEVICE_TOKEN"));
+
+                if ((deviceToken != null) && !deviceToken.isEmpty()) {
+                    deviceTokenList.add(deviceToken);
+                }
+            }
+
+            statement.close();
+
+            return deviceTokenList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getAllDeviceTokensForSingleUser= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
+    public List<UserNotificationsPushVO> getAllNotifcationsForPush(
+        TSDataSource tsDataSource, Connection connection)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
             List<UserNotificationsPushVO> userNotificationsPushVOList = new ArrayList<UserNotificationsPushVO>();
 
             statement = connection.prepareStatement(PushQueries.PUSH_NOTIFICATIONS_ALL_SELECT_SQL);
@@ -66,106 +103,19 @@ public class PushDAOImpl implements PushDAO {
             throw new TasteSyncException(
                 "Error while getAllNotifcationsForPush= " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
-        }
-    }
-
-    @Override
-    public List<String> getAllDeviceTokensForSingleUser(String userId)
-        throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-
-        try {
-            connection = tsDataSource.getConnection();
-
-            List<String> deviceTokenList = new ArrayList<String>();
-
-            statement = connection.prepareStatement(PushQueries.DEVICE_TOKEN_SELECT_SQL);
-            statement.setString(1, userId);
-
-            resultset = statement.executeQuery();
-
-            String deviceToken;
-
-            while (resultset.next()) {
-                //deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                  //          "USER_DEVICE_OAUTH.DEVICE_TOKEN"));
-                deviceToken = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
-                        "DEVICE_TOKEN"));
-
-                if ((deviceToken != null) && !deviceToken.isEmpty()) {
-                    deviceTokenList.add(deviceToken);
-                }
-            }
-
-            statement.close();
-
-            return deviceTokenList;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new TasteSyncException(
-                "Error while getAllDeviceTokensForSingleUser= " +
-                e.getMessage());
-        } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
-        }
-    }
-
-    @Override
-    public void updateNotificationsSentStatus(
-        List<UserNotificationsPushVO> userNotificationsPushVOList,
-        int statusFlag) throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultset = null;
-
-        try {
-            connection = tsDataSource.getConnection();
-
-            statement = connection.prepareStatement(PushQueries.PUSH_NOTIFICATIONS_ALL_UPDATE_SQL);
-
-            for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
-                statement.setInt(1, statusFlag);
-                statement.setString(2, userNotificationsPushVO.getUserId());
-                statement.setString(3,
-                    userNotificationsPushVO.getNotificationType());
-                statement.setString(4, userNotificationsPushVO.getLinkedId());
-
-                statement.executeUpdate();
-            }
-
-            statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new TasteSyncException(
-                "Error while updateNotificationsSentStatus= " + e.getMessage());
-        } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(statement, resultset);
         }
     }
 
     @Override
     public NotificationsPushTextDataVO getNotificationsPushTextData(
+        TSDataSource tsDataSource, Connection connection,
         UserNotificationsPushVO userNotificationsPushVO)
         throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
-            connection = tsDataSource.getConnection();
-
             String sql;
 
             if ("1".equals(userNotificationsPushVO.getNotificationType())) {
@@ -198,30 +148,26 @@ public class PushDAOImpl implements PushDAO {
 
             statement.close();
 
-            return new NotificationsPushTextDataVO(firstName,
-                    lastName);
+            return new NotificationsPushTextDataVO(firstName, lastName);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
                 "Error while updateNotificationsSentStatus= " + e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(statement, resultset);
         }
     }
 
     @Override
-    public void updateDidYouLikeFordailyPushServiceNotifications()
+    public void updateDidYouLikeFordailyPushServiceNotifications(
+        TSDataSource tsDataSource, Connection connection)
         throws TasteSyncException {
-        Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultset = null;
-        TSDataSource tsDataSource = TSDataSource.getInstance();
         PreparedStatement statementInner = null;
 
         try {
-            connection = tsDataSource.getConnection();
-
+        	tsDataSource.begin();
             statement = connection.prepareStatement(PushQueries.REPLY_VIEWED_INITIATOR_RECOREQUEST_USER_SELECT_SQL);
             statement.setInt(1, 3);
             statement.setInt(2, 2);
@@ -241,13 +187,20 @@ public class PushDAOImpl implements PushDAO {
 
                 statementInner.setInt(2, 0);
 
-                statementInner.setString(1, recoRequestId);
+                statementInner.setString(3, recoRequestId);
+                statementInner.execute();
             }
 
             statementInner.close();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+				tsDataSource.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
             throw new TasteSyncException(
                 "Error while updateDidYouLikeFordailyPushServiceNotifications= " +
                 e.getMessage());
@@ -260,24 +213,56 @@ public class PushDAOImpl implements PushDAO {
                 }
             }
 
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(statement, resultset);
         }
     }
 
     @Override
-    public void updateSingleNotificationSentStatus(
-        UserNotificationsPushVO userNotificationsPushVO, int statusFlag)
-        throws TasteSyncException {
-        TSDataSource tsDataSource = TSDataSource.getInstance();
-
-        Connection connection = null;
+    public void updateNotificationsSentStatus(TSDataSource tsDataSource,
+        Connection connection,
+        List<UserNotificationsPushVO> userNotificationsPushVOList,
+        int statusFlag) throws TasteSyncException {
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
-            connection = tsDataSource.getConnection();
+        	tsDataSource.begin();
+            statement = connection.prepareStatement(PushQueries.PUSH_NOTIFICATIONS_ALL_UPDATE_SQL);
 
+            for (UserNotificationsPushVO userNotificationsPushVO : userNotificationsPushVOList) {
+                statement.setInt(1, statusFlag);
+                statement.setString(2, userNotificationsPushVO.getUserId());
+                statement.setString(3,
+                    userNotificationsPushVO.getNotificationType());
+                statement.setString(4, userNotificationsPushVO.getLinkedId());
+
+                statement.executeUpdate();
+            }
+
+            statement.close();
+            tsDataSource.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+				tsDataSource.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+            throw new TasteSyncException(
+                "Error while updateNotificationsSentStatus= " + e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
+    public void updateSingleNotificationSentStatus(TSDataSource tsDataSource,
+        Connection connection, UserNotificationsPushVO userNotificationsPushVO,
+        int statusFlag) throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
             statement = connection.prepareStatement(PushQueries.PUSH_NOTIFICATIONS_ALL_UPDATE_SQL);
             statement.setInt(1, statusFlag);
             statement.setString(2, userNotificationsPushVO.getUserId());
@@ -290,10 +275,10 @@ public class PushDAOImpl implements PushDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
-                "Error while updateSingleNotificationSentStatus= " + e.getMessage());
+                "Error while updateSingleNotificationSentStatus= " +
+                e.getMessage());
         } finally {
-            tsDataSource.close();
-            tsDataSource.closeConnection(connection, statement, resultset);
+            tsDataSource.closeConnection(statement, resultset);
         }
     }
 }
