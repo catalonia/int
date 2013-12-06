@@ -115,7 +115,6 @@ public class DemandPriorityCalc {
                 // user points
                 int userPoints = userUserDAO.getUserPoints(tsDataSource,
                         connection, flaggedUserId);
-                tsDataSource.begin();
 
                 //-- Tier 3 logic
                 if ((numRecoreqsAnsToday >= 2) ||
@@ -137,7 +136,6 @@ public class DemandPriorityCalc {
                     }
                 }
 
-                tsDataSource.commit();
             }
 
             tsDataSource.begin();

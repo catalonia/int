@@ -102,8 +102,8 @@ public class UserUserCalc {
                 connection, algoIndicatorIdentifyUseridList);
 
         for (UserFolloweeUserFollowerVO userFolloweeUserFollowerVOElement : userFolloweeUserFollowerVOList) {
-            userAUserBVO = new UserAUserBVO(userFolloweeUserFollowerVOElement.getUserFollowee(),
-                    userFolloweeUserFollowerVOElement.getUserFollower());
+            userAUserBVO = new UserAUserBVO(userFolloweeUserFollowerVOElement.getUserFollower(),
+                    userFolloweeUserFollowerVOElement.getUserFollowee());
 
             if (!userAUserBVOList.contains(userAUserBVO)) {
                 userAUserBVOList.add(userAUserBVO);
@@ -121,9 +121,11 @@ public class UserUserCalc {
         // reset list to null
         userFolloweeUserFollowerVOList = null;
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Number of pairs UserA/UserB found. " +
-                userAUserBVOList.size());
+        if (printExtraDebug) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Number of pairs UserA/UserB found. " +
+                    userAUserBVOList.size());
+            }
         }
 
         //pair are available

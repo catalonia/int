@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class RankRestaurantsSingleUserCalcHelper {
      * Logger for this class
      */
     private static final Logger logger = Logger.getLogger(RankRestaurantsSingleUserCalcHelper.class);
+    private static final boolean printExtraDebug = false;
 
     public RankRestaurantsSingleUserCalcHelper() {
         super();
@@ -42,10 +44,12 @@ public class RankRestaurantsSingleUserCalcHelper {
                 ? Integer.valueOf(restaurantPopularityTierVO.getNumUserRestaurantMatchCount())
                 : (Integer.MIN_VALUE);
 
-            if (logger.isInfoEnabled()) {
-                logger.info("restaurantTierId=" + restaurantTierId +
-                    " userMatchCounter=" + userMatchCounter + "\nt" +
-                    restaurantPopularityTierVO);
+            if (printExtraDebug) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("restaurantTierId=" + restaurantTierId +
+                        " userMatchCounter=" + userMatchCounter + "\nt" +
+                        restaurantPopularityTierVO);
+                }
             }
 
             if ((restaurantTierId == 1) && (userMatchCounter == 0)) {
@@ -94,9 +98,31 @@ public class RankRestaurantsSingleUserCalcHelper {
             numTier2Match1.size() + numTier3Match1.size() +
             numTier4Match1.size() + numTier5Match1.size();
 
-        List<RestaurantPopularityTierVO> restaurantsRankMatch0List = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch0ListExpectedSize);
+        //        List<RestaurantPopularityTierVO> restaurantsRankMatch0List = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch0ListExpectedSize);
+        //
+        //        List<RestaurantPopularityTierVO> restaurantsRankMatch1List = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch1ListExpectedSize);
+        List<RestaurantPopularityTierVO> list1ofrestaurants = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch0ListExpectedSize +
+                restaurantsRankMatch1ListExpectedSize);
 
-        List<RestaurantPopularityTierVO> restaurantsRankMatch1List = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch1ListExpectedSize);
+        currentRankNumber = 0;
+        //shuffle
+        //Collections.shuffle(numTier1Match1);        
+        Collections.sort(numTier1Match1,
+            new Comparator<RestaurantPopularityTierVO>() {
+                public int compare(RestaurantPopularityTierVO o1,
+                    RestaurantPopularityTierVO o2) {
+                    return Double.valueOf(o2.getNumUserRestaurantMatchCount())
+                                 .compareTo(Double.valueOf(
+                            o1.getNumUserRestaurantMatchCount()));
+                }
+            });
+
+        for (RestaurantPopularityTierVO numTier1Match1Element : numTier1Match1) {
+            ++currentRankNumber;
+            // set rank number
+            numTier1Match1Element.setRankNumber(currentRankNumber);
+            list1ofrestaurants.add(numTier1Match1Element);
+        }
 
         //shuffle
         Collections.shuffle(numTier1Match0);
@@ -105,17 +131,57 @@ public class RankRestaurantsSingleUserCalcHelper {
             ++currentRankNumber;
             // set rank number
             aNumTier1Match0.setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(aNumTier1Match0);
+            list1ofrestaurants.add(aNumTier1Match0);
         }
 
         //shuffle
-        Collections.shuffle(numTier2Match1);
+        //Collections.shuffle(numTier2Match1);
+        Collections.sort(numTier2Match1,
+            new Comparator<RestaurantPopularityTierVO>() {
+                public int compare(RestaurantPopularityTierVO o1,
+                    RestaurantPopularityTierVO o2) {
+                    return Double.valueOf(o2.getNumUserRestaurantMatchCount())
+                                 .compareTo(Double.valueOf(
+                            o1.getNumUserRestaurantMatchCount()));
+                }
+            });
+
+        for (RestaurantPopularityTierVO aNumTier2Match1 : numTier2Match1) {
+            ++currentRankNumber;
+
+            // set rank number
+            aNumTier2Match1.setRankNumber(currentRankNumber);
+            list1ofrestaurants.add(aNumTier2Match1);
+        }
+
+        //shuffle
+        Collections.shuffle(numTier2Match0);
 
         for (RestaurantPopularityTierVO aNumTier2Match0 : numTier2Match0) {
             ++currentRankNumber;
             // set rank number
             aNumTier2Match0.setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(aNumTier2Match0);
+            list1ofrestaurants.add(aNumTier2Match0);
+        }
+
+        //shuffle
+        //Collections.shuffle(numTier3Match1);
+        Collections.sort(numTier3Match1,
+            new Comparator<RestaurantPopularityTierVO>() {
+                public int compare(RestaurantPopularityTierVO o1,
+                    RestaurantPopularityTierVO o2) {
+                    return Double.valueOf(o2.getNumUserRestaurantMatchCount())
+                                 .compareTo(Double.valueOf(
+                            o1.getNumUserRestaurantMatchCount()));
+                }
+            });
+
+        for (RestaurantPopularityTierVO aNumTier3Match1 : numTier3Match1) {
+            ++currentRankNumber;
+
+            // set rank number
+            aNumTier3Match1.setRankNumber(currentRankNumber);
+            list1ofrestaurants.add(aNumTier3Match1);
         }
 
         //shuffle
@@ -125,7 +191,27 @@ public class RankRestaurantsSingleUserCalcHelper {
             ++currentRankNumber;
             // set rank number
             aNumTier3Match0.setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(aNumTier3Match0);
+            list1ofrestaurants.add(aNumTier3Match0);
+        }
+
+        //shuffle
+        //Collections.shuffle(numTier4Match1);
+        Collections.sort(numTier4Match1,
+            new Comparator<RestaurantPopularityTierVO>() {
+                public int compare(RestaurantPopularityTierVO o1,
+                    RestaurantPopularityTierVO o2) {
+                    return Double.valueOf(o2.getNumUserRestaurantMatchCount())
+                                 .compareTo(Double.valueOf(
+                            o1.getNumUserRestaurantMatchCount()));
+                }
+            });
+
+        for (RestaurantPopularityTierVO aNumTier4Match1 : numTier4Match1) {
+            ++currentRankNumber;
+
+            // set rank number
+            aNumTier4Match1.setRankNumber(currentRankNumber);
+            list1ofrestaurants.add(aNumTier4Match1);
         }
 
         //shuffle
@@ -135,7 +221,27 @@ public class RankRestaurantsSingleUserCalcHelper {
             ++currentRankNumber;
             // set rank number
             aNumTier4Match0.setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(aNumTier4Match0);
+            list1ofrestaurants.add(aNumTier4Match0);
+        }
+
+        //shuffle
+        //Collections.shuffle(numTier5Match1);
+        Collections.sort(numTier5Match1,
+            new Comparator<RestaurantPopularityTierVO>() {
+                public int compare(RestaurantPopularityTierVO o1,
+                    RestaurantPopularityTierVO o2) {
+                    return Double.valueOf(o2.getNumUserRestaurantMatchCount())
+                                 .compareTo(Double.valueOf(
+                            o1.getNumUserRestaurantMatchCount()));
+                }
+            });
+
+        for (RestaurantPopularityTierVO aNumTier5Match1 : numTier5Match1) {
+            ++currentRankNumber;
+
+            // set rank number
+            aNumTier5Match1.setRankNumber(currentRankNumber);
+            list1ofrestaurants.add(aNumTier5Match1);
         }
 
         //shuffle
@@ -146,62 +252,7 @@ public class RankRestaurantsSingleUserCalcHelper {
 
             // set rank number
             aNumTier5Match0.setRankNumber(currentRankNumber);
-            restaurantsRankMatch0List.add(aNumTier5Match0);
-        }
-
-        currentRankNumber = 0;
-        //shuffle
-        Collections.shuffle(numTier1Match1);
-
-        for (RestaurantPopularityTierVO numTier1Match1Element : numTier1Match1) {
-            ++currentRankNumber;
-            // set rank number
-            numTier1Match1Element.setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(numTier1Match1Element);
-        }
-
-        //shuffle
-        Collections.shuffle(numTier2Match1);
-
-        for (RestaurantPopularityTierVO aNumTier2Match1 : numTier2Match1) {
-            ++currentRankNumber;
-
-            // set rank number
-            aNumTier2Match1.setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(aNumTier2Match1);
-        }
-
-        //shuffle
-        Collections.shuffle(numTier3Match1);
-
-        for (RestaurantPopularityTierVO aNumTier3Match1 : numTier3Match1) {
-            ++currentRankNumber;
-
-            // set rank number
-            aNumTier3Match1.setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(aNumTier3Match1);
-        }
-
-        //shuffle
-        Collections.shuffle(numTier4Match1);
-
-        for (RestaurantPopularityTierVO aNumTier4Match1 : numTier4Match1) {
-            ++currentRankNumber;
-
-            // set rank number
-            aNumTier4Match1.setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(aNumTier4Match1);
-        }
-
-        //shuffle
-        Collections.shuffle(numTier5Match1);
-
-        for (RestaurantPopularityTierVO aNumTier5Match1 : numTier5Match1) {
-            ++currentRankNumber;
-
-            // set rank number
-            aNumTier5Match1.setRankNumber(currentRankNumber);
-            restaurantsRankMatch1List.add(aNumTier5Match1);
+            list1ofrestaurants.add(aNumTier5Match0);
         }
 
         // free memory
@@ -218,74 +269,73 @@ public class RankRestaurantsSingleUserCalcHelper {
 
         //take 4 from restaurantsRankMatch0List and 6 restaurantsRankMatch1List, reset the ranking
         //70 130
-        int restaurantsRankMatch0ListSize = restaurantsRankMatch0List.size();
-        int restaurantsRankMatch1ListSize = restaurantsRankMatch1List.size();
-
-        List<RestaurantPopularityTierVO> list1ofrestaurants = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch0ListExpectedSize +
-                restaurantsRankMatch1ListExpectedSize);
-
-        int finalRankNumber = 0;
-        RestaurantPopularityTierVO finalRestaurantPopularityTierVO = null;
-
-        int INCREMENT0 = 4;
-        int INCREMENT1 = 6;
-        int lower0StartIndex = 0;
-        int upper0Endindex = lower0StartIndex + INCREMENT0;
-
-        int lower1StartIndex = 0;
-        int upper1Endindex = lower1StartIndex + INCREMENT1;
-
-        //less than INCREMENT0 (4)
-        if ((restaurantsRankMatch0ListSize != 0) &&
-                (upper0Endindex > restaurantsRankMatch0ListSize)) {
-            upper0Endindex = restaurantsRankMatch0ListSize;
-        }
-
-        //less than INCREMENT1 (6)
-        if ((restaurantsRankMatch1ListSize != 0) &&
-                (upper1Endindex > restaurantsRankMatch1ListSize)) {
-            upper1Endindex = restaurantsRankMatch1ListSize;
-        }
-
-        while ((upper0Endindex <= restaurantsRankMatch0ListSize) ||
-                (upper1Endindex <= restaurantsRankMatch1ListSize)) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("upper0Endindex=" + upper0Endindex +
-                    " restaurantsRankMatch0ListSize=" +
-                    restaurantsRankMatch0ListSize + " upper1Endindex=" +
-                    upper1Endindex + " restaurantsRankMatch1ListSize=" +
-                    restaurantsRankMatch1ListSize);
-            }
-
-            if (upper0Endindex <= restaurantsRankMatch0ListSize) {
-                for (int currentRestaurantsRankMatch0Index = lower0StartIndex;
-                        currentRestaurantsRankMatch0Index < upper0Endindex;
-                        ++currentRestaurantsRankMatch0Index) {
-                    ++finalRankNumber;
-                    finalRestaurantPopularityTierVO = restaurantsRankMatch0List.get(currentRestaurantsRankMatch0Index);
-                    finalRestaurantPopularityTierVO.setRankNumber(finalRankNumber);
-                    list1ofrestaurants.add(finalRestaurantPopularityTierVO);
-                }
-
-                lower0StartIndex = upper0Endindex;
-                upper0Endindex = lower0StartIndex + INCREMENT0;
-            }
-
-            if (upper1Endindex <= restaurantsRankMatch1ListSize) {
-                for (int currentRestaurantsRankMatch1Index = lower1StartIndex;
-                        currentRestaurantsRankMatch1Index < upper1Endindex;
-                        ++currentRestaurantsRankMatch1Index) {
-                    ++finalRankNumber;
-                    finalRestaurantPopularityTierVO = restaurantsRankMatch1List.get(currentRestaurantsRankMatch1Index);
-                    finalRestaurantPopularityTierVO.setRankNumber(finalRankNumber);
-                    list1ofrestaurants.add(finalRestaurantPopularityTierVO);
-                }
-
-                lower1StartIndex = upper1Endindex;
-                upper1Endindex = lower1StartIndex + INCREMENT1;
-            }
-        }
-
+        //        int restaurantsRankMatch0ListSize = restaurantsRankMatch0List.size();
+        //        int restaurantsRankMatch1ListSize = restaurantsRankMatch1List.size();
+        //
+        //        List<RestaurantPopularityTierVO> list1ofrestaurants = new ArrayList<RestaurantPopularityTierVO>(restaurantsRankMatch0ListExpectedSize +
+        //                restaurantsRankMatch1ListExpectedSize);
+        //
+        //        int finalRankNumber = 0;
+        //        RestaurantPopularityTierVO finalRestaurantPopularityTierVO = null;
+        //
+        //        int INCREMENT0 = 4;
+        //        int INCREMENT1 = 6;
+        //        int lower0StartIndex = 0;
+        //        int upper0Endindex = lower0StartIndex + INCREMENT0;
+        //
+        //        int lower1StartIndex = 0;
+        //        int upper1Endindex = lower1StartIndex + INCREMENT1;
+        //
+        //        //less than INCREMENT0 (4)
+        //        if ((restaurantsRankMatch0ListSize != 0) &&
+        //                (upper0Endindex > restaurantsRankMatch0ListSize)) {
+        //            upper0Endindex = restaurantsRankMatch0ListSize;
+        //        }
+        //
+        //        //less than INCREMENT1 (6)
+        //        if ((restaurantsRankMatch1ListSize != 0) &&
+        //                (upper1Endindex > restaurantsRankMatch1ListSize)) {
+        //            upper1Endindex = restaurantsRankMatch1ListSize;
+        //        }
+        //
+        //        while ((upper0Endindex <= restaurantsRankMatch0ListSize) ||
+        //                (upper1Endindex <= restaurantsRankMatch1ListSize)) {
+        //            if (logger.isDebugEnabled()) {
+        //                logger.debug("upper0Endindex=" + upper0Endindex +
+        //                    " restaurantsRankMatch0ListSize=" +
+        //                    restaurantsRankMatch0ListSize + " upper1Endindex=" +
+        //                    upper1Endindex + " restaurantsRankMatch1ListSize=" +
+        //                    restaurantsRankMatch1ListSize);
+        //            }
+        //
+        //            if (upper0Endindex <= restaurantsRankMatch0ListSize) {
+        //                for (int currentRestaurantsRankMatch0Index = lower0StartIndex;
+        //                        currentRestaurantsRankMatch0Index < upper0Endindex;
+        //                        ++currentRestaurantsRankMatch0Index) {
+        //                    ++finalRankNumber;
+        //                    finalRestaurantPopularityTierVO = restaurantsRankMatch0List.get(currentRestaurantsRankMatch0Index);
+        //                    finalRestaurantPopularityTierVO.setRankNumber(finalRankNumber);
+        //                    list1ofrestaurants.add(finalRestaurantPopularityTierVO);
+        //                }
+        //
+        //                lower0StartIndex = upper0Endindex;
+        //                upper0Endindex = lower0StartIndex + INCREMENT0;
+        //            }
+        //
+        //            if (upper1Endindex <= restaurantsRankMatch1ListSize) {
+        //                for (int currentRestaurantsRankMatch1Index = lower1StartIndex;
+        //                        currentRestaurantsRankMatch1Index < upper1Endindex;
+        //                        ++currentRestaurantsRankMatch1Index) {
+        //                    ++finalRankNumber;
+        //                    finalRestaurantPopularityTierVO = restaurantsRankMatch1List.get(currentRestaurantsRankMatch1Index);
+        //                    finalRestaurantPopularityTierVO.setRankNumber(finalRankNumber);
+        //                    list1ofrestaurants.add(finalRestaurantPopularityTierVO);
+        //                }
+        //
+        //                lower1StartIndex = upper1Endindex;
+        //                upper1Endindex = lower1StartIndex + INCREMENT1;
+        //            }
+        //        }
         return list1ofrestaurants;
     }
 }

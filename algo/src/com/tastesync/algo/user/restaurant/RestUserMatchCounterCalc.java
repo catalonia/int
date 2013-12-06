@@ -18,6 +18,7 @@ import java.util.List;
 
 
 public class RestUserMatchCounterCalc {
+    private static final boolean printExtraDebug = false;
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
     public RestUserMatchCounterCalc() {
@@ -60,11 +61,15 @@ public class RestUserMatchCounterCalc {
         //For each userId, multiple restaurant ids are associated!
         int numUserRestaurantMatchCount = 0;
         tsDataSource.begin();
+
         for (RestaurantUserVO flaggedRestaurantUserVO : allflaggedRestaurantUserList) {
             //String chainFlag = userRestaurantDAO.getRestaurantInfoChained(flaggedRestaurantUserVO.getRestaurantId());
             LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
                 userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(tsDataSource,
                     connection, flaggedRestaurantUserVO);
+
+            int counter = 0;
+            ArrayList<String> restaurantIdFromRestaurantPopularityTierVOList = new ArrayList<String>(restaurantPopularityTierVOList.size());
 
             for (RestaurantPopularityTierVO aRestaurantPopularityTierVOList : restaurantPopularityTierVOList) {
                 numUserRestaurantMatchCount = userRestaurantDAO.getRestUserMatchCounter(tsDataSource,
@@ -75,34 +80,62 @@ public class RestUserMatchCounterCalc {
                         numUserRestaurantMatchCount));
                 // set userId
                 aRestaurantPopularityTierVOList.setUserId(flaggedRestaurantUserVO.getUserId());
+                ++counter;
+
+                if (printExtraDebug) {
+                    System.out.println("counter=" + counter +
+                        " aRestaurantPopularityTierVOList" +
+                        aRestaurantPopularityTierVOList);
+                }
+
+                restaurantIdFromRestaurantPopularityTierVOList.add(aRestaurantPopularityTierVOList.getRestaurantId());
+            }
+
+            ArrayList<RestaurantPopularityTierVO> existingRestaurantPopularityTierVOList =
+                userRestaurantDAO.getExistingConsolidatedFlaggedRestaurantForSingleUser(tsDataSource,
+                    connection, flaggedRestaurantUserVO.getUserId());
+
+            for (RestaurantPopularityTierVO existingRestaurantPopularityTierVO : existingRestaurantPopularityTierVOList) {
+                if (!restaurantIdFromRestaurantPopularityTierVOList.contains(
+                            existingRestaurantPopularityTierVO.getRestaurantId())) {
+                    restaurantPopularityTierVOList.add(existingRestaurantPopularityTierVO);
+                }
             }
 
             List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
             // final insert
             userRestaurantDAO.submitAssignedRankUserRestaurantForWhole(tsDataSource,
-                connection, list1ofrestaurants);
+                connection, list1ofrestaurants,
+                flaggedRestaurantUserVO.getUserId());
         }
+
         tsDataSource.commit();
         tsDataSource.begin();
+
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantReplyUserList) {
             userRestaurantDAO.submitRecorrequestReplyUserAlgo2(tsDataSource,
                 connection, restaurantUserVO.getUserId(), 0);
         }
+
         tsDataSource.commit();
         tsDataSource.begin();
+
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantTipsUserList) {
             userRestaurantDAO.submitRestaurantTipsTastesyncAlgo2(tsDataSource,
                 connection, restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 0);
         }
+
         tsDataSource.commit();
         tsDataSource.begin();
+
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantFavUserList) {
             userRestaurantDAO.submitRestaurantFav(tsDataSource, connection,
                 restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 0,
                 TSConstants.ALGO_TYPE.ALGO2);
         }
+
         tsDataSource.commit();
     }
 }

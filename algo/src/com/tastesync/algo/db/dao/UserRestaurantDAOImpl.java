@@ -169,6 +169,56 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     }
 
     @Override
+    public ArrayList<RestaurantPopularityTierVO> getExistingConsolidatedFlaggedRestaurantForSingleUser(
+        TSDataSource tsDataSource, Connection connection, String userId)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            statement = connection.prepareStatement(UserRestaurantQueries.EXISTING_USER_RESTAURANT_MATCH_COUNTER_SELECT_SQL);
+            statement.setString(1, userId);
+            resultset = statement.executeQuery();
+
+            ArrayList<RestaurantPopularityTierVO> existingRestaurantPopularityTierVOList =
+                new ArrayList<RestaurantPopularityTierVO>();
+
+            String restaurantId;
+            String popularityTierId;
+            String numUserRestaurantMatchCount;
+            int rankNumber;
+            String strRankNumber;
+
+            while (resultset.next()) {
+                restaurantId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "USER_RESTAURANT_MATCH_COUNTER.RESTAURANT_ID"));
+                popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "RESTAURANT_INFO_POPULARITY_TIER.TIER_ID"));
+                numUserRestaurantMatchCount = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "USER_RESTAURANT_MATCH_COUNTER.MATCH_COUNTER"));
+                strRankNumber = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "USER_RESTAURANT_MATCH_COUNTER.USER_RESTAURANT_RANK"));
+                rankNumber = (strRankNumber != null)
+                    ? Integer.valueOf(strRankNumber) : 0;
+                existingRestaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
+                        restaurantId, popularityTierId, userId,
+                        numUserRestaurantMatchCount, rankNumber));
+            }
+
+            statement.close();
+
+            return existingRestaurantPopularityTierVOList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getExistingConsolidatedFlaggedRestaurantForSingleUser= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
     public List<String> getFlaggedCityIdList(TSDataSource tsDataSource,
         Connection connection, int algoIndicatorIdentifyRestaurantIdList)
         throws TasteSyncException {
@@ -854,7 +904,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public void submitAssignedRankUserRestaurantForWhole(
         TSDataSource tsDataSource, Connection connection,
-        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList)
+        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList, String userId)
         throws TasteSyncException {
         PreparedStatement statement = null;
         ResultSet resultset = null;
@@ -863,8 +913,15 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
             // do for only 1000+
             int i = 0;
 
+            // first delete, then insert
+            
+
+            statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_DELETE_SQL);
+            statement.setString(1, userId);
+            statement.executeUpdate();
+            statement.close();
+            statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
             for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
-                statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
 
                 statement.setInt(1, 0);
                 statement.setInt(2,
@@ -882,13 +939,14 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 statement.setInt(8, restaurantPopularityTierVO.getRankNumber());
 
                 statement.executeUpdate();
-                statement.close();
                 ++i;
 
                 //                if (i == 1000) {
                 //                    break;
                 //                }
             }
+            statement.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
 

@@ -23,4 +23,11 @@ public class RecorequestReplyUserVO implements Serializable {
     public Date getReplyDatetime() {
         return replyDatetime;
     }
+
+	@Override
+	public String toString() {
+		return "RecorequestReplyUserVO [replyId=" + replyId
+				+ ", replyDatetime=" + replyDatetime + "]";
+	}
+    
 }

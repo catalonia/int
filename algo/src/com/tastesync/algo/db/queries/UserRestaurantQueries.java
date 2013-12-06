@@ -224,6 +224,8 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "           user_restaurant_reco.recommender_user_id " +
         "       AND user_friend_tastesync.friend_trusted_flag = 1 " +
         "       AND user_restaurant_reco.restaurant_id = ? ";
+    public static String USER_RESTAURANT_MATCH_COUNTER_DELETE_SQL = "DELETE FROM USER_RESTAURANT_MATCH_COUNTER " +
+        "WHERE USER_ID = ?";
     public static String USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL = "" +
         "INSERT INTO user_restaurant_match_counter " +
         "            (user_restaurant_match_counter.calc_flag, " +
@@ -255,8 +257,7 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         " ON DUPLICATE KEY UPDATE " +
         " user_restaurant_match_counter.user_restaurant_rank = ?";
     public static String COUNT_USER_CITY_RESTAURANT_SEARCH_RESULTS_SELECT_SQL = "" +
-        "SELECT COUNT(*) " +
-        "FROM   RESTAURANT x " +
+        "SELECT COUNT(*) " + "FROM   RESTAURANT x " +
         "       LEFT OUTER JOIN USER_RESTAURANT_MATCH_COUNTER y " +
         "                    ON x.RESTAURANT_CITY_ID = ? " +
         "                       AND x.RESTAURANT_ID = y.RESTAURANT_ID " +
@@ -272,4 +273,14 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
         "                       AND y.USER_ID = ? " +
         "ORDER  BY Isnull(y.USER_RESTAURANT_RANK), " +
         "          y.USER_RESTAURANT_RANK ASC " + "LIMIT ?, ? ";
+    public static String EXISTING_USER_RESTAURANT_MATCH_COUNTER_SELECT_SQL = "" +
+        "SELECT USER_RESTAURANT_MATCH_COUNTER.RESTAURANT_ID, " +
+        "       USER_RESTAURANT_MATCH_COUNTER.MATCH_COUNTER, " +
+        "       RESTAURANT_INFO_POPULARITY_TIER.TIER_ID, " +
+        "       USER_RESTAURANT_MATCH_COUNTER.USER_RESTAURANT_RANK " +
+        "FROM   USER_RESTAURANT_MATCH_COUNTER, " +
+        "       RESTAURANT_INFO_POPULARITY_TIER " +
+        "WHERE  USER_RESTAURANT_MATCH_COUNTER.USER_ID = ? " +
+        "       AND USER_RESTAURANT_MATCH_COUNTER.RESTAURANT_ID = " +
+        "           RESTAURANT_INFO_POPULARITY_TIER.RESTAURANT_ID ";
 }

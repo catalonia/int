@@ -124,6 +124,10 @@ public class InputRestaurantSearchVO implements Serializable {
         this.chainFlag = chainFlag;
     }
 
+    public void setCityId(String cityId) {
+        this.cityId = cityId;
+    }
+    
     @Override
     public String toString() {
         return "InputRestaurantSearchVO [userId=" + userId + ", restaurantId=" +

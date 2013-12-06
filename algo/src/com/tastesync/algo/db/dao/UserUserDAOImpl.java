@@ -14,6 +14,9 @@ import com.tastesync.common.utils.CommonFunctionsUtil;
 
 import com.tastesync.db.pool.TSDataSource;
 
+import org.joda.time.DateTime;
+import org.joda.time.Minutes;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1407,15 +1410,32 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             resultset = statement.executeQuery();
 
             String userOnline = null;
+            Date userOnlineLasteUpdated = null;
 
             while (resultset.next()) {
                 userOnline = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "USERS.IS_ONLINE"));
+                userOnlineLasteUpdated = resultset.getDate(
+                        "USERS.IS_ONLINE_UPDATED_DATETIME");
             }
 
             statement.close();
 
-            return "y".equalsIgnoreCase(userOnline);
+            DateTime userDatetime = new DateTime(userOnlineLasteUpdated);
+            DateTime currentDatetime = new DateTime(new Date());
+
+            boolean isUserOnline = false;
+
+            if ("y".equalsIgnoreCase(userOnline)) {
+                Minutes diffMin = Minutes.minutesBetween(currentDatetime,
+                        userDatetime);
+
+                if (diffMin.getMinutes() <= 30) {
+                    isUserOnline = true;
+                }
+            }
+
+            return isUserOnline;
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -1701,6 +1721,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
+        	tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.USER_RECO_DEMAND_INSERT_SQL);
 
             int calcFlag = 0;
@@ -1713,6 +1734,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1723,7 +1745,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             }
 
             throw new TasteSyncException(
-                "Error while getRecoRequestsReplyUserAnsweredLastNDays = " +
+                "Error while submitUserRecoDemandTierPrecalc = " +
                 e.getMessage());
         } finally {
             tsDataSource.closeConnection(statement, resultset);

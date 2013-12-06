@@ -649,14 +649,6 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             throw new TasteSyncException("Error while submitPiRecoLog= " +
                 e.getMessage());
         } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
             tsDataSource.closeConnection(statement, resultset);
         }
     }
@@ -780,14 +772,6 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
                 "Error while submitRecommendationRequestAnswer " +
                 e.getMessage());
         } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
             tsDataSource.closeConnection(statement, resultset);
         }
     }

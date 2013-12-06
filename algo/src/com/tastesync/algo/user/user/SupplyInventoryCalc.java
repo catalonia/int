@@ -119,6 +119,10 @@ public class SupplyInventoryCalc {
                             connection,
                             recorequestUserVOElement.getRecorequestId());
 
+                    if (recorequestReplyUserVO == null) {
+                        continue;
+                    }
+
                     // increment if the reply is withing 10 minutes of assignment!!
                     //Time in milli seoncds - 10 minutes = 
                     long milliSecondsBetween = (recorequestReplyUserVO.getReplyDatetime()
@@ -189,9 +193,10 @@ public class SupplyInventoryCalc {
                     }
                 }
             }
+
+            tsDataSource.commit();
         }
 
-        tsDataSource.commit();
         tsDataSource.begin();
 
         for (String flaggedUserId : recorequestUserFlaggedUserList) {

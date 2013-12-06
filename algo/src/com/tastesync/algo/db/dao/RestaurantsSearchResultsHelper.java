@@ -257,8 +257,10 @@ public class RestaurantsSearchResultsHelper {
         // Always present
         if ((inputRestaurantSearchVO.getCityId() == null) ||
                 inputRestaurantSearchVO.getCityId().isEmpty()) {
-            throw new TasteSyncException("City Id is not avaialble cityId=" +
-                inputRestaurantSearchVO.getCityId());
+        	//JAGS TODO to be removed later
+        	inputRestaurantSearchVO.setCityId("11756");
+//            throw new TasteSyncException("City Id is not avaialble cityId=" +
+//                inputRestaurantSearchVO.getCityId());
         }
 
         consolidatedSearchQuery.append("WHERE ");

@@ -268,7 +268,7 @@ public interface UserUserQueries extends TSDBCommonQueries {
         "       AND y.TIER_ID = ? ";
     
     public static String USER_ONLINE_SELECT_SQL = ""
-    		+ "SELECT USERS.IS_ONLINE "
+    		+ "SELECT USERS.IS_ONLINE, USERS.IS_ONLINE_UPDATED_DATETIME "
     		+ "FROM   USERS "
     		+ "WHERE  USER_ID = ? ";
 
