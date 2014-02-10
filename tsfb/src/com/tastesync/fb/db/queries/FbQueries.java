@@ -133,6 +133,8 @@ public interface FbQueries {
     public static String TS_USER_ID_FROM_USERS_SELECT_SQL = "" +
         "SELECT USERS.USER_ID " + "FROM   USERS " +
         "WHERE  USERS.USER_FB_ID =? ";
+    
+
     public static String USER_FACEBOOK_INSERT_SQL = "INSERT INTO users " +
         "(TS_USER_EMAIL, " + "USER_CREATED_INITIAL_DATETIME, " +
         "TS_FIRST_NAME, " + "TS_LAST_NAME, " + "USER_GENDER, " +
@@ -213,4 +215,83 @@ public interface FbQueries {
         "              ? ) " + "ON DUPLICATE KEY UPDATE " +
         "USER_FRIEND_FB.FB_UPDATE_DATETIME=?," +
         "USER_FRIEND_FB.USER_FRIEND_FB_STATUS = ?";
+    
+    public static String USERS_INSERT_SQL = ""
+    		+ "INSERT INTO USERS "
+    		+ "            (TS_USER_EMAIL, "
+    		+ "             USER_CREATED_INITIAL_DATETIME, "
+    		+ "             TS_FIRST_NAME, "
+    		+ "             TS_LAST_NAME, "
+    		+ "             USER_GENDER, "
+    		+ "             USER_CITY_ID, "
+    		+ "             USER_STATE, "
+    		+ "             USER_COUNTRY, "
+    		+ "             USER_FB_ID, "
+    		+ "             USER_ID, "
+    		+ "             TS_USER_ID) "
+    		+ "VALUES      (?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?, "
+    		+ "             ?) ";
+
+    public static String USERS_UPDATE_SQL = ""
+    		+ "UPDATE USERS "
+    		+ "SET    TS_USER_EMAIL = ?, "
+    		+ "       TS_FIRST_NAME = ?, "
+    		+ "       TS_LAST_NAME = ?, "
+    		+ "       USER_GENDER = ?, "
+    		+ "       USER_CITY_ID = ?, "
+    		+ "       USER_STATE = ?, "
+    		+ "       USER_COUNTRY = ? "
+    		+ "WHERE  USERS.USER_ID =? ";
+    
+    public static String USER_FBID_SELECT_SQL = "SELECT users.USER_ID, users.TS_USER_ID, users.TS_USER_EMAIL, users.TS_FIRST_NAME,users.TS_LAST_NAME,users.MAX_INVITES," +
+            "users.USER_CREATED_INITIAL_DATETIME, users.USER_POINTS, users.TWITTER_USR_URL, users.USER_DISABLED_FLAG, users.USER_ACTIVATION_KEY, users.USER_GENDER, " +
+            "users.USER_CITY_ID, users.USER_STATE, users.IS_ONLINE, users.USER_COUNTRY, users.ABOUT, users.CURRENT_STATUS, users.USER_FB_ID" +
+            " FROM users WHERE User_FB_ID = ? AND (CURRENT_STATUS = ? OR CURRENT_STATUS = ?)";
+    
+    public static String CITY_STATE_SELECT_SQL = "" + "SELECT CITIES.CITY_ID, " +
+            "CITIES.COUNTRY, "+
+            "CITIES.STATE, "+
+            "CITIES.CITY "+
+            "FROM   CITIES, " + "       STATE_NAME " +
+            "WHERE  CITIES.STATE = STATE_NAME.STATE_ID " +
+            "       AND STATE_NAME.STATE_NAME = ? " +
+            "       AND REPLACE(REPLACE(Lower(CITIES.CITY), ' ', ''), '.', '') = REPLACE( " +
+            "           REPLACE(Lower(?), ' ', ''), '.', '')";
+    
+    public static String USER_FB_ACCESS_INSERT_SQL = "" +
+            "INSERT INTO USER_FB_ACCESS " +
+            "            (USER_FB_ACCESS.FB_ACCESS_TOKEN, " +
+            "             USER_FB_ACCESS.FB_ACCESS_TOKEN_CREATED, " +
+            "             USER_FB_ACCESS.FB_ACCESS_TOKEN_ID, " +
+            "             USER_FB_ACCESS.FB_INFO_STATUS, " +
+            "             USER_FB_ACCESS.FB_INFO_UPDATED_DATETIME, " +
+            "             USER_FB_ACCESS.USER_FB_ID, " +
+            "             USER_FB_ACCESS.USER_ID, " +
+            "             USER_FB_ACCESS.VENDOR_IDENTIFIER) " +
+            "VALUES      ( ?, " + "              ?, " + "              ?, " +
+            "              ?, " + "              ?, " + "              ?, " +
+            "              ?, " + "              ? ) " +
+            "ON DUPLICATE KEY UPDATE " +
+            "USER_FB_ACCESS.FB_INFO_UPDATED_DATETIME = ?, " +
+            "USER_FB_ACCESS.VENDOR_IDENTIFIER = ?";
+    public static String USER_ONLINE_UPDATE_SQL = "UPDATE users " +
+            "SET IS_ONLINE = ? , IS_ONLINE_UPDATED_DATETIME = ? " +
+            "WHERE USER_ID = ?";
+    
+    public static String USER_FRIEND_TASTESYNC_TRUST_INSERT_UPDATE_SQL = "" +
+            "INSERT INTO USER_FRIEND_TASTESYNC " +
+            "            (USER_FRIEND_TASTESYNC.FRIEND_ID, " +
+            "             USER_FRIEND_TASTESYNC.USER_ID) " + "VALUES      ( ?, " +
+            "              ? ) " + "ON DUPLICATE KEY UPDATE " +
+            "USER_FRIEND_TASTESYNC.FRIEND_ID = USER_FRIEND_TASTESYNC.FRIEND_ID, " +
+            "USER_FRIEND_TASTESYNC.USER_ID = USER_FRIEND_TASTESYNC.USER_ID";
 }

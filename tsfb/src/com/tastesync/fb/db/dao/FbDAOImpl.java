@@ -9,6 +9,8 @@ import com.tastesync.fb.exception.TasteSyncException;
 import com.tastesync.fb.json.FBLocation;
 import com.tastesync.fb.model.fqlmodel.FqlFriend;
 import com.tastesync.fb.model.fqlmodel.FqlUser;
+import com.tastesync.fb.vo.City;
+import com.tastesync.fb.vo.TsUser;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -27,12 +29,226 @@ import java.util.List;
 
 
 public class FbDAOImpl implements FbDAO {
+    public static final String DEFAULT_CITY_ID = "1";
+    public static final String DEFAULT_CITY_NAME = "Anchorage";
+    public static final String DEFAULT_STATE = "AK";
+    public static final String DEFAULT_COUNTRY = "us";
+    private static final boolean printExtraDebug = false;
+
+    @Override
+    public void createOrUpdateUserFrmFbData(TSDataSource tsDataSource,
+        Connection connection, FqlUser currentUserFB,
+        String identifierForVendor, String accessToken)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            FBLocation currentLocation = null;
+            String cityFB = null;
+            String userCityId = null;
+            String stateFB = null;
+            String countryFB = null;
+
+            if (currentUserFB.current_location != null) {
+                currentLocation = mapper.readValue(currentUserFB.current_location,
+                        FBLocation.class);
+                stateFB = currentLocation.getState();
+                countryFB = currentLocation.getCountry();
+                cityFB = currentLocation.getCity();
+
+                if ((stateFB != null) && !stateFB.isEmpty() &&
+                        (cityFB != null) && !cityFB.isEmpty()) {
+                    City city = getCityInforByStateAndCityName(tsDataSource,
+                            connection, stateFB, cityFB);
+
+                    if (city != null) {
+                        userCityId = city.getCityId();
+                    }
+                }
+            }
+
+            if (userCityId == null) {
+                cityFB = null;
+                userCityId = null;
+                stateFB = null;
+                countryFB = null;
+
+                FBLocation hometownLocation = null;
+
+                if (currentUserFB.hometown_location != null) {
+                    hometownLocation = mapper.readValue(currentUserFB.hometown_location,
+                            FBLocation.class);
+                    stateFB = hometownLocation.getState();
+                    countryFB = hometownLocation.getCountry();
+                    cityFB = hometownLocation.getCity();
+
+                    if ((stateFB != null) && !stateFB.isEmpty() &&
+                            (cityFB != null) && !cityFB.isEmpty()) {
+                        City city = getCityInforByStateAndCityName(tsDataSource,
+                                connection, stateFB, cityFB);
+
+                        if (city != null) {
+                            userCityId = city.getCityId();
+                        }
+                    }
+                }
+            }
+
+            String state = (userCityId == null) ? DEFAULT_STATE : stateFB;
+            String country = (userCityId == null) ? DEFAULT_COUNTRY : countryFB;
+
+            String cityId = (userCityId == null) ? DEFAULT_CITY_ID : userCityId;
+
+            String userID = null;
+            TsUser currentUser = getUserInformationByFacebookID(tsDataSource,
+                    connection, currentUserFB.uid);
+
+            if (currentUser == null) {
+                userID = cityId + "-" +
+                    CommonFunctionsUtil.generateUniqueKey();
+                statement = connection.prepareStatement(FbQueries.USERS_INSERT_SQL);
+                statement.setString(1, currentUserFB.email);
+                statement.setTimestamp(2,
+                    CommonFunctionsUtil.getCurrentDateTimestamp());
+                statement.setString(3, currentUserFB.first_name);
+                statement.setString(4, currentUserFB.last_name);
+                statement.setString(5, currentUserFB.sex);
+                statement.setString(6, cityId);
+                statement.setString(7, state);
+                statement.setString(8, country);
+                statement.setString(9, currentUserFB.uid);
+                statement.setString(10, userID);
+                statement.setString(11, userID);
+                statement.executeUpdate();
+                statement.close();
+                currentUser = getUserInformationByFacebookID(tsDataSource,
+                        connection, currentUserFB.uid);
+            } else {
+                statement = connection.prepareStatement(FbQueries.USERS_UPDATE_SQL);
+                statement.setString(1, currentUserFB.email);
+                statement.setString(2, currentUserFB.first_name);
+                statement.setString(3, currentUserFB.last_name);
+                statement.setString(4, currentUserFB.sex);
+                statement.setString(5, cityId);
+                statement.setString(6, state);
+                statement.setString(7, country);
+                statement.setString(8, currentUser.getUserId());
+
+                statement.execute();
+                statement.close();
+            }
+
+            statement = connection.prepareStatement(FbQueries.USER_FB_ACCESS_INSERT_SQL);
+
+            statement.setString(1, accessToken);
+            statement.setTimestamp(2,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
+
+            String fbAccessTokenId = CommonFunctionsUtil.generateUniqueKey();
+            statement.setString(3, fbAccessTokenId);
+            statement.setString(4, "0");
+            statement.setTimestamp(5,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setString(6, currentUser.getUserFbId());
+            statement.setString(7, currentUser.getUserId());
+            statement.setString(8, identifierForVendor);
+
+            statement.setTimestamp(9,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setString(10, identifierForVendor);
+
+            statement.executeUpdate();
+            statement.close();
+
+            statement = connection.prepareStatement(FbQueries.USER_ONLINE_UPDATE_SQL);
+            statement.setString(1, String.valueOf("y"));
+            statement.setTimestamp(2,
+                CommonFunctionsUtil.getCurrentDateTimestamp());
+            statement.setString(3, currentUser.getUserId());
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException("Error while createUserFrmFbData " +
+                e.getMessage());
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("createUserFrmFbData " +
+                e.getMessage());
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("createUserFrmFbData " +
+                e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new TasteSyncException("createUserFrmFbData " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
     @Override
     public List<String> getAllDeviceTokensForSingleUser(
         TSDataSource tsDataSource, Connection connection, String userId)
         throws com.tastesync.fb.exception.TasteSyncException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public City getCityInforByStateAndCityName(TSDataSource tsDataSource,
+        Connection connection, String state, String city_name)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            statement = connection.prepareStatement(FbQueries.CITY_STATE_SELECT_SQL);
+            statement.setString(1, state);
+            statement.setString(2, city_name);
+
+            resultset = statement.executeQuery();
+
+            City city = null;
+
+            if (resultset.next()) {
+                city = new City();
+                city.setCityId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("CITIES.CITY_ID")));
+                city.setCountry(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("CITIES.COUNTRY")));
+                city.setState(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("CITIES.STATE")));
+                city.setCity(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("CITIES.CITY")));
+            }
+
+            statement.close();
+
+            return city;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException(
+                "Error while getCityInforByStateAndCityName " + e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
     }
 
     @Override
@@ -61,8 +277,85 @@ public class FbDAOImpl implements FbDAO {
 
             throw new TasteSyncException(
                 "Error while getExistingUserIdBasedOnFBId " + e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
         }
-        finally {
+    }
+
+    @Override
+    public TsUser getUserInformationByFacebookID(TSDataSource tsDataSource,
+        Connection connection, String userFbId) throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            statement = connection.prepareStatement(FbQueries.USER_FBID_SELECT_SQL);
+            statement.setString(1, userFbId);
+            statement.setString(2, String.valueOf("e"));
+            statement.setString(3, String.valueOf("p"));
+
+            resultset = statement.executeQuery();
+
+            TsUser user = null;
+
+            if (resultset.next()) {
+                user = new TsUser();
+                user.setUserId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_ID")));
+                user.setTsUserId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.TS_USER_ID")));
+                user.setTsUserEmail(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.TS_USER_EMAIL")));
+                user.setTsFirstName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.TS_FIRST_NAME")));
+                user.setTsLastName(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.TS_LAST_NAME")));
+                user.setMaxInvites(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.MAX_INVITES")));
+                user.setUserCreatedInitialDatetime(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString(
+                            "users.USER_CREATED_INITIAL_DATETIME")));
+                user.setUserPoints(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_POINTS")));
+                user.setTwitterUsrUrl(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.TWITTER_USR_URL")));
+                user.setUserDisabledFlag(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_DISABLED_FLAG")));
+                user.setUserActivationKey(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_ACTIVATION_KEY")));
+                user.setUserGender(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_GENDER")));
+                user.setUserCityId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_CITY_ID")));
+                user.setUserState(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_STATE")));
+                user.setIsOnline(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.IS_ONLINE")));
+                user.setUserCountry(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_COUNTRY")));
+                user.setAbout(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.ABOUT")));
+                user.setCurrentStatus(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.CURRENT_STATUS")));
+                user.setUserFbId(CommonFunctionsUtil.getModifiedValueString(
+                        resultset.getString("users.USER_FB_ID")));
+            }
+
+            statement.close();
+
+            return user;
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException(
+                "Error while getCityInforByStateAndCityName " + e.getMessage());
+        } finally {
             tsDataSource.closeConnection(statement, resultset);
         }
     }
@@ -85,11 +378,16 @@ public class FbDAOImpl implements FbDAO {
             ArrayList<String> existingFriends = new ArrayList<String>();
 
             for (FqlFriend fqlFriend : friends) {
-                System.out.println("fqlFriend=" + fqlFriend);
+                if (printExtraDebug) {
+                    System.out.println("fqlFriend=" + fqlFriend);
+                }
+
                 existingFriends.add(fqlFriend.uid);
                 currentDateTimestamp = CommonFunctionsUtil.getCurrentDateTimestamp();
 
-                System.out.println(fqlFriend.current_location);
+                if (printExtraDebug) {
+                    System.out.println(fqlFriend.current_location);
+                }
 
                 FBLocation currentLocation = null;
 
@@ -109,7 +407,9 @@ public class FbDAOImpl implements FbDAO {
                     statement.close();
                 }
 
-                System.out.println(fqlFriend.hometown_location);
+                if (printExtraDebug) {
+                    System.out.println(fqlFriend.hometown_location);
+                }
 
                 FBLocation hometownLocation = null;
 
@@ -129,7 +429,7 @@ public class FbDAOImpl implements FbDAO {
                     statement.executeUpdate();
                     statement.close();
                 }
-                
+
                 statement = connection.prepareStatement(FbQueries.FACEBOOK_FRIEND_DATA_INSERT_UPDATE_SQL);
                 statement.setString(1, fqlFriend.birthday_date);
                 statement.setString(2,
@@ -174,16 +474,16 @@ public class FbDAOImpl implements FbDAO {
                 statement.setString(35, fqlFriend.is_verified);
                 statement.executeUpdate();
                 statement.close();
-                
+
                 statement = connection.prepareStatement(FbQueries.USER_FRIEND_FB_INSERT_UPDATE_SQL);
                 statement.setTimestamp(1, currentDateTimestamp);
-                statement.setString(2,userFbId);
-                statement.setString(3,fqlFriend.uid);
-                statement.setString(4,"ACTIVE");
-                statement.setString(5,existingUserId);
-                
-                statement.setTimestamp(6,currentDateTimestamp);
-                statement.setString(7,"ACTIVE");
+                statement.setString(2, userFbId);
+                statement.setString(3, fqlFriend.uid);
+                statement.setString(4, "ACTIVE");
+                statement.setString(5, existingUserId);
+
+                statement.setTimestamp(6, currentDateTimestamp);
+                statement.setString(7, "ACTIVE");
 
                 statement.executeUpdate();
                 statement.close();
@@ -216,7 +516,6 @@ public class FbDAOImpl implements FbDAO {
                 statement.executeUpdate();
             }
 
-
             statement.close();
             tsDataSource.commit();
         } catch (SQLException e) {
@@ -248,6 +547,42 @@ public class FbDAOImpl implements FbDAO {
     }
 
     @Override
+    public void submitTrustedFriends(TSDataSource tsDataSource,
+        Connection connection, List<TsUser> friendsListUsingTasteSync,
+        String userID) throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            if ((friendsListUsingTasteSync != null) &&
+                    !friendsListUsingTasteSync.isEmpty()) {
+                statement = connection.prepareStatement(FbQueries.USER_FRIEND_TASTESYNC_TRUST_INSERT_UPDATE_SQL);
+
+                for (TsUser tsUser : friendsListUsingTasteSync) {
+                    statement.setString(1, tsUser.getUserId());
+                    statement.setString(2, userID);
+                    statement.execute();
+                }
+
+                statement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+            try {
+                tsDataSource.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+            throw new TasteSyncException("Error while submitTrustedFriends " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
     public void submitUsersData(TSDataSource tsDataSource,
         Connection connection, List<FqlUser> users) throws TasteSyncException {
         PreparedStatement statement = null;
@@ -260,7 +595,10 @@ public class FbDAOImpl implements FbDAO {
             ObjectMapper mapper = new ObjectMapper();
 
             for (FqlUser fqlUser : users) {
-                System.out.println("fqlUser=" + fqlUser);
+                if (printExtraDebug) {
+                    System.out.println("fqlUser=" + fqlUser);
+                }
+
                 //TODO add homezone_location, current location data
                 currentDateTimestamp = CommonFunctionsUtil.getCurrentDateTimestamp();
                 statement = connection.prepareStatement(FbQueries.COUNT_FACEBOOK_USER_DATA_SELECT_SQL);
@@ -275,7 +613,9 @@ public class FbDAOImpl implements FbDAO {
 
                 statement.close();
 
-                System.out.println(fqlUser.current_location);
+                if (printExtraDebug) {
+                    System.out.println(fqlUser.current_location);
+                }
 
                 FBLocation currentLocation = null;
 
@@ -295,7 +635,9 @@ public class FbDAOImpl implements FbDAO {
                     statement.close();
                 }
 
-                System.out.println(fqlUser.hometown_location);
+                if (printExtraDebug) {
+                    System.out.println(fqlUser.hometown_location);
+                }
 
                 FBLocation hometownLocation = null;
 
