@@ -53,8 +53,6 @@ public class UserTopicCalc {
             restaurantUsersList.add(restaurantUserVO);
         }
 
-        tsDataSource.begin();
-
         for (RestaurantUserVO flaggedRestaurantUserVO : restaurantUsersList) {
             String chainFlag = userUserDAO.getRestaurantInfoChained(tsDataSource,
                     connection, flaggedRestaurantUserVO.getRestaurantId());
@@ -64,9 +62,6 @@ public class UserTopicCalc {
                     connection, flaggedRestaurantUserVO);
             }
         }
-
-        tsDataSource.commit();
-        tsDataSource.begin();
 
         for (RestaurantUserVO restaurantUserVO : recorequestReplyUserRestaurantUsersList) {
             ArrayList<String> userIdListDone = new ArrayList<String>();
@@ -78,17 +73,11 @@ public class UserTopicCalc {
             }
         }
 
-        tsDataSource.commit();
-        tsDataSource.begin();
-
         for (RestaurantUserVO restaurantUserVO : restaurantTipsTastesyncUsersList) {
             userUserDAO.submitRestaurantTipsTastesyncAlgo1(tsDataSource,
                 connection, restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 1);
         }
-
-        tsDataSource.commit();
-        tsDataSource.begin();
 
         for (RestaurantUserVO restaurantUserVO : restaurantFavUsersList) {
             userUserDAO.submitRestaurantFav(tsDataSource, connection,
@@ -96,7 +85,5 @@ public class UserTopicCalc {
                 restaurantUserVO.getRestaurantId(), 2,
                 TSConstants.ALGO_TYPE.ALGO1);
         }
-
-        tsDataSource.commit();
     }
 }

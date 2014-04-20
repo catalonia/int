@@ -26,7 +26,7 @@ public class UserUserCalc {
      */
     private static final Logger logger = Logger.getLogger(UserUserCalc.class);
     private UserUserDAO userUserDAO = new UserUserDAOImpl();
-    private boolean printExtraDebug = false;
+    private boolean printDebugExtra = false;
 
     public UserUserCalc() {
         super();
@@ -80,7 +80,7 @@ public class UserUserCalc {
                     if (!userAUserBVOList.contains(userAUserBVO)) {
                         userAUserBVOList.add(userAUserBVO);
                     } else {
-                        if (printExtraDebug) {
+                        if (printDebugExtra) {
                             if (logger.isInfoEnabled()) {
                                 logger.info("Pair UserA/UserB already found. " +
                                     userAUserBVO.toString());
@@ -108,7 +108,7 @@ public class UserUserCalc {
             if (!userAUserBVOList.contains(userAUserBVO)) {
                 userAUserBVOList.add(userAUserBVO);
             } else {
-                if (printExtraDebug) {
+                if (printDebugExtra) {
                     if (logger.isDebugEnabled()) {
                         logger.info(
                             "From Follow data. - Pair UserA/UserB already found. " +
@@ -121,7 +121,7 @@ public class UserUserCalc {
         // reset list to null
         userFolloweeUserFollowerVOList = null;
 
-        if (printExtraDebug) {
+        if (printDebugExtra) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Number of pairs UserA/UserB found. " +
                     userAUserBVOList.size());
@@ -272,7 +272,7 @@ public class UserUserCalc {
             double numUserBFavNCPopTier1Rest = userUserDAO.getNumUserFavNvTierNRestaurant(tsDataSource,
                     connection, userAUserBVOValue.getUserB(), 1);
 
-            if (printExtraDebug) {
+            if (printDebugExtra) {
                 System.out.println("userAFollowUserB=" + userAFollowUserB +
                     " userBFollowUserA=" + userBFollowUserA +
                     " numCommonNCFavRest=" + numCommonNCFavRest +
@@ -296,16 +296,12 @@ public class UserUserCalc {
                     ((numCommonNCFavRest / minNumUserABFavNCRest) >= 0.5) ||
                     ((numCommonNbrhoodNCFavRest / minNumUserABFavNCRest) >= 0.7) ||
                     ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) == 1.0)) {
-                tsDataSource.begin();
                 userUserDAO.submitAssignedUserUserMatchTier(tsDataSource,
                     connection, userAUserBVOValue.getUserA(),
                     userAUserBVOValue.getUserB(), 1);
-                tsDataSource.commit();
-                tsDataSource.begin();
                 userUserDAO.submitAssignedUserUserMatchTier(tsDataSource,
                     connection, userAUserBVOValue.getUserB(),
                     userAUserBVOValue.getUserA(), 1);
-                tsDataSource.commit();
             } else {
                 // -- Tier 2 logic
                 if ((numCommonNCFavRestClusters / minNumUserABFavNCRestClusters) >= 0.7) {
@@ -341,17 +337,13 @@ public class UserUserCalc {
                 }
             }
 
-            tsDataSource.begin();
             //TODO
             //USER_RESTAURANT_FAV_UPDATE_SQL shud have a different algo_indicator? 
             userUserDAO.submitRestaurantFav(tsDataSource, connection,
                 userAUserBVOValue.getUserA(), null, 0,
                 TSConstants.ALGO_TYPE.ALGO1);
-            tsDataSource.commit();
-            tsDataSource.begin();
             userUserDAO.submitUserFollowDataUpdate(tsDataSource, connection,
                 userAUserBVOValue.getUserA(), userAUserBVOValue.getUserB(), 0);
-            tsDataSource.commit();
             //reset list to null!
             userAFavNCRest = null;
             userBFavNCRest = null;
