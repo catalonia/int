@@ -28,8 +28,8 @@ public class UserRestRankOrderCalc {
 
         RankRestaurantsSingleUserCalcHelper rankRestaurantsSingleUserCalcHelper = new RankRestaurantsSingleUserCalcHelper();
         RestaurantUserVO restaurantUserVO = null;
-        String numUserRestaurantMatchCount = null;
-        String restaurantTier = null;
+        int numUserRestaurantMatchCount = 0;
+        int restaurantTier = 0;
 
         if ((flaggedRestaurantList != null) &&
                 (flaggedRestaurantList.size() != 0)) {
@@ -48,48 +48,35 @@ public class UserRestRankOrderCalc {
                 }
 
                 for (RestaurantUserVO flaggedRestaurantUserVO : restaurantUserVOList) {
-                    LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
-                        userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(tsDataSource,
-                            connection, flaggedRestaurantUserVO);
+                    //NOT Needed anymore
 
-                    //numUserRestaurantMatchCount restaurantTier
-                    for (RestaurantPopularityTierVO aRestaurantPopularityTierVOList : restaurantPopularityTierVOList) {
-                        numUserRestaurantMatchCount = String.valueOf(userRestaurantDAO.getUserMatchCounter(
-                                    tsDataSource, connection, userId,
-                                    flaggedRestaurantUserVO.getRestaurantId()));
-                        aRestaurantPopularityTierVOList.setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
-                        restaurantTier = String.valueOf(userRestaurantDAO.getRestaurantInfoTierId(
-                                    tsDataSource, connection, userId,
-                                    flaggedRestaurantUserVO.getRestaurantId()));
-                        aRestaurantPopularityTierVOList.setPopularityTierId(restaurantTier);
-                        aRestaurantPopularityTierVOList.setUserId(userId);
-                    }
-
-                    // check numUserRestaurantMatchCount
-                    List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
-
-                    try {
-                        tsDataSource.begin();
-                        // final insert
-                        userRestaurantDAO.submitAssignedRankUserRestaurant(tsDataSource,
-                            connection, list1ofrestaurants);
-                        tsDataSource.commit();
-                        tsDataSource.begin();
-                        userRestaurantDAO.submitFlaggedRestaurant(tsDataSource,
-                            connection,
-                            flaggedRestaurantUserVO.getRestaurantId(), -1);
-                        tsDataSource.commit();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-
-                        try {
-                            tsDataSource.rollback();
-                        } catch (SQLException e1) {
-                            e1.printStackTrace();
-                        }
-
-                        throw new TasteSyncException(e.getMessage());
-                    }
+                    //                    LinkedList<RestaurantPopularityTierVO> restaurantPopularityTierVOList =
+                    //                        userRestaurantDAO.getConsolidatedFlaggedRestaurantForSingleUser(tsDataSource,
+                    //                            connection, flaggedRestaurantUserVO);
+                    //
+                    //                    //numUserRestaurantMatchCount restaurantTier
+                    //                    for (RestaurantPopularityTierVO aRestaurantPopularityTierVOList : restaurantPopularityTierVOList) {
+                    //                        numUserRestaurantMatchCount = userRestaurantDAO.getUserMatchCounter(
+                    //                                    tsDataSource, connection, userId,
+                    //                                    flaggedRestaurantUserVO.getRestaurantId());
+                    //                        aRestaurantPopularityTierVOList.setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
+                    //                        restaurantTier = userRestaurantDAO.getRestaurantInfoTierId(
+                    //                                    tsDataSource, connection, userId,
+                    //                                    flaggedRestaurantUserVO.getRestaurantId());
+                    //                        aRestaurantPopularityTierVOList.setPopularityTierId(restaurantTier);
+                    //                        aRestaurantPopularityTierVOList.setUserId(userId);
+                    //                    }
+                    //
+                    //                    // check numUserRestaurantMatchCount
+                    //                    List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
+                    //
+                    //                    // final insert
+                    //                    userRestaurantDAO.submitAssignedRankUserRestaurant(tsDataSource,
+                    //                        connection, list1ofrestaurants);
+                    //                	
+                    userRestaurantDAO.submitFlaggedRestaurant(tsDataSource,
+                        connection, flaggedRestaurantUserVO.getRestaurantId(),
+                        -1);
                 }
             }
         }

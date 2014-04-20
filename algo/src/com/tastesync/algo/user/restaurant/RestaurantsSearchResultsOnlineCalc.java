@@ -23,7 +23,7 @@ public class RestaurantsSearchResultsOnlineCalc {
     // return list of restaurantIds based on different parameters
     public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         TSDataSource tsDataSource, Connection connection, String userId,
-        String restaurantId, String neighborhoodId, String cityId,
+        String restaurantId, String[] neighborhoodIdArray, String cityId,
         String stateName, String[] priceIdList, String rating,
         String savedFlag, String favFlag, String dealFlag, String chainFlag,
         String paginationId, String[] cuisineTier2IdArray,
@@ -32,7 +32,7 @@ public class RestaurantsSearchResultsOnlineCalc {
         throws TasteSyncException {
         userId = CommonFunctionsUtil.converStringAsNullIfNeeded(userId);
         restaurantId = CommonFunctionsUtil.converStringAsNullIfNeeded(restaurantId);
-        neighborhoodId = CommonFunctionsUtil.converStringAsNullIfNeeded(neighborhoodId);
+        
         cityId = CommonFunctionsUtil.converStringAsNullIfNeeded(cityId);
         stateName = CommonFunctionsUtil.converStringAsNullIfNeeded(stateName);
         rating = CommonFunctionsUtil.converStringAsNullIfNeeded(rating);
@@ -58,7 +58,7 @@ public class RestaurantsSearchResultsOnlineCalc {
 
         //        searchType = TSConstants.DEFAULT_SEARCH_TYPE;
         RestaurantsSearchResultsVO restaurantsSearchResultsVO = userRestaurantDAO.showListOfRestaurantsSearchResults(tsDataSource,
-                connection, userId, restaurantId, neighborhoodId, cityId,
+                connection, userId, restaurantId, neighborhoodIdArray, cityId,
                 stateName, priceIdList, rating, savedFlag, favFlag, dealFlag,
                 chainFlag, paginationId, cuisineTier2IdArray, themeIdArray,
                 whoareyouwithIdArray, typeOfRestaurantIdArray, occasionIdArray);

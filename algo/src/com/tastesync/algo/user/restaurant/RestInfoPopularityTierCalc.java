@@ -7,7 +7,6 @@ import com.tastesync.algo.model.vo.RestaurantCityVO;
 import com.tastesync.db.pool.TSDataSource;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,23 +54,10 @@ public class RestInfoPopularityTierCalc {
 
             medianUsersNumberForCity = cityMedianHashMap.get(restaurantCityVO.getCityId());
             
-            try {
-            	tsDataSource.begin();
                 userRestaurantDAO.processSingleRestaurantIdCalc(tsDataSource, connection,restaurantCityVO.getRestaurantId(),
                     medianUsersNumberForCity);
                 userRestaurantDAO.submitFlaggedRestaurant(tsDataSource, connection,restaurantCityVO.getRestaurantId(),
                     algoIndicatorDone);
-                				tsDataSource.commit();
-			} catch (SQLException e) {
-				e.printStackTrace();
-	            try {
-	                tsDataSource.rollback();
-	            } catch (SQLException e1) {
-	                e1.printStackTrace();
-	            }
-
-	            throw new TasteSyncException(e.getMessage());
-			}
         }
     }
 }

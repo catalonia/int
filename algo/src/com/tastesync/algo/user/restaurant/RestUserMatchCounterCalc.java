@@ -1,5 +1,7 @@
 package com.tastesync.algo.user.restaurant;
 
+import org.apache.log4j.Logger;
+
 import com.tastesync.algo.db.dao.UserRestaurantDAO;
 import com.tastesync.algo.db.dao.UserRestaurantDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
@@ -18,7 +20,13 @@ import java.util.List;
 
 
 public class RestUserMatchCounterCalc {
-    private static final boolean printExtraDebug = false;
+	/**
+	 * Logger for this class
+	 */
+	private static final Logger logger = Logger
+			.getLogger(RestUserMatchCounterCalc.class);
+	
+    private static final boolean printDebugExtra = true;
     private UserRestaurantDAO userRestaurantDAO = new UserRestaurantDAOImpl();
 
     public RestUserMatchCounterCalc() {
@@ -60,7 +68,6 @@ public class RestUserMatchCounterCalc {
 
         //For each userId, multiple restaurant ids are associated!
         int numUserRestaurantMatchCount = 0;
-        tsDataSource.begin();
 
         for (RestaurantUserVO flaggedRestaurantUserVO : allflaggedRestaurantUserList) {
             //String chainFlag = userRestaurantDAO.getRestaurantInfoChained(flaggedRestaurantUserVO.getRestaurantId());
@@ -76,18 +83,23 @@ public class RestUserMatchCounterCalc {
                         connection, flaggedRestaurantUserVO.getUserId(),
                         aRestaurantPopularityTierVOList);
                 //set numUserRestaurantMatchCount
-                aRestaurantPopularityTierVOList.setNumUserRestaurantMatchCount(String.valueOf(
-                        numUserRestaurantMatchCount));
+                aRestaurantPopularityTierVOList.setNumUserRestaurantMatchCount(numUserRestaurantMatchCount);
                 // set userId
                 aRestaurantPopularityTierVOList.setUserId(flaggedRestaurantUserVO.getUserId());
                 ++counter;
 
-                if (printExtraDebug) {
-                    System.out.println("counter=" + counter +
-                        " aRestaurantPopularityTierVOList" +
-                        aRestaurantPopularityTierVOList);
+                if (printDebugExtra) {
+//                	System.out.println("counter=" + counter +
+//                            " aRestaurantPopularityTierVOList" +
+//                            aRestaurantPopularityTierVOList);
+                    //if (logger.isDebugEnabled()) {
+                    logger.info("counter=" + counter +
+                            " aRestaurantPopularityTierVOList" +
+                            aRestaurantPopularityTierVOList);	
+                    //}
                 }
 
+                
                 restaurantIdFromRestaurantPopularityTierVOList.add(aRestaurantPopularityTierVOList.getRestaurantId());
             }
 
@@ -103,22 +115,17 @@ public class RestUserMatchCounterCalc {
             }
 
             List<RestaurantPopularityTierVO> list1ofrestaurants = rankRestaurantsSingleUserCalcHelper.personalisedRestaurantsResultsForSingleUser(restaurantPopularityTierVOList);
+
             // final insert
             userRestaurantDAO.submitAssignedRankUserRestaurantForWhole(tsDataSource,
                 connection, list1ofrestaurants,
                 flaggedRestaurantUserVO.getUserId());
         }
 
-        tsDataSource.commit();
-        tsDataSource.begin();
-
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantReplyUserList) {
             userRestaurantDAO.submitRecorrequestReplyUserAlgo2(tsDataSource,
                 connection, restaurantUserVO.getUserId(), 0);
         }
-
-        tsDataSource.commit();
-        tsDataSource.begin();
 
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantTipsUserList) {
             userRestaurantDAO.submitRestaurantTipsTastesyncAlgo2(tsDataSource,
@@ -126,16 +133,11 @@ public class RestUserMatchCounterCalc {
                 restaurantUserVO.getRestaurantId(), 0);
         }
 
-        tsDataSource.commit();
-        tsDataSource.begin();
-
         for (RestaurantUserVO restaurantUserVO : flaggedRestaurantFavUserList) {
             userRestaurantDAO.submitRestaurantFav(tsDataSource, connection,
                 restaurantUserVO.getUserId(),
                 restaurantUserVO.getRestaurantId(), 0,
                 TSConstants.ALGO_TYPE.ALGO2);
         }
-
-        tsDataSource.commit();
     }
 }

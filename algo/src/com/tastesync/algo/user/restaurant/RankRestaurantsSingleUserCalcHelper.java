@@ -16,7 +16,7 @@ public class RankRestaurantsSingleUserCalcHelper {
      * Logger for this class
      */
     private static final Logger logger = Logger.getLogger(RankRestaurantsSingleUserCalcHelper.class);
-    private static final boolean printExtraDebug = false;
+    private static final boolean printDebugExtra = false;
 
     public RankRestaurantsSingleUserCalcHelper() {
         super();
@@ -37,14 +37,10 @@ public class RankRestaurantsSingleUserCalcHelper {
         List<RestaurantPopularityTierVO> numTier5Match1 = new LinkedList<RestaurantPopularityTierVO>();
 
         for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
-            int restaurantTierId = (restaurantPopularityTierVO.getPopularityTierId() != null)
-                ? Integer.valueOf(restaurantPopularityTierVO.getPopularityTierId())
-                : (Integer.MIN_VALUE);
-            int userMatchCounter = (restaurantPopularityTierVO.getNumUserRestaurantMatchCount() != null)
-                ? Integer.valueOf(restaurantPopularityTierVO.getNumUserRestaurantMatchCount())
-                : (Integer.MIN_VALUE);
+            int restaurantTierId =restaurantPopularityTierVO.getPopularityTierId();
+            int userMatchCounter = restaurantPopularityTierVO.getNumUserRestaurantMatchCount();
 
-            if (printExtraDebug) {
+            if (printDebugExtra) {
                 if (logger.isInfoEnabled()) {
                     logger.info("restaurantTierId=" + restaurantTierId +
                         " userMatchCounter=" + userMatchCounter + "\nt" +
