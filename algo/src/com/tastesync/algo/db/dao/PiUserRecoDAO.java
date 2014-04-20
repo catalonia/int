@@ -2,6 +2,7 @@ package com.tastesync.algo.db.dao;
 
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
+import com.tastesync.algo.model.vo.PiUsersAlreadyAssignedDataVO;
 
 import com.tastesync.db.pool.TSDataSource;
 
@@ -12,7 +13,7 @@ import java.util.List;
 
 public interface PiUserRecoDAO extends UserRecoDAO {
     List<String> getAllReccomendationIds(TSDataSource tsDataSource,
-        Connection connection) throws TasteSyncException;
+        Connection connection, String cityId) throws TasteSyncException;
 
     int getCountPiRecoUserCuistier2MatchMapper(TSDataSource tsDataSource,
         Connection connection, String recommendationId,
@@ -27,8 +28,8 @@ public interface PiUserRecoDAO extends UserRecoDAO {
         throws TasteSyncException;
 
     int getCountPiRecoUserThemeMatch(TSDataSource tsDataSource,
-            Connection connection,String recommendationId,
-        List<String> themeIdList) throws TasteSyncException;
+        Connection connection, String recommendationId, List<String> themeIdList)
+        throws TasteSyncException;
 
     int getCountPiRecoUserTypeofrestMatch(TSDataSource tsDataSource,
         Connection connection, String recommendationId,
@@ -42,6 +43,10 @@ public interface PiUserRecoDAO extends UserRecoDAO {
         Connection connection, String recommendationId,
         List<String> cuisineTier2IdList) throws TasteSyncException;
 
+    int getCountPiUserNeighbourhoodIdMatch(TSDataSource tsDataSource,
+        Connection connection, String recommendationId, String neighbourhoodId)
+        throws TasteSyncException;
+
     List<String> getExcludedRecommendationIdList(TSDataSource tsDataSource,
         Connection connection, String userId) throws TasteSyncException;
 
@@ -52,8 +57,11 @@ public interface PiUserRecoDAO extends UserRecoDAO {
     List<String> getPiUserAlreadyAssignedToUser(TSDataSource tsDataSource,
         Connection connection, String userId) throws TasteSyncException;
 
+    List<PiUsersAlreadyAssignedDataVO> getPiUserAlreadyAssignedToUserData(TSDataSource tsDataSource,
+            Connection connection, String userId) throws TasteSyncException;
+
     List<String> getPiUsersCategoryCityNbrhoodList(TSDataSource tsDataSource,
-        Connection connection, String cityId, String nbrHoodId)
+        Connection connection, String cityId)
         throws TasteSyncException;
 
     void submitPiRecoLog(TSDataSource tsDataSource, Connection connection,

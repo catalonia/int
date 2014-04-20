@@ -72,10 +72,16 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                     popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_info_popularity_tier.tier_id"));
 
+                    if ((popularityTierId == null) ||
+                            popularityTierId.isEmpty()) {
+                        popularityTierId = "5"; // worst
+                    }
+
                     if (!restaurantIdList.contains(restaurantIdFromNgbrhoodId)) {
                         restaurantIdList.add(restaurantIdFromNgbrhoodId);
                         restaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
-                                restaurantIdFromNgbrhoodId, popularityTierId));
+                                restaurantIdFromNgbrhoodId,
+                                Integer.valueOf(popularityTierId)));
                     }
                 }
 
@@ -109,10 +115,16 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                     popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_info_popularity_tier.tier_id"));
 
+                    if ((popularityTierId == null) ||
+                            popularityTierId.isEmpty()) {
+                        popularityTierId = "5"; // worst
+                    }
+
                     if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
                         restaurantIdList.add(restaurantIdFromPricerangeId);
                         restaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
-                                restaurantIdFromPricerangeId, popularityTierId));
+                                restaurantIdFromPricerangeId,
+                                Integer.valueOf(popularityTierId)));
                     }
                 }
 
@@ -144,10 +156,16 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                     popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultsetInner.getString(
                                 "restaurant_info_popularity_tier.tier_id"));
 
+                    if ((popularityTierId == null) ||
+                            popularityTierId.isEmpty()) {
+                        popularityTierId = "5"; // worst
+                    }
+
                     if (!restaurantIdList.contains(restaurantIdFromPricerangeId)) {
                         restaurantIdList.add(restaurantIdFromPricerangeId);
                         restaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
-                                restaurantIdFromPricerangeId, popularityTierId));
+                                restaurantIdFromPricerangeId,
+                                Integer.valueOf(popularityTierId)));
                     }
                 }
 
@@ -194,15 +212,27 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                             "USER_RESTAURANT_MATCH_COUNTER.RESTAURANT_ID"));
                 popularityTierId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "RESTAURANT_INFO_POPULARITY_TIER.TIER_ID"));
+
+                if ((popularityTierId == null) || popularityTierId.isEmpty()) {
+                    numUserRestaurantMatchCount = "5";
+                }
+
                 numUserRestaurantMatchCount = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "USER_RESTAURANT_MATCH_COUNTER.MATCH_COUNTER"));
+
+                if ((numUserRestaurantMatchCount == null) ||
+                        numUserRestaurantMatchCount.isEmpty()) {
+                    numUserRestaurantMatchCount = "0";
+                }
+
                 strRankNumber = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
                             "USER_RESTAURANT_MATCH_COUNTER.USER_RESTAURANT_RANK"));
                 rankNumber = (strRankNumber != null)
                     ? Integer.valueOf(strRankNumber) : 0;
                 existingRestaurantPopularityTierVOList.add(new RestaurantPopularityTierVO(
-                        restaurantId, popularityTierId, userId,
-                        numUserRestaurantMatchCount, rankNumber));
+                        restaurantId, Integer.valueOf(popularityTierId),
+                        userId, Integer.valueOf(numUserRestaurantMatchCount),
+                        rankNumber));
             }
 
             statement.close();
@@ -828,7 +858,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         TSDataSource tsDataSource, Connection connection, String userId,
-        String restaurantId, String neighborhoodId, String cityId,
+        String restaurantId, String[] neighborhoodIdArray, String cityId,
         String stateName, String[] priceIdList, String rating,
         String savedFlag, String favFlag, String dealFlag, String chainFlag,
         String paginationId, String[] cuisineTier2IdArray,
@@ -838,7 +868,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         RestaurantsSearchResultsHelper restaurantsSearchResultsHelper = new RestaurantsSearchResultsHelper();
 
         return restaurantsSearchResultsHelper.showListOfRestaurantsSearchResults(tsDataSource,
-            connection, userId, restaurantId, neighborhoodId, cityId,
+            connection, userId, restaurantId, neighborhoodIdArray, cityId,
             stateName, priceIdList, rating, savedFlag, favFlag, dealFlag,
             chainFlag, paginationId, cuisineTier2IdArray, themeIdArray,
             whoareyouwithIdArray, typeOfRestaurantIdArray, occasionIdArray);
@@ -863,10 +893,15 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         ResultSet resultset = null;
 
         try {
+            if (1 == 1) {
+                return;
+            }
+
             // do for only 1000+
             int i = 0;
 
             for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
+                tsDataSource.begin();
                 statement = connection.prepareStatement(UserRestaurantQueries.RANK_USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
 
                 statement.setString(1,
@@ -883,6 +918,7 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 //                if (i == 1000) {
                 //                    break;
                 //                }
+                tsDataSource.commit();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -904,25 +940,25 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
     @Override
     public void submitAssignedRankUserRestaurantForWhole(
         TSDataSource tsDataSource, Connection connection,
-        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList, String userId)
-        throws TasteSyncException {
+        List<RestaurantPopularityTierVO> restaurantPopularityTierVOList,
+        String userId) throws TasteSyncException {
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
             // do for only 1000+
             int i = 0;
-
+            tsDataSource.begin();
             // first delete, then insert
-            
-
             statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_DELETE_SQL);
             statement.setString(1, userId);
             statement.executeUpdate();
             statement.close();
+            //          tsDataSource.commit();
+            //          tsDataSource.begin();
             statement = connection.prepareStatement(UserRestaurantQueries.USER_RESTAURANT_MATCH_COUNTER_INSERT_SQL);
-            for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
 
+            for (RestaurantPopularityTierVO restaurantPopularityTierVO : restaurantPopularityTierVOList) {
                 statement.setInt(1, 0);
                 statement.setInt(2,
                     Integer.valueOf(
@@ -941,12 +977,13 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
                 statement.executeUpdate();
                 ++i;
 
-                //                if (i == 1000) {
-                //                    break;
-                //                }
+                if (i == 1000) {
+                    break;
+                }
             }
-            statement.close();
 
+            statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -972,11 +1009,13 @@ public class UserRestaurantDAOImpl extends BaseDaoImpl
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserRestaurantQueries.RESTAURANT_FLAGGED_UPDATE_SQL);
             statement.setInt(1, algoIndicator);
             statement.setString(2, restaurantId);
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(

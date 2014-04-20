@@ -56,25 +56,30 @@ public interface UserRecoQueries extends UserUserQueries {
         "WHERE  ( ( user_reco_supply_tier.user_supply_inv_tier = 1 ) " +
         "          OR ( user_reco_supply_tier.user_supply_inv_tier = 2 ) " +
         "          OR ( user_reco_supply_tier.user_supply_inv_tier = 3 ) ) " +
-        "       AND Date_format(Now(), '%H') BETWEEN 9 AND 23 " +
+        //"       AND Date_format(Now(), '%H') BETWEEN 9 AND 23 " +
+        "       AND Date_format(Now(), '%H') NOT BETWEEN 4 AND 14 " +
         "       AND user_reco_supply_tier.user_id != ? " +
         "       AND  user_reco_supply_tier.user_id NOT IN " +
         "       ( SELECT users_category.USER_ID FROM users_category " +
         "        WHERE users_category.CATEGORY_ID = 5 " +
         "       ) AND user_reco_supply_tier.user_id NOT IN " +
         "       ( SELECT recorequest_ts_assigned.ASSIGNED_USER_ID " +
-        "        FROM recorequest_ts_assigned WHERE recorequest_ts_assigned.RECOREQUEST_ID = ? )";
+        "        FROM recorequest_ts_assigned WHERE recorequest_ts_assigned.RECOREQUEST_ID = ? ) "+
+        "       AND user_reco_supply_tier.user_id NOT IN (select users.user_id from users where users.CURRENT_STATUS NOT IN ('e')) ";
     public static String COUNT_NOT_USER_TOPIC_MATCH_4_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   user_city_nbrhood_match " +
         "WHERE  user_city_nbrhood_match.match_count >= ? " +
         "       AND user_city_nbrhood_match.city_id = ? " +
         "       AND user_city_nbrhood_match.user_id = ? ";
-    public static String COUNT_NOT_USER_TOPIC_MATCH_4_WITH_NBRHD_SELECT_SQL = "" +
-        "SELECT Count(*) " + "FROM   user_city_nbrhood_match " +
-        "WHERE  user_city_nbrhood_match.match_count >= ? " +
-        "       AND user_city_nbrhood_match.city_id = ? " +
-        "       AND user_city_nbrhood_match.user_id = ? " +
-        "       AND user_city_nbrhood_match.neighborhood_id = ? ";
+
+    //    public static String COUNT_NOT_USER_TOPIC_MATCH_4_WITH_NBRHD_SELECT_SQL = "" +
+    //        "SELECT Count(*) " + "FROM   user_city_nbrhood_match "
+    //
+    //        +
+    //            "WHERE  user_city_nbrhood_match.match_count >= ? "+
+    //            "       AND user_city_nbrhood_match.city_id = ? " +
+    //            "       AND user_city_nbrhood_match.user_id = ? ";
+    //    //        "       AND user_city_nbrhood_match.neighborhood_id = ? ";
     public static String COUNT_USER_FRIEND_FB_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   user_friend_fb " +
         "WHERE  user_friend_fb.user_id = ? " +
@@ -116,7 +121,7 @@ public interface UserRecoQueries extends UserUserQueries {
         "FROM   user_typeofrest_match " +
         "WHERE  user_typeofrest_match.user_id = ? " +
         "       AND user_typeofrest_match.match_count >= ? " +
-        "       AND user_typeofrest_match.typeofrest_id = ? ";
+        "       AND user_typeofrest_match.typeofrest_id IN ( 1_REPLACE_PARAM ) ";
     public static String COUNT_USER_OCCASION_MATCH_SELECT_SQL = "" +
         "SELECT user_occasion_match.user_id " + "FROM   user_occasion_match " +
         "WHERE  user_occasion_match.user_id = ? " +
@@ -141,22 +146,19 @@ public interface UserRecoQueries extends UserUserQueries {
         "              ?, " + "              ?, " + "              ?, " +
         "              ?,    ? ) " + "ON DUPLICATE KEY UPDATE " +
         "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
-    
     public static String PI_RECOREQUEST_TS_ASSIGNED_INSERT_SQL = "" +
-            "INSERT INTO recorequest_ts_assigned " +
-            "            (recorequest_ts_assigned.assigned_datetime, " +
-            "             recorequest_ts_assigned.assigned_prepopulated_yn, " +
-            "             recorequest_ts_assigned.assigned_trusted_type, " +
-            "             recorequest_ts_assigned.assigned_user_id, " +
-            "             recorequest_ts_assigned.assigned_user_registered_yn, " +
-            "             recorequest_ts_assigned.assigned_usertype, " +
-            "             recorequest_ts_assigned.recorequest_id) " +
-            "VALUES      ( ?, " + "              ?, " + "              ?, " +
-            "              ?, " + "              ?, " + "              ?, " +
-            "              ? ) " + "ON DUPLICATE KEY UPDATE " +
-            "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
-        
-    
+        "INSERT INTO recorequest_ts_assigned " +
+        "            (recorequest_ts_assigned.assigned_datetime, " +
+        "             recorequest_ts_assigned.assigned_prepopulated_yn, " +
+        "             recorequest_ts_assigned.assigned_trusted_type, " +
+        "             recorequest_ts_assigned.assigned_user_id, " +
+        "             recorequest_ts_assigned.assigned_user_registered_yn, " +
+        "             recorequest_ts_assigned.assigned_usertype, " +
+        "             recorequest_ts_assigned.recorequest_id) " +
+        "VALUES      ( ?, " + "              ?, " + "              ?, " +
+        "              ?, " + "              ?, " + "              ?, " +
+        "              ? ) " + "ON DUPLICATE KEY UPDATE " +
+        "recorequest_ts_assigned.assigned_user_id = recorequest_ts_assigned.assigned_user_id";
     public static String USER_RECO_SUPPLY_TIER_INSERT_SQL = "" +
         "INSERT INTO user_reco_supply_tier " +
         "            (user_reco_supply_tier.user_id, " +

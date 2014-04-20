@@ -554,28 +554,26 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
     @Override
     public int getNumUserCityNbrhoodMatchTopicFound(TSDataSource tsDataSource,
-        Connection connection, String userId, String cityId,
-        String neighborhoodId) throws TasteSyncException {
+        Connection connection, String userId, String cityId)
+        throws TasteSyncException {
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
             String sql = UserRecoQueries.COUNT_NOT_USER_TOPIC_MATCH_4_SELECT_SQL;
 
-            if ((neighborhoodId != null) && !neighborhoodId.isEmpty()) {
-                sql = UserRecoQueries.COUNT_NOT_USER_TOPIC_MATCH_4_WITH_NBRHD_SELECT_SQL;
-            }
-
+            //            if ((neighborhoodId != null) && !neighborhoodId.isEmpty()) {
+            //                sql = UserRecoQueries.COUNT_NOT_USER_TOPIC_MATCH_4_WITH_NBRHD_SELECT_SQL;
+            //            }
             statement = connection.prepareStatement(sql);
 
             statement.setInt(1, 1);
             statement.setString(2, cityId);
             statement.setString(3, userId);
-
-            if ((neighborhoodId != null) && !neighborhoodId.isEmpty()) {
-                statement.setString(4, neighborhoodId);
-            }
-
+            //
+            //            if ((neighborhoodId != null) && !neighborhoodId.isEmpty()) {
+            //                statement.setString(4, neighborhoodId);
+            //            }
             resultset = statement.executeQuery();
 
             int numUserCityNbrhoodMatchTopicFound = 0;
@@ -1137,6 +1135,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserRecoQueries.PI_RECOREQUEST_TS_ASSIGNED_INSERT_SQL);
 
             statement.setTimestamp(1,
@@ -1150,6 +1149,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1175,6 +1175,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserRecoQueries.RECOREQUEST_TS_ASSIGNED_INSERT_SQL);
             statement.setTimestamp(1,
                 CommonFunctionsUtil.getCurrentDateTimestamp());
@@ -1188,6 +1189,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(
@@ -1206,6 +1208,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserRecoQueries.USER_RECO_SUPPLY_TIER_INSERT_SQL);
             statement.setString(1, userId);
             statement.setInt(2, usrSupplyInvTier);
@@ -1214,6 +1217,7 @@ public class UserRecoDAOImpl extends BaseDaoImpl implements UserRecoDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException(

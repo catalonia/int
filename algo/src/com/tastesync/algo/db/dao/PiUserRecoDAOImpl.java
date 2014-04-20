@@ -3,6 +3,7 @@ package com.tastesync.algo.db.dao;
 import com.tastesync.algo.db.queries.PiUserRecoQueries;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
+import com.tastesync.algo.model.vo.PiUsersAlreadyAssignedDataVO;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
 
@@ -23,12 +24,14 @@ import java.util.List;
 public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO {
     @Override
     public List<String> getAllReccomendationIds(TSDataSource tsDataSource,
-        Connection connection) throws TasteSyncException {
+        Connection connection, String cityId) throws TasteSyncException {
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
             statement = connection.prepareStatement(PiUserRecoQueries.PI_RECOMMENDATIONS_ALL_SELECT_SQL);
+            statement.setString(1, cityId);
+
             resultset = statement.executeQuery();
 
             List<String> allRecommendationIdsList = new LinkedList<String>();
@@ -465,6 +468,44 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
     }
 
     @Override
+    public int getCountPiUserNeighbourhoodIdMatch(TSDataSource tsDataSource,
+        Connection connection, String recommendationId, String neighbourhoodId)
+        throws TasteSyncException {
+        if ((neighbourhoodId == null) || neighbourhoodId.isEmpty()) {
+            return 0;
+        }
+
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            statement = connection.prepareStatement(PiUserRecoQueries.COUNT_PI_RECO_NBRHOOD_MATCH_SELECT_SQL);
+
+            statement.setString(1, recommendationId);
+            statement.setString(2, neighbourhoodId);
+
+            resultset = statement.executeQuery();
+
+            int rowCount = 0;
+
+            if (resultset.next()) {
+                rowCount = resultset.getInt(1);
+            }
+
+            statement.close();
+
+            return rowCount;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getCountPiUserNeighbourhoodIdMatch= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
     public List<String> getExcludedRecommendationIdList(
         TSDataSource tsDataSource, Connection connection, String userId)
         throws TasteSyncException {
@@ -572,29 +613,70 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
     }
 
     @Override
+    public List<PiUsersAlreadyAssignedDataVO> getPiUserAlreadyAssignedToUserData(
+        TSDataSource tsDataSource, Connection connection, String userId)
+        throws TasteSyncException {
+        PreparedStatement statement = null;
+        ResultSet resultset = null;
+
+        try {
+            statement = connection.prepareStatement(PiUserRecoQueries.PI_RECO_LOG_SELECT_SQL);
+
+            statement.setString(1, userId);
+            resultset = statement.executeQuery();
+
+            List<PiUsersAlreadyAssignedDataVO> piUsersAlreadyAssignedIdList = new LinkedList<PiUsersAlreadyAssignedDataVO>();
+            PiUsersAlreadyAssignedDataVO piUsersAlreadyAssignedDataVO = null;
+
+            String currentPiUsersAlreadyAssignedId;
+
+            int countRepliesByPiUserId = 0;
+
+            while (resultset.next()) {
+                currentPiUsersAlreadyAssignedId = CommonFunctionsUtil.getModifiedValueString(resultset.getString(
+                            "users_category.user_id"));
+
+                countRepliesByPiUserId = resultset.getInt("counter");
+                piUsersAlreadyAssignedDataVO = new PiUsersAlreadyAssignedDataVO(currentPiUsersAlreadyAssignedId,
+                        countRepliesByPiUserId);
+                piUsersAlreadyAssignedIdList.add(piUsersAlreadyAssignedDataVO);
+            }
+
+            statement.close();
+
+            return piUsersAlreadyAssignedIdList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new TasteSyncException(
+                "Error while getPiUserAlreadyAssignedToUserData= " +
+                e.getMessage());
+        } finally {
+            tsDataSource.closeConnection(statement, resultset);
+        }
+    }
+
+    @Override
     public List<String> getPiUsersCategoryCityNbrhoodList(
-        TSDataSource tsDataSource, Connection connection, String cityId,
-        String nbrHoodId) throws TasteSyncException {
+        TSDataSource tsDataSource, Connection connection, String cityId) 
+        throws TasteSyncException {
         PreparedStatement statement = null;
         ResultSet resultset = null;
 
         try {
             String sql = PiUserRecoQueries.USER_CATEGORY_CITY_SELECT_SQL;
 
-            if (nbrHoodId != null) {
-                sql = PiUserRecoQueries.USER_CATEGORY_CITY_NBRHOOD_SELECT_SQL;
-            }
-
+            //            if (nbrHoodId != null) {
+            //                sql = PiUserRecoQueries.USER_CATEGORY_CITY_NBRHOOD_SELECT_SQL;
+            //            }
             statement = connection.prepareStatement(sql);
             statement.setInt(1, 5);
             statement.setInt(2, 1);
 
             statement.setString(3, cityId);
-
-            if (nbrHoodId != null) {
-                statement.setString(4, nbrHoodId);
-            }
-
+            //
+            //            if (nbrHoodId != null) {
+            //                statement.setString(4, nbrHoodId);
+            //            }
             resultset = statement.executeQuery();
 
             List<String> piUsersCategoryIdList = new LinkedList<String>();
@@ -628,6 +710,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(PiUserRecoQueries.PI_RECO_LOG_INSERT_SQL);
 
             //generate Pi_Reco_Log_Id
@@ -644,6 +727,8 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             statement.executeUpdate();
 
             statement.close();
+
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new TasteSyncException("Error while submitPiRecoLog= " +
@@ -662,6 +747,7 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(PiUserRecoQueries.RECOREQUEST_REPLY_USER_INSERT_SQL);
 
             //datetime userid random number
@@ -759,6 +845,8 @@ public class PiUserRecoDAOImpl extends UserRecoDAOImpl implements PiUserRecoDAO 
             if (statement != null) {
                 statement.close();
             }
+
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 

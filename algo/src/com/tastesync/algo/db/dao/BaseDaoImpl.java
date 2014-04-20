@@ -126,12 +126,14 @@ public abstract class BaseDaoImpl implements BaseDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_RECOREQUEST_REPLY_USER_UPDATE_SQL);
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -156,12 +158,14 @@ public abstract class BaseDaoImpl implements BaseDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_RECOREQUEST_REPLY_USER_UPDATE_SQL);
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -186,6 +190,8 @@ public abstract class BaseDaoImpl implements BaseDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
+
             if (algoType.equals(TSConstants.ALGO_TYPE.ALGO1)) {
                 statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_USER_RESTAURANT_FAV_UPDATE_SQL);
             } else if (algoType.equals(TSConstants.ALGO_TYPE.ALGO2)) {
@@ -203,6 +209,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
 
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -227,12 +234,14 @@ public abstract class BaseDaoImpl implements BaseDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(TSDBCommonQueries.ALGO1_RESTAURANT_TIPS_TASTESYNC_UPDATE_SQL);
             statement.setInt(1, algoInd);
             statement.setString(2, flaggedUserId);
             statement.setString(3, restaurantId);
             statement.executeUpdate();
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -258,6 +267,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(TSDBCommonQueries.ALGO2_RESTAURANT_TIPS_TASTESYNC_UPDATE_SQL);
 
             statement.setInt(1, algoInd);
@@ -267,6 +277,7 @@ public abstract class BaseDaoImpl implements BaseDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 

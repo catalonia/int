@@ -95,22 +95,6 @@ public interface UserRestaurantQueries extends TSDBCommonQueries {
     public static String RESTAURANT_NEIGHBOURHOOD_BASEDON_PRICERANGE_SELECT_SQL = "" +
         "SELECT restaurant.restaurant_id " + "FROM   restaurant " +
         "WHERE  restaurant.price_range = ? ";
-    public static String COUNT_USER_CITY_RESTAURANT_NEIGHBOURHOOD_MATCH_SELECT_SQL =
-        "" + "SELECT count(*) " + "FROM   user_city_nbrhood_match, " +
-        "       restaurant_neighbourhood " +
-        "WHERE  restaurant_neighbourhood.restaurant_id = ? " +
-        "       AND restaurant_neighbourhood.neighbourhood_id = " +
-        "           user_city_nbrhood_match.neighborhood_id " +
-        "       AND user_city_nbrhood_match.match_count >= 1 " +
-        "       AND user_city_nbrhood_match.user_id = ? ";
-    public static String COUNT_USER_CUSINE_RESTAURANT_CUSINE_MATCH_SELECT_SQL = "" +
-        "SELECT Count(*) " + "FROM   user_cuistier2_match, " +
-        "       restaurant_cuisine " +
-        "WHERE  restaurant_cuisine.restaurant_id = ? " +
-        "       AND restaurant_cuisine.tier2_cuisine_id = " +
-        "           user_cuistier2_match.cuisine_tier2 " +
-        "       AND user_cuistier2_match.match_count >= 1 " +
-        "       AND user_cuistier2_match.user_id = ? ";
     public static String COUNT_USER_PRICE_RESTAURANT_MATCH_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   user_price_match, " +
         "       restaurant " + "WHERE  restaurant.restaurant_id = ? " +

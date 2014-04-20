@@ -65,7 +65,7 @@ public interface UserRestaurantDAO extends BaseDAO {
 
     RestaurantsSearchResultsVO showListOfRestaurantsSearchResults(
         TSDataSource tsDataSource, Connection connection, String userId,
-        String restaurantId, String neighborhoodId, String cityId,
+        String restaurantId, String[] neighborhoodIdList, String cityId,
         String stateName, String[] priceIdList, String rating,
         String savedFlag, String favFlag, String dealFlag, String chainFlag,
         String paginationId, String[] cuisineTier2IdArray,

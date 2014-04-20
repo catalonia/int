@@ -1495,6 +1495,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.USER_USER_MATCH_TIER_INSERT_SQL);
 
             statement.setInt(1, 0);
@@ -1507,6 +1508,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1526,6 +1528,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_TS_ASSIGNED_UPDATE_SQL);
 
             statement.setInt(1, algoInd);
@@ -1534,6 +1537,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1558,6 +1562,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.RECOREQUEST_USER_UPDATE_SQL);
 
             statement.setInt(1, algoInd);
@@ -1566,6 +1571,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1592,6 +1598,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         PreparedStatement statementInner = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.RESTAURANT_NEIGHBOURHOOD_CITY_SELECT_SQL);
 
             statement.setString(1, flaggedRestaurantUserVO.getRestaurantId());
@@ -1664,6 +1671,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             }
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1688,6 +1696,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.USER_FOLLOW_DATA_UPDATE_SQL);
 
             statement.setInt(1, algoInd);
@@ -1697,6 +1706,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 
@@ -1707,7 +1717,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             }
 
             throw new TasteSyncException(
-                "Error while submitRecorrequestUser = " + e.getMessage());
+                "Error while submitUserFollowDataUpdate = " + e.getMessage());
         } finally {
             tsDataSource.closeConnection(statement, resultset);
         }
@@ -1721,7 +1731,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
-        	tsDataSource.begin();
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.USER_RECO_DEMAND_INSERT_SQL);
 
             int calcFlag = 0;
@@ -1760,6 +1770,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
         ResultSet resultset = null;
 
         try {
+            tsDataSource.begin();
             statement = connection.prepareStatement(UserUserQueries.USER_RECO_SUPPLY_TIER_INSERT_SQL);
 
             statement.setString(1, flaggedUserId);
@@ -1771,6 +1782,7 @@ public class UserUserDAOImpl extends BaseDaoImpl implements UserUserDAO {
             statement.executeUpdate();
 
             statement.close();
+            tsDataSource.commit();
         } catch (SQLException e) {
             e.printStackTrace();
 

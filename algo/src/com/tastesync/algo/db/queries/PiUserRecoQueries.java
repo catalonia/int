@@ -1,14 +1,16 @@
 package com.tastesync.algo.db.queries;
 
 public interface PiUserRecoQueries extends UserRecoQueries {
-    public static String USER_CATEGORY_CITY_NBRHOOD_SELECT_SQL = "" +
-        "SELECT DISTINCT users_category.user_id " +
-        "FROM   user_city_nbrhood_match, " + "       users_category " +
-        "WHERE  users_category.category_id = ? " +
-        "       AND user_city_nbrhood_match.user_id = users_category.user_id " +
-        "       AND user_city_nbrhood_match.match_count >= ? " +
-        "       AND user_city_nbrhood_match.city_id = ? " +
-        "       AND user_city_nbrhood_match.neighborhood_id = ? ";
+    //    public static String USER_CATEGORY_CITY_NBRHOOD_SELECT_SQL = "" +
+    //        "SELECT DISTINCT users_category.user_id " +
+    //        "FROM   user_city_nbrhood_match, " + "       users_category " +
+    //        "WHERE  users_category.category_id = ? ";
+    //
+    //    //    +
+    //    //        "       AND user_city_nbrhood_match.user_id = users_category.user_id " +
+    //    //        "       AND user_city_nbrhood_match.match_count >= ? " +
+    //    //        "       AND user_city_nbrhood_match.city_id = ? " +
+    //    //        "       AND user_city_nbrhood_match.neighborhood_id = ? ";
     public static String USER_CATEGORY_CITY_SELECT_SQL = "" +
         "SELECT DISTINCT users_category.user_id " +
         "FROM   user_city_nbrhood_match, " + "       users_category " +
@@ -16,12 +18,33 @@ public interface PiUserRecoQueries extends UserRecoQueries {
         "       AND user_city_nbrhood_match.user_id = users_category.user_id " +
         "       AND user_city_nbrhood_match.match_count >= ? " +
         "       AND user_city_nbrhood_match.city_id = ? ";
-    public static String PI_RECO_LOG_SELECT_SQL = "" +
-        "SELECT DISTINCT pi_reco_log.pi_user_id " + "FROM   pi_reco_log " +
-        "WHERE  pi_reco_log.user_id = ? ";
+//    public static String PI_RECO_LOG_SELECT_SQL = "" +
+//        "SELECT pi_reco_log.pi_user_id, count(*) as counter " + "FROM   pi_reco_log " +
+//        "WHERE  pi_reco_log.user_id = ? GROUP BY pi_reco_log.Pi_User_Id ";
+
+    public static String PI_RECO_LOG_SELECT_SQL = "" 
+    				+ "SELECT users_category.user_id, "
+    				+ "       Sum(CASE "
+    				+ "             WHEN Isnull(pi_reco_log.recommendation_id) = 0 THEN 1 "
+    				+ "             ELSE 0 "
+    				+ "           end) AS counter "
+    				+ "FROM   users_category "
+    				+ "       LEFT OUTER JOIN pi_reco_log "
+    				+ "                    ON users_category.category_id = 5 "
+    				+ "                       AND users_category.user_id = pi_reco_log.pi_user_id "
+    				+ "                       AND pi_reco_log.user_id =? "
+    				+ "GROUP  BY users_category.user_id ";
+    
+    public static String PI_RECO_LOG_TIMES_SELECT_SQL = "" +
+    "SELECT  pi_reco_log.pi_user_id  FROM   pi_reco_log "+
+    " WHERE  pi_reco_log.user_id = ? "+
+    " order by pi_reco_log.pi_user_id ";
+
     public static String PI_RECOMMENDATIONS_ALL_SELECT_SQL = "" +
-        "SELECT pi_recommendations.recommendation_id " +
-        "FROM   pi_recommendations ";
+        "SELECT distinct pi_recommendations.recommendation_id " +
+        "FROM   pi_recommendations, pi_reco_location " +
+        "WHERE pi_recommendations.Recommendation_Id=pi_reco_location.Recommendation_Id " +
+        "AND pi_reco_location.city_id = ? ";
     public static String COUNT_PI_RECO_CUISTIER2_MATCH_SELECT_SQL = "" +
         "SELECT Count(*) " + "FROM   pi_reco_cuisine_tier2 " +
         "WHERE  pi_reco_cuisine_tier2.recommendation_id = ? " +
@@ -53,6 +76,10 @@ public interface PiUserRecoQueries extends UserRecoQueries {
         "SELECT Count(*) " + "FROM   pi_reco_occasion " +
         "WHERE  pi_reco_occasion.recommendation_id = ? " +
         "       AND pi_reco_occasion.occasion_id IN (1_REPLACE_PARAM) ";
+    public static String COUNT_PI_RECO_NBRHOOD_MATCH_SELECT_SQL = "" +
+        "SELECT Count(*) " + "FROM   pi_reco_location " +
+        "WHERE  pi_reco_location.recommendation_id = ? " +
+        "       AND pi_reco_location.neighbourhood_id = ? ";
     public static String EXCLUDE_RESTAURANT_ID_FRM_PI_RECOMMENDATIONS_SELECT_SQL =
         "" + "SELECT pi_recommendations.recommendation_id " +
         "FROM   pi_recommendations " +
@@ -79,51 +106,45 @@ public interface PiUserRecoQueries extends UserRecoQueries {
         "             pi_reco_log.user_id) " + "VALUES      ( ?, " +
         "              ?, " + "              ?," + "              ?, " +
         "              ? " + ")";
-    
     public static String RECOREQUEST_REPLY_USER_INSERT_SQL = "" +
-            "INSERT INTO recorequest_reply_user " +
-            "            (recorequest_reply_user.recorequest_id, " +
-            "             recorequest_reply_user.reply_id, " +
-            "             recorequest_reply_user.reply_like_initiator, " +
-            "             recorequest_reply_user.reply_send_datetime, " +
-            "             recorequest_reply_user.reply_text, " +
-            "             recorequest_reply_user.reply_ts_user_id, " +
-            "             recorequest_reply_user.reply_user_id, " +
-            "             recorequest_reply_user.algo1_ind, " +
-            "             recorequest_reply_user.algo2_ind) " +
-            "VALUES      ( ?, " + "              ?, " + "              ?, " +
-            "              ?, ?, " + "              ?,?,?, " + "              ? )";
+        "INSERT INTO recorequest_reply_user " +
+        "            (recorequest_reply_user.recorequest_id, " +
+        "             recorequest_reply_user.reply_id, " +
+        "             recorequest_reply_user.reply_like_initiator, " +
+        "             recorequest_reply_user.reply_send_datetime, " +
+        "             recorequest_reply_user.reply_text, " +
+        "             recorequest_reply_user.reply_ts_user_id, " +
+        "             recorequest_reply_user.reply_user_id, " +
+        "             recorequest_reply_user.algo1_ind, " +
+        "             recorequest_reply_user.algo2_ind) " +
+        "VALUES      ( ?, " + "              ?, " + "              ?, " +
+        "              ?, ?, " + "              ?,?,?, " + "              ? )";
     public static final String RECOREQUEST_USER_FRIEND_SELECT_SQL = "" +
-            "SELECT recorequest_user.initiator_user_id, " +
-            "       recorequest_user.recorequest_free_text " +
-            "FROM   recorequest_user " +
-            "WHERE  recorequest_user.recorequest_id = ? ";
-    
+        "SELECT recorequest_user.initiator_user_id, " +
+        "       recorequest_user.recorequest_free_text " +
+        "FROM   recorequest_user " +
+        "WHERE  recorequest_user.recorequest_id = ? ";
     public static String RESTAURANT_REPLY_INSERT_SQL = "" +
-            "INSERT INTO restaurant_reply " +
-            "            (restaurant_reply.created, " +
-            "             restaurant_reply.initiator_went_yn, " +
-            "             restaurant_reply.reply_id, " +
-            "             restaurant_reply.restaurant_id) " + "VALUES      ( ?, " +
-            "              ?, " + "              ?, " + "              ? )";
-    
+        "INSERT INTO restaurant_reply " +
+        "            (restaurant_reply.created, " +
+        "             restaurant_reply.initiator_went_yn, " +
+        "             restaurant_reply.reply_id, " +
+        "             restaurant_reply.restaurant_id) " + "VALUES      ( ?, " +
+        "              ?, " + "              ?, " + "              ? )";
     public static String USER_RESTAURANT_INSERT_SQL = "" +
-            "INSERT INTO user_restaurant_reco " +
-            "            (user_restaurant_reco.recommendee_user_id, " +
-            "             user_restaurant_reco.recommender_user_id, " +
-            "             user_restaurant_reco.reply_id, " +
-            "             user_restaurant_reco.restaurant_id, " +
-            "             user_restaurant_reco.updated_datetime) " +
-            "VALUES      ( ?, " + "              ?, " + "              ?, " +
-            "              ?, " + "              ? )";
+        "INSERT INTO user_restaurant_reco " +
+        "            (user_restaurant_reco.recommendee_user_id, " +
+        "             user_restaurant_reco.recommender_user_id, " +
+        "             user_restaurant_reco.reply_id, " +
+        "             user_restaurant_reco.restaurant_id, " +
+        "             user_restaurant_reco.updated_datetime) " +
+        "VALUES      ( ?, " + "              ?, " + "              ?, " +
+        "              ?, " + "              ? )";
     public static String COUNT_REPLIES_RECOREQUEST_REPLY_USER_SELECT_SQL = "" +
-            "SELECT Count(*) " + "FROM   recorequest_reply_user " +
-            "WHERE  recorequest_reply_user.recorequest_id = ? " +
-            "       AND recorequest_reply_user.reply_user_id = ?";
-    
+        "SELECT Count(*) " + "FROM   recorequest_reply_user " +
+        "WHERE  recorequest_reply_user.recorequest_id = ? " +
+        "       AND recorequest_reply_user.reply_user_id = ?";
     public static String USER_POINTS_UPDATE_SQL = "" + "UPDATE users " +
-            "SET    users.user_points = users.user_points + ? " +
-            "WHERE  users.user_id = ? ";
-    
-    
+        "SET    users.user_points = users.user_points + ? " +
+        "WHERE  users.user_id = ? ";
 }
