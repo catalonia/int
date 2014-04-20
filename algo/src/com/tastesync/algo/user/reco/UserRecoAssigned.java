@@ -15,7 +15,6 @@ import com.tastesync.db.pool.TSDataSource;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +29,7 @@ public class UserRecoAssigned {
      */
     private static final Logger logger = Logger.getLogger(UserRecoAssigned.class);
     private static final String NOT_USER_TOPIC_MATCH_4 = "not_user_topic_match_4";
-    private static final boolean printDebugExtra = false;
+    private static final boolean printDebugExtra = true;
     private UserRecoDAO userRecoDAO = new UserRecoDAOImpl();
 
     public UserRecoAssigned() {
@@ -82,14 +81,17 @@ public class UserRecoAssigned {
         }
 
         String neighborhoodId = null;
-
+        int numNeighborhoodId = 0;
         if ((cityNeighbourhoodVO != null) &&
                 (cityNeighbourhoodVO.getNeighbourhoodId() != null) &&
                 !cityNeighbourhoodVO.getNeighbourhoodId().isEmpty()) {
-            cityId = cityNeighbourhoodVO.getNeighbourhoodId();
+        	cityId = cityNeighbourhoodVO.getCityId();
+        	neighborhoodId = cityNeighbourhoodVO.getNeighbourhoodId();
+            
+            numNeighborhoodId=1;
         }
 
-        int numRecorequestParams = cuisineTier2IdList.size() +
+        int numRecorequestParams = numNeighborhoodId + cuisineTier2IdList.size() +
             cuisineTier1IdList.size() + priceIdList.size() +
             themeIdList.size() + whoareyouwithIdList.size();
 
@@ -133,11 +135,11 @@ public class UserRecoAssigned {
 
         // -- this implies Demand Tier 4
         if (numSameParamRequests > 1) {
-            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
-                recorequestIteration, cityId, neighborhoodId, initiatorUserId,
-                cuisineTier2IdList, cuisineTier1IdList, priceIdList,
-                themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
-                occasionIdList);
+            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                connection, recoRequestId, recorequestIteration, cityId,
+                neighborhoodId, initiatorUserId, cuisineTier2IdList,
+                cuisineTier1IdList, priceIdList, themeIdList,
+                whoareyouwithIdList, typeOfRestaurantIdList, occasionIdList);
         } else {
             int demandTier = userRecoDAO.getDemandTierForSingleUser(tsDataSource,
                     connection, initiatorUserId);
@@ -158,7 +160,7 @@ public class UserRecoAssigned {
                     userRecoSupplyTierVO = anUserRecoSupplyTierVOList;
                     numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(tsDataSource,
                             connection, userRecoSupplyTierVO.getUserId(),
-                            cityId, neighborhoodId);
+                            cityId);
 
                     if (numUserCityNbrhoodMatchTopicFound > 0) {
                         temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH_4);
@@ -261,12 +263,12 @@ public class UserRecoAssigned {
                 boolean piassignedDone = false;
 
                 if (temp1usersTemp1FieldValue == 0) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
-                        recorequestIteration, cityId, neighborhoodId,
-                        initiatorUserId, cuisineTier2IdList,
-                        cuisineTier1IdList, priceIdList, themeIdList,
-                        whoareyouwithIdList, typeOfRestaurantIdList,
-                        occasionIdList);
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                        connection, recoRequestId, recorequestIteration,
+                        cityId, neighborhoodId, initiatorUserId,
+                        cuisineTier2IdList, cuisineTier1IdList, priceIdList,
+                        themeIdList, whoareyouwithIdList,
+                        typeOfRestaurantIdList, occasionIdList);
                     piassignedDone = true;
                 } else if (temp1usersTemp1FieldValue == 1) {
                     //single user
@@ -382,6 +384,9 @@ public class UserRecoAssigned {
                                 tranche7usersUserId.add(userRecoSupplyTierVO.getUserId());
                             }
                         }
+
+                        topicMatchCounter = 0;
+                        topicMatchRate = 0;
                     }
 
                     // tranch user list available
@@ -496,22 +501,10 @@ public class UserRecoAssigned {
                 }
 
                 if (assigneduserUserId != null) {
-
-                	try {
-                    	tsDataSource.begin();
-                        userRecoDAO.submitRecorequestTsAssigned(tsDataSource,
-                            connection, recoRequestId, assigneduserUserId);
-                        userRecoDAO.submitUserRecoSupplyTier(tsDataSource,
-                            connection, assigneduserUserId, 0, 1);
-						tsDataSource.commit();
-					} catch (SQLException e1) {
-						e1.printStackTrace();
-			            try {
-			                tsDataSource.rollback();
-			            } catch (SQLException e2) {
-			                e2.printStackTrace();
-			            }
-					}
+                    userRecoDAO.submitRecorequestTsAssigned(tsDataSource,
+                        connection, recoRequestId, assigneduserUserId);
+                    userRecoDAO.submitUserRecoSupplyTier(tsDataSource,
+                        connection, assigneduserUserId, 0, 1);
 
                     try {
                         CommonFunctionsUtil.execAsync(TSConstants.SEND_PUSH_NOTIFICATIONS_SCRIPT,
@@ -545,7 +538,8 @@ public class UserRecoAssigned {
                                 connection, recoRequestId, recorequestIteration);
                         } else if ((numReplyFromAssignedUser == 0) &&
                                 (recorequestIteration == 2)) {
-                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
+                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                                connection, recoRequestId,
                                 recorequestIteration, cityId, neighborhoodId,
                                 initiatorUserId, cuisineTier2IdList,
                                 cuisineTier1IdList, priceIdList, themeIdList,
@@ -555,7 +549,8 @@ public class UserRecoAssigned {
                         }
                     } else if (demandTier == 2) {
                         if (numReplyFromAssignedUser == 0) {
-                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
+                            piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                                connection, recoRequestId,
                                 recorequestIteration, cityId, neighborhoodId,
                                 initiatorUserId, cuisineTier2IdList,
                                 cuisineTier1IdList, priceIdList, themeIdList,
@@ -568,12 +563,12 @@ public class UserRecoAssigned {
 
                 //Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
-                        recorequestIteration, cityId, neighborhoodId,
-                        initiatorUserId, cuisineTier2IdList,
-                        cuisineTier1IdList, priceIdList, themeIdList,
-                        whoareyouwithIdList, typeOfRestaurantIdList,
-                        occasionIdList);
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                        connection, recoRequestId, recorequestIteration,
+                        cityId, neighborhoodId, initiatorUserId,
+                        cuisineTier2IdList, cuisineTier1IdList, priceIdList,
+                        themeIdList, whoareyouwithIdList,
+                        typeOfRestaurantIdList, occasionIdList);
                 }
             } else {
                 //sleep for remaining time!!
@@ -611,7 +606,7 @@ public class UserRecoAssigned {
                 for (UserRecoSupplyTierVO anUserRecoSupplyTierVOList : userRecoSupplyTierVOList) {
                     userRecoSupplyTierVO = anUserRecoSupplyTierVOList;
                     numUserCityNbrhoodMatchTopicFound = userRecoDAO.getNumUserCityNbrhoodMatchTopicFound(tsDataSource,
-                            connection, initiatorUserId, cityId, neighborhoodId);
+                            connection, initiatorUserId, cityId);
 
                     if (numUserCityNbrhoodMatchTopicFound > 0) {
                         temp1usersTemp1Field.add(NOT_USER_TOPIC_MATCH_4);
@@ -693,12 +688,12 @@ public class UserRecoAssigned {
                 boolean piassignedDone = false;
 
                 if (temp1usersTemp1FieldValue == 0) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
-                        recorequestIteration, cityId, neighborhoodId,
-                        initiatorUserId, cuisineTier2IdList,
-                        cuisineTier1IdList, priceIdList, themeIdList,
-                        whoareyouwithIdList, typeOfRestaurantIdList,
-                        occasionIdList);
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                        connection, recoRequestId, recorequestIteration,
+                        cityId, neighborhoodId, initiatorUserId,
+                        cuisineTier2IdList, cuisineTier1IdList, priceIdList,
+                        themeIdList, whoareyouwithIdList,
+                        typeOfRestaurantIdList, occasionIdList);
                     piassignedDone = true;
                 } else if (temp1usersTemp1FieldValue == 1) {
                     //single user
@@ -785,6 +780,9 @@ public class UserRecoAssigned {
                                 tranche3usersUserId.add(userRecoSupplyTierVO.getUserId());
                             }
                         }
+
+                        topicMatchCounter = 0;
+                        topicMatchRate = 0;
                     }
 
                     // tranch user list available
@@ -839,24 +837,24 @@ public class UserRecoAssigned {
                             connection, recoRequestId, assigneduserUserId);
 
                     if (numReplyFromAssignedUser == 0) {
-                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
-                            recorequestIteration, cityId, neighborhoodId,
-                            initiatorUserId, cuisineTier2IdList,
-                            cuisineTier1IdList, priceIdList, themeIdList,
-                            whoareyouwithIdList, typeOfRestaurantIdList,
-                            occasionIdList);
+                        piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                            connection, recoRequestId, recorequestIteration,
+                            cityId, neighborhoodId, initiatorUserId,
+                            cuisineTier2IdList, cuisineTier1IdList,
+                            priceIdList, themeIdList, whoareyouwithIdList,
+                            typeOfRestaurantIdList, occasionIdList);
                         piassignedDone = true;
                     }
                 }
 
                 //Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
                 if ((assigneduserUserId == null) && !piassignedDone) {
-                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource, connection,recoRequestId,
-                        recorequestIteration, cityId, neighborhoodId,
-                        initiatorUserId, cuisineTier2IdList,
-                        cuisineTier1IdList, priceIdList, themeIdList,
-                        whoareyouwithIdList, typeOfRestaurantIdList,
-                        occasionIdList);
+                    piUserRecoAssigned.processingPiAssignRecorequestToUsers(tsDataSource,
+                        connection, recoRequestId, recorequestIteration,
+                        cityId, neighborhoodId, initiatorUserId,
+                        cuisineTier2IdList, cuisineTier1IdList, priceIdList,
+                        themeIdList, whoareyouwithIdList,
+                        typeOfRestaurantIdList, occasionIdList);
                 }
             }
         }

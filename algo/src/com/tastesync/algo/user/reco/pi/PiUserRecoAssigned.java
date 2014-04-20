@@ -5,6 +5,7 @@ import com.tastesync.algo.db.dao.PiUserRecoDAOImpl;
 import com.tastesync.algo.exception.TasteSyncException;
 import com.tastesync.algo.model.vo.PiRecommendationsTopicMatchRateVO;
 import com.tastesync.algo.model.vo.PiRestaurantRecommendationVO;
+import com.tastesync.algo.model.vo.PiUsersAlreadyAssignedDataVO;
 import com.tastesync.algo.util.TSConstants;
 
 import com.tastesync.common.utils.CommonFunctionsUtil;
@@ -14,7 +15,6 @@ import com.tastesync.db.pool.TSDataSource;
 import org.apache.log4j.Logger;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,19 +39,25 @@ public class PiUserRecoAssigned {
     }
 
     private PiRestaurantRecommendationVO getPiRestaurantRecommendation(
-        TSDataSource tsDataSource, Connection connection,
-        String initiatorUserId, List<String> cuisineTier2IdList,
-        List<String> cuisineTier1IdList, List<String> priceIdList,
-        List<String> themeIdList, List<String> whoareyouwithIdList,
-        List<String> typeOfRestaurantIdList, List<String> occasionIdList)
-        throws TasteSyncException {
+        TSDataSource tsDataSource, Connection connection, String cityId,
+        String nbrHoodId, String initiatorUserId,
+        List<String> cuisineTier2IdList, List<String> cuisineTier1IdList,
+        List<String> priceIdList, List<String> themeIdList,
+        List<String> whoareyouwithIdList, List<String> typeOfRestaurantIdList,
+        List<String> occasionIdList) throws TasteSyncException {
         List<String> allRecommendationIdsList = piUserRecoDAO.getAllReccomendationIds(tsDataSource,
-                connection);
+                connection, cityId);
         int topicMatchCounter = 0;
         double topicMatchRate;
+        int numNbrHoodId = 0;
+
+        if ((nbrHoodId != null) && !nbrHoodId.isEmpty()) {
+            numNbrHoodId = 1;
+        }
+
         int numRecorequestParams = cuisineTier2IdList.size() +
             cuisineTier1IdList.size() + priceIdList.size() +
-            themeIdList.size() + whoareyouwithIdList.size();
+            themeIdList.size() + whoareyouwithIdList.size() + numNbrHoodId;
 
         List<PiRecommendationsTopicMatchRateVO> piRecommendationsTopicMatchRateVOList =
             new LinkedList<PiRecommendationsTopicMatchRateVO>();
@@ -87,19 +93,26 @@ public class PiUserRecoAssigned {
                 piUserRecoDAO.getCountPiRecoUserOccasionMatch(tsDataSource,
                     connection, recommendationId, occasionIdList);
 
+            topicMatchCounter = topicMatchCounter +
+                piUserRecoDAO.getCountPiUserNeighbourhoodIdMatch(tsDataSource,
+                    connection, recommendationId, nbrHoodId);
+
             topicMatchRate = (double) topicMatchCounter / numRecorequestParams;
 
             piRecommendationsTopicMatchRateVO = new PiRecommendationsTopicMatchRateVO(recommendationId,
                     topicMatchRate);
             piRecommendationsTopicMatchRateVOList.add(piRecommendationsTopicMatchRateVO);
+
+            topicMatchCounter = 0;
+            topicMatchRate = 0;
         }
 
         Collections.sort(piRecommendationsTopicMatchRateVOList,
             new Comparator<PiRecommendationsTopicMatchRateVO>() {
                 public int compare(PiRecommendationsTopicMatchRateVO o1,
                     PiRecommendationsTopicMatchRateVO o2) {
-                    return Double.valueOf(o1.getTopicMatchRate())
-                                 .compareTo(o2.getTopicMatchRate());
+                    return Double.valueOf(o2.getTopicMatchRate())
+                                 .compareTo(o1.getTopicMatchRate());
                 }
             });
 
@@ -141,7 +154,7 @@ public class PiUserRecoAssigned {
 
     public void processingPiAssignRecorequestToUsers(
         TSDataSource tsDataSource, Connection connection, String recoRequestId,
-        int recorequestIteration, String cityId, String nbrHoodId,
+        int recorequestIteration, String cityId, String nbrHoodId1,
         String initiatorUserId, List<String> cuisineTier2IdList,
         List<String> cuisineTier1IdList, List<String> priceIdList,
         List<String> themeIdList, List<String> whoareyouwithIdList,
@@ -149,16 +162,44 @@ public class PiUserRecoAssigned {
         throws TasteSyncException {
         //7A
         List<String> temp1PiUsersUserIdList = piUserRecoDAO.getPiUsersCategoryCityNbrhoodList(tsDataSource,
-                connection, cityId, nbrHoodId);
+                connection, cityId);
 
+        int totalPiUsers = temp1PiUsersUserIdList.size();
+        
         String temp1PiUsersUserId;
         boolean userReported;
         List<Integer> indexElementToBeRemovedFrmUserRecoSupplyTierVOList = new ArrayList<Integer>();
 
         //7B
-        List<String> piUsersAlreadyAssignedIdList = piUserRecoDAO.getPiUserAlreadyAssignedToUser(tsDataSource,
-                connection, initiatorUserId);
+        
+//        List<String> piUsersAlreadyAssignedIdList1 = piUserRecoDAO.getPiUserAlreadyAssignedToUser(tsDataSource,
+//                connection, initiatorUserId);
 
+        List<PiUsersAlreadyAssignedDataVO> piUsersAlreadyAssignedDataVOList = piUserRecoDAO.getPiUserAlreadyAssignedToUserData(tsDataSource,
+                connection, initiatorUserId);
+        
+        //min assigned users find 
+        int minTimesEveryPiusersAssigned = 0;
+        int j=0;
+        for ( PiUsersAlreadyAssignedDataVO piUsersAlreadyAssignedDataVOListElement : piUsersAlreadyAssignedDataVOList) {
+        	// default value
+        	if (j==0) {
+        		minTimesEveryPiusersAssigned=piUsersAlreadyAssignedDataVOListElement.getCountRepliesByPiUserId();
+        	} else {
+            	if (piUsersAlreadyAssignedDataVOListElement.getCountRepliesByPiUserId() < minTimesEveryPiusersAssigned) {
+            		minTimesEveryPiusersAssigned = piUsersAlreadyAssignedDataVOListElement.getCountRepliesByPiUserId();
+            	}
+        	}
+        	++j;
+        }
+      
+        List<String> piUsersAlreadyAssignedIdList = new LinkedList<String>();
+        
+        for ( PiUsersAlreadyAssignedDataVO piUsersAlreadyAssignedDataVOListElement : piUsersAlreadyAssignedDataVOList) {
+        	if (piUsersAlreadyAssignedDataVOListElement.getCountRepliesByPiUserId() > minTimesEveryPiusersAssigned) {
+        		piUsersAlreadyAssignedIdList.add(piUsersAlreadyAssignedDataVOListElement.getPiUserId());
+        	}
+        }
         // filter list of temp1users{userId}
         for (int i = 0; i < temp1PiUsersUserIdList.size(); ++i) {
             temp1PiUsersUserId = temp1PiUsersUserIdList.get(i);
@@ -300,6 +341,9 @@ public class PiUserRecoAssigned {
                     if (userAUserBMatchTier != 4) {
                         tranche3PiUsersUserId.add(aTemp1PiUsersUserIdList);
                     }
+
+                    topicMatchCounter = 0;
+                    topicMatchRate = 0;
                 }
 
                 if (printDebugExtra) {
@@ -353,60 +397,43 @@ public class PiUserRecoAssigned {
         }
 
         if (assigneduserUserId != null) {
+        	//TODO
+            piUserRecoDAO.submitPiRecorequestTsAssigned(tsDataSource,
+                connection, recoRequestId, assigneduserUserId);
+
+            //sleep for remaining time!!
             try {
-                tsDataSource.begin();
-                piUserRecoDAO.submitPiRecorequestTsAssigned(tsDataSource,
-                    connection, recoRequestId, assigneduserUserId);
-                tsDataSource.commit();
+                long sleepTime = (long) (TSConstants.PI_ASSIGNED_START_SLEEP_TIME * ((Math.random() * 3) +
+                    1));
 
-                //sleep for remaining time!!
-                try {
-                    long sleepTime = (long) (TSConstants.PI_ASSIGNED_START_SLEEP_TIME * ((Math.random() * 6) +
-                        2));
-
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(" SLEEP (in ms) for " + sleepTime);
-                    }
-
-                    Thread.currentThread();
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" SLEEP (in ms) for " + sleepTime);
                 }
 
-                tsDataSource.begin();
-
-                PiRestaurantRecommendationVO piRestaurantRecommendationVO = getPiRestaurantRecommendation(tsDataSource,
-                        connection, initiatorUserId, cuisineTier2IdList,
-                        cuisineTier1IdList, priceIdList, themeIdList,
-                        whoareyouwithIdList, typeOfRestaurantIdList,
-                        occasionIdList);
-
-                // Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
-
-                //  invoke underlying implementation as part of web service
-                piUserRecoDAO.submitRecommendationRequestAnswer(tsDataSource,
-                    connection, recoRequestId, assigneduserUserId,
-                    CommonFunctionsUtil.convertStringListAsArrayList(
-                        piRestaurantRecommendationVO.getRestaurantId()),
-                    piRestaurantRecommendationVO.getReccomendationText());
-
-                // log data
-                piUserRecoDAO.submitPiRecoLog(tsDataSource, connection,
-                    initiatorUserId, assigneduserUserId,
-                    piRestaurantRecommendationVO);
-                tsDataSource.commit();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-
-                try {
-                    tsDataSource.rollback();
-                } catch (SQLException e2) {
-                    e2.printStackTrace();
-                }
-
-                throw new TasteSyncException(e1.getMessage());
+                Thread.currentThread();
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
+            PiRestaurantRecommendationVO piRestaurantRecommendationVO = getPiRestaurantRecommendation(tsDataSource,
+                    connection, cityId, nbrHoodId1, initiatorUserId,
+                    cuisineTier2IdList, cuisineTier1IdList, priceIdList,
+                    themeIdList, whoareyouwithIdList, typeOfRestaurantIdList,
+                    occasionIdList);
+            // Send notification to `recorequest_ts_assigned`.`ASSIGNED_USER_ID`
+
+            //  invoke underlying implementation as part of web service
+            piUserRecoDAO.submitRecommendationRequestAnswer(tsDataSource,
+                connection, recoRequestId, assigneduserUserId,
+                CommonFunctionsUtil.convertStringListAsArrayList(
+                    piRestaurantRecommendationVO.getRestaurantId()),
+                piRestaurantRecommendationVO.getReccomendationText());
+
+            // log data
+            piUserRecoDAO.submitPiRecoLog(tsDataSource, connection,
+                initiatorUserId, assigneduserUserId,
+                piRestaurantRecommendationVO);
         } else {
             if (logger.isInfoEnabled()) {
                 logger.info("No user is assigned!!!");

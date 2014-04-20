@@ -6,14 +6,14 @@ import java.io.Serializable;
 public class RestaurantPopularityTierVO implements Serializable {
     private static final long serialVersionUID = 4886210352528952164L;
     private String restaurantId;
-    private String popularityTierId;
+    private int popularityTierId;
     private String userId;
-    private String numUserRestaurantMatchCount;
+    private int numUserRestaurantMatchCount;
     private int rankNumber;
 
     public RestaurantPopularityTierVO(String restaurantId,
-        String popularityTierId, String userId,
-        String numUserRestaurantMatchCount, int rankNumber) {
+        int popularityTierId, String userId,
+        int numUserRestaurantMatchCount, int rankNumber) {
         super();
         this.restaurantId = restaurantId;
         this.popularityTierId = popularityTierId;
@@ -23,7 +23,7 @@ public class RestaurantPopularityTierVO implements Serializable {
     }
 
     public RestaurantPopularityTierVO(String restaurantId,
-        String popularityTierId) {
+        int popularityTierId) {
         super();
         this.restaurantId = restaurantId;
         this.popularityTierId = popularityTierId;
@@ -41,7 +41,7 @@ public class RestaurantPopularityTierVO implements Serializable {
         return userId;
     }
 
-    public String getNumUserRestaurantMatchCount() {
+    public int getNumUserRestaurantMatchCount() {
         return numUserRestaurantMatchCount;
     }
 
@@ -49,7 +49,7 @@ public class RestaurantPopularityTierVO implements Serializable {
         this.restaurantId = restaurantId;
     }
 
-    public void setPopularityTierId(String popularityTierId) {
+    public void setPopularityTierId(int popularityTierId) {
         this.popularityTierId = popularityTierId;
     }
 
@@ -58,11 +58,11 @@ public class RestaurantPopularityTierVO implements Serializable {
     }
 
     public void setNumUserRestaurantMatchCount(
-        String numUserRestaurantMatchCount) {
+        int numUserRestaurantMatchCount) {
         this.numUserRestaurantMatchCount = numUserRestaurantMatchCount;
     }
 
-    public String getPopularityTierId() {
+    public int getPopularityTierId() {
         return popularityTierId;
     }
 

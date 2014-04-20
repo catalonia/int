@@ -22,14 +22,17 @@ public class UserRestaurantOfflineAlgo2CalcMain {
 
             while (true) {
                 //Run algo calc
+            	//1: 1 to 0
                 RestInfoPopularityTierCalc restInfoPopularityTierCalc = new RestInfoPopularityTierCalc();
                 restInfoPopularityTierCalc.processAllFlaggedRestaurantListRestInfoPopularityTier(tsDataSource,
                     connection);
 
+                // 2/3:
                 RestUserMatchCounterCalc restUserMatchCounterCalc = new RestUserMatchCounterCalc();
                 restUserMatchCounterCalc.processAllFlaggedRestaurantListRestUserMatchCounter(tsDataSource,
                     connection);
 
+                // 4: 0 to -1
                 UserRestRankOrderCalc userRestRankOrderCalc = new UserRestRankOrderCalc();
                 userRestRankOrderCalc.updateUserRestRankOrderCalc(tsDataSource,
                     connection);
@@ -45,7 +48,7 @@ public class UserRestaurantOfflineAlgo2CalcMain {
                 e1.printStackTrace();
             }
         } finally {
-        	tsDataSource.closeConnection(connection);
+            tsDataSource.closeConnection(connection);
         }
     }
 }

@@ -9,7 +9,7 @@ public class InputRestaurantSearchVO implements Serializable {
     private static final long serialVersionUID = -2575368611727415318L;
     private String userId;
     private String restaurantId;
-    private String neighborhoodId;
+    private String[] neighborhoodIdArray;
     private String cityId;
     private String stateName;
     private String[] priceIdList;
@@ -26,7 +26,7 @@ public class InputRestaurantSearchVO implements Serializable {
     private String[] occasionIdArray;
 
     public InputRestaurantSearchVO(String userId, String restaurantId,
-        String neighborhoodId, String cityId, String stateName,
+        String[] neighborhoodIdArray, String cityId, String stateName,
         String[] priceIdList, String rating,
         String savedFlag, String favFlag, String dealFlag, String chainFlag,
         String paginationId, String[] cuisineTier2IdArray,
@@ -35,7 +35,7 @@ public class InputRestaurantSearchVO implements Serializable {
         super();
         this.userId = userId;
         this.restaurantId = restaurantId;
-        this.neighborhoodId = neighborhoodId;
+        this.neighborhoodIdArray = neighborhoodIdArray;
         this.cityId = cityId;
         this.stateName = stateName;
         this.priceIdList = priceIdList;
@@ -60,8 +60,8 @@ public class InputRestaurantSearchVO implements Serializable {
         return restaurantId;
     }
 
-    public String getNeighborhoodId() {
-        return neighborhoodId;
+    public String[] getNeighborhoodIdArray() {
+        return neighborhoodIdArray;
     }
 
     public String getCityId() {
@@ -131,7 +131,7 @@ public class InputRestaurantSearchVO implements Serializable {
     @Override
     public String toString() {
         return "InputRestaurantSearchVO [userId=" + userId + ", restaurantId=" +
-        restaurantId + ", neighborhoodId=" + neighborhoodId + ", cityId=" +
+        restaurantId + ", neighborhoodIdArray=" + Arrays.toString(neighborhoodIdArray) + ", cityId=" +
         cityId + ", stateName=" + stateName + ", priceIdList=" +
         Arrays.toString(priceIdList) + ", rating=" + rating + ", savedFlag=" +
         savedFlag + ", favFlag=" + favFlag + ", dealFlag=" + dealFlag +
